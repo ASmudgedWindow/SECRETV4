@@ -1,1 +1,48 @@
+# Unpacks game zips for you.
+# Upload one or more .zip files into the "game-zips" folder of this repo (Add file -> Upload files).
+# This workflow unzips them into the "games" folder, deletes the zips, and refreshes the site.
+name: Unpack game zips
 
+on:
+  push:
+    paths:
+      - 'game-zips/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+
+jobs:
+  unpack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Unzip into games/
+        run: |
+          shopt -s nullglob
+          mkdir -p games
+          for z in game-zips/*.zip; do
+            echo "Unpacking $z"
+            unzip -o -j -q "$z" -d games
+          done
+          rm -f game-zips/*.zip
+          echo "Files now in games/: $(ls games | wc -l)"
+
+      - name: Save the changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A games game-zips
+          if git diff --cached --quiet; then
+            echo "Nothing new to save"
+          else
+            git commit -m "Unpack game files"
+            git push
+          fi
+
+      - name: Refresh the site
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X POST "repos/${{ github.repository }}/pages/builds" || true
