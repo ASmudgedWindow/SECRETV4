@@ -1,0 +1,246 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #0a0e0f;
+  --bg-secondary: #0d1416;
+  --bg-tertiary: #111a1c;
+  --panel: #0f1719;
+  --border: #1a2e30;
+  --text: #d4f4f4;
+  --text-dim: #5a7a7c;
+  --accent: #00fff0;
+  --accent-glow: rgba(0, 255, 240, 0.4);
+  --accent-secondary: #00b8a0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--bg);
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  color: var(--text);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  overflow: hidden;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-secondary);
+}
+
+/* Intro shimmer */
+@keyframes shimmer-sweep {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes intro-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes intro-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { filter: drop-shadow(0 0 10px var(--accent-glow)); }
+  50% { filter: drop-shadow(0 0 30px var(--accent-glow)); }
+}
+
+@keyframes scan-line {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+@keyframes card-glow {
+  0%, 100% { box-shadow: 0 0 0 0 var(--accent-glow); }
+  50% { box-shadow: 0 0 12px 0 var(--accent-glow); }
+}
+
+@keyframes slide-up {
+  from { transform: translateY(8px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.shimmer-text {
+  background: linear-gradient(
+    90deg,
+    var(--text-dim) 0%,
+    var(--text-dim) 35%,
+    var(--accent) 50%,
+    var(--text-dim) 65%,
+    var(--text-dim) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer-sweep 3s ease-in-out infinite;
+}
+
+.scan-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    var(--accent-glow) 50%,
+    transparent 100%
+  );
+  height: 2px;
+  animation: scan-line 4s linear infinite;
+  opacity: 0.3;
+}
+
+.grid-bg {
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: 0.15;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out;
+}
+
+/* Game cards */
+.game-card:hover {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 16px var(--accent-glow);
+  transform: translateY(-2px);
+}
+
+/* Featured / gold */
+:root {
+  --gold: #ffc83d;
+  --gold-glow: rgba(255, 200, 61, 0.45);
+}
+.gold-card {
+  border-color: var(--gold) !important;
+  background: linear-gradient(135deg, rgba(255, 200, 61, 0.12), var(--bg-secondary) 60%) !important;
+  box-shadow: 0 0 14px rgba(255, 200, 61, 0.18);
+}
+.gold-card:hover {
+  box-shadow: 0 0 22px var(--gold-glow) !important;
+  transform: translateY(-2px);
+}
+.game-card.gold-card:hover {
+  border-color: var(--gold) !important;
+  box-shadow: 0 0 22px var(--gold-glow) !important;
+}
+
+/* ---------- Hover / click effects (site-wide) ---------- */
+:root {
+  --sheen: rgba(255, 255, 255, 0.13);
+}
+
+button:not(.absolute):not(.no-fx),
+.game-card {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.18s ease, box-shadow 0.25s ease, border-color 0.2s ease, filter 0.2s ease,
+    background-color 0.2s ease;
+}
+
+/* A soft band of light that sweeps across on hover */
+button:not(.absolute):not(.no-fx)::after,
+.game-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    var(--sheen) 47%,
+    var(--accent-glow) 50%,
+    var(--sheen) 53%,
+    transparent 65%
+  );
+  transform: translateX(-130%);
+}
+button:not(.absolute):not(.no-fx):not(:disabled):hover::after,
+.game-card:hover::after {
+  transform: translateX(130%);
+  transition: transform 0.75s ease;
+}
+.gold-card {
+  --sheen: rgba(255, 220, 120, 0.2);
+  --accent-glow: var(--gold-glow);
+}
+
+/* Gentle lift on buttons, press-in on click */
+button:not(.absolute):not(.no-fx):not(:disabled):hover {
+  filter: brightness(1.12);
+}
+button:not(.absolute):not(.no-fx):not(:disabled):active,
+.game-card:active {
+  transform: scale(0.97);
+}
+
+/* Click ripple (added by useClickRipple) */
+.fx-ripple {
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+  background: var(--accent-glow);
+  transform: scale(0);
+  opacity: 0.8;
+  animation: fx-ripple 0.6s ease-out forwards;
+}
+@keyframes fx-ripple {
+  to {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button::after,
+  .game-card::after {
+    display: none;
+  }
+  button:active,
+  .game-card:active {
+    transform: none;
+  }
+}
