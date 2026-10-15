@@ -1,0 +1,25 @@
+name: Audit Drive links
+
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "Test batch size (use 25 first). Put 0 to check everything."
+        default: "25"
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run the audit
+        env:
+          DRIVE_API_KEY: ${{ secrets.DRIVE_API_KEY }}
+        run: python3 tools/audit_links.py --limit "${{ inputs.limit }}" --out audit.csv
+
+      - name: Save the report
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-report
+          path: audit.csv
