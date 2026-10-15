@@ -1,11 +1,18 @@
+# Checks Google Drive links in batches. Run it from the Actions tab: "Audit Drive links" -> Run workflow.
 name: Audit Drive links
 
 on:
   workflow_dispatch:
     inputs:
-      limit:
-        description: "Test batch size (use 25 first). Put 0 to check everything."
-        default: "25"
+      start:
+        description: "First file number (first batch: 0, then 500, 1000, 1500, 2000, 2500)"
+        default: "0"
+      count:
+        description: "How many files in this batch"
+        default: "500"
+      download:
+        description: "Also download the files and scan what is inside? (yes / no)"
+        default: "yes"
 
 jobs:
   audit:
@@ -16,10 +23,14 @@ jobs:
       - name: Run the audit
         env:
           DRIVE_API_KEY: ${{ secrets.DRIVE_API_KEY }}
-        run: python3 tools/audit_links.py --limit "${{ inputs.limit }}" --out audit.csv
+        run: |
+          EXTRA=""
+          if [ "${{ inputs.download }}" = "yes" ]; then EXTRA="--download downloaded"; fi
+          python3 tools/audit_links.py --start "${{ inputs.start }}" --count "${{ inputs.count }}" --out audit.csv $EXTRA
 
       - name: Save the report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: audit-report
-          path: audit.csv
+          name: audit-report-from-${{ inputs.start }}
+          path: |
