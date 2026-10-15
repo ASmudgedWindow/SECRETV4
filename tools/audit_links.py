@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 SecretV4 link audit (metadata only, downloads NO game files).
 
@@ -81,7 +80,7 @@ def query(did, key):
                 return "error", {}, "HTTP %d %s" % (e.code, body.replace("\n", " "))
         except Exception as e:  # network hiccup
             last = str(e)
-        time.sleep(2 ** attempt)
+        time.sleep(3 * (2 ** attempt))
     return "error", {}, "gave up after retries: " + last
 
 
@@ -89,8 +88,11 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default="audit.csv")
     ap.add_argument("--limit", type=int, default=0, help="only check N unique files, spread across the list")
-    ap.add_argument("--workers", type=int, default=6)
+    ap.add_argument("--start", type=int, default=0, help="batch mode: first file number (0 = the beginning)")
+    ap.add_argument("--count", type=int, default=0, help="batch mode: how many files to check from --start")
+    ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--download", default="", help="folder to save small game files into and scan them")
     a = ap.parse_args()
 
     entries = load_entries()
@@ -99,7 +101,10 @@ def main():
     ids = list(dict.fromkeys(e["drive_id"] for e in entries if e["drive_id"]))
     print("Unique Drive file IDs: %d  | entries without a Drive link: %d" %
           (len(ids), sum(1 for e in entries if not e["drive_id"])))
-    if a.limit:
+    if a.count:
+        ids = ids[a.start:a.start + a.count]
+        print("Batch: files %d to %d (%d files)" % (a.start, a.start + len(ids) - 1, len(ids)))
+    elif a.limit:
         step = max(1, len(ids) // a.limit)
         ids = ids[::step][:a.limit]
         print("Test batch: checking %d files" % len(ids))
@@ -141,7 +146,7 @@ def main():
             old = done[did]
             row = {k: old.get(k, "") for k in ("status", "drive_name", "mime", "size_bytes", "md5", "trashed", "error")}
         rows.append({**{k: e.get(k, "") for k in FIELDS[:7]}, **row})
-    if not a.limit:
+    if not a.limit and not a.count:
         for e in entries:
             if not e["drive_id"]:
                 rows.append({**{k: e.get(k, "") for k in FIELDS[:7]}, "status": "not_drive", "error": e["note"]})
@@ -151,6 +156,103 @@ def main():
         w.writeheader()
         w.writerows(rows)
     summarize(rows)
+    if a.download:
+        download_and_scan(rows, key, a.download, a.workers)
+
+
+MAX_FILE = 5 * 1024 * 1024      # skip anything bigger than 5 MB
+MAX_TOTAL = 400 * 1024 * 1024   # stop after 400 MB in total
+
+
+def fetch_file(did, key):
+    url = "https://www.googleapis.com/drive/v3/files/%s?alt=media&supportsAllDrives=true&key=%s" % (did, urllib.parse.quote(key))
+    last = ""
+    for attempt in range(4):
+        try:
+            with urllib.request.urlopen(url, timeout=60) as r:
+                return r.read(), ""
+        except urllib.error.HTTPError as e:
+            last = "HTTP %d" % e.code
+            if e.code in (403, 404):
+                return None, last
+        except Exception as e:
+            last = str(e)
+        time.sleep(2 ** attempt)
+    return None, last
+
+
+URL_RE = re.compile(r"https?://([A-Za-z0-9.-]+)(/[^\s\"'<>)\\]*)?")
+JSD_RE = re.compile(r"cdn\.jsdelivr\.net/(gh|npm)/([^/@\s\"']+(?:/[^/@\s\"']+)?)")
+
+
+def scan_html(text):
+    hosts = set(m.group(1).lower() for m in URL_RE.finditer(text))
+    jsd = set(m.group(1) + "/" + m.group(2) for m in JSD_RE.finditer(text))
+    flags = set()
+    for name, pat in (("iframe", "<iframe"), ("ruffle", "ruffle"), ("emulatorjs", "EJS_"),
+                      ("fetch/XHR", "fetch("), ("cookies/localStorage", "localStorage"),
+                      ("base64 data blob", "data:application"), ("service worker", "serviceWorker")):
+        if pat.lower() in text.lower():
+            flags.add(name)
+    return hosts, jsd, flags
+
+
+def download_and_scan(rows, key, folder, workers):
+    os.makedirs(folder, exist_ok=True)
+    ok = [r for r in rows if r["status"] == "ok" and r["size_bytes"] and int(r["size_bytes"]) <= MAX_FILE]
+    skipped_big = sum(1 for r in rows if r["status"] == "ok" and r["size_bytes"] and int(r["size_bytes"]) > MAX_FILE)
+    seen, uniq = set(), []
+    for r in ok:
+        if r["drive_id"] not in seen:
+            seen.add(r["drive_id"])
+            uniq.append(r)
+    total, fails = 0, 0
+    host_files = defaultdict(set)
+    jsd_repos = Counter()
+    flag_count = Counter()
+    per_group = defaultdict(Counter)
+    with ThreadPoolExecutor(workers) as ex:
+        futs = {ex.submit(fetch_file, r["drive_id"], key): r for r in uniq}
+        for f in as_completed(futs):
+            r = futs[f]
+            data, err = f.result()
+            if data is None:
+                fails += 1
+                continue
+            total += len(data)
+            if total > MAX_TOTAL:
+                print("Stopped: reached the 400 MB safety limit")
+                break
+            grp = r["source"] if r["source"] in ("library", "eaglercraft", "flash") else "emulated"
+            ext = ".html" if r["drive_name"].lower().endswith((".html", ".htm")) else ".bin"
+            d = os.path.join(folder, grp)
+            os.makedirs(d, exist_ok=True)
+            safe = re.sub(r"[^A-Za-z0-9._-]", "_", r["drive_name"] or r["drive_id"])[:60]
+            open(os.path.join(d, "%s__%s" % (r["drive_id"][:8], safe)), "wb").write(data)
+            hosts, jsd, flags = scan_html(data.decode("utf-8", "replace"))
+            for h in hosts:
+                host_files[h].add(r["drive_id"])
+                per_group[grp][h] += 1
+            for j in jsd:
+                jsd_repos[j] += 1
+            for fl in flags:
+                flag_count[fl] += 1
+    n = len(uniq) - fails
+    out = ["\n## What is inside the downloaded files\n",
+           "Downloaded %d files (%s). Failed: %d. Skipped for being over 5 MB: %d.\n" % (n, mb(total), fails, skipped_big)]
+    out.append("Files that mention each website (top 15):\n")
+    out.append("| Host | Files |\n|---|---|")
+    for h, ids in sorted(host_files.items(), key=lambda x: -len(x[1]))[:15]:
+        out.append("| %s | %d |" % (h, len(ids)))
+    out.append("\nTop jsDelivr sources (top 10):\n")
+    for j, c in jsd_repos.most_common(10):
+        out.append("- %s: %d files" % (j, c))
+    out.append("\nThings found inside the files: %s\n" % dict(flag_count))
+    text = "\n".join(out)
+    print(text)
+    sm = os.environ.get("GITHUB_STEP_SUMMARY")
+    if sm:
+        open(sm, "a").write(text + "\n")
 
 
 def mb(n):
