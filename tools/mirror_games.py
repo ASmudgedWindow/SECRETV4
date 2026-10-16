@@ -57,8 +57,9 @@ def main():
     ap.add_argument("--start", type=int, default=0)
     ap.add_argument("--count", type=int, default=500)
     ap.add_argument("--out-dir", default="games")
-    ap.add_argument("--max-mb", type=float, default=25)
+    ap.add_argument("--max-mb", type=float, default=10)
     ap.add_argument("--workers", type=int, default=3)
+    ap.add_argument("--redo", action="store_true", help="download again even if already copied")
     a = ap.parse_args()
 
     key = os.environ.get("DRIVE_API_KEY", "").strip()
@@ -77,13 +78,26 @@ def main():
             manifest[g["id"]] = g
     used = {g["file"]: g["drive_id"] for g in manifest.values() if g.get("file")}
     max_bytes = int(a.max_mb * 1024 * 1024)
+    # Games already copied (and whose file is really there) are skipped, so re-running is safe and fast
+    done = {}
+    if not a.redo:
+        for g in manifest.values():
+            if g.get("mode") == "local" and g.get("file") and os.path.exists(os.path.join(a.out_dir, g["file"])):
+                done.setdefault(g["drive_id"], g)
+    eagler_ids = {e["drive_id"] for e in entries if e["source"] == "eaglercraft"}
 
     def work(did):
+        if did in done:
+            g = done[did]
+            return did, dict(mode="local", skipped=True, file=g["file"], size=g.get("size", 0),
+                             depends_on=g.get("depends_on", []), uses=g.get("uses", [])), None
         st, meta, err = A.query(did, key)
         if st != "ok":
             return did, dict(mode="missing", note=err or st), None
         size = int(meta.get("size", 0) or 0)
         base = dict(drive_name=meta.get("name", ""), size=size)
+        if did in eagler_ids:
+            return did, dict(mode="drive", note="Eaglercraft: download from Drive", **base), None
         if size > max_bytes:
             return did, dict(mode="drive", note="over %g MB: keep on Drive" % a.max_mb, **base), None
         data, err = fetch_robust(did, key)
@@ -100,13 +114,17 @@ def main():
             if n % 50 == 0:
                 print("  processed %d / %d" % (n, len(ids)), flush=True)
 
-    counts = {"local": 0, "drive": 0, "missing": 0, "failed": 0}
+    counts = {"local": 0, "drive": 0, "missing": 0, "failed": 0, "skipped": 0}
     stripped = 0
     saved = {}   # drive_id -> relative filename
     for did in ids:
         info, data = results[did]
         rec = dict(info)
-        if info["mode"] == "local":
+        if info.get("skipped"):
+            counts["skipped"] += 1
+            counts["local"] -= 1
+            saved[did] = info["file"]
+        elif info["mode"] == "local":
             data, n = strip_trackers(data)
             stripped += n
             if n:
@@ -140,7 +158,8 @@ def main():
                "games": games}, open(mpath, "w", encoding="utf-8"), indent=1)
 
     text = ["## Mirror result (files %d to %d)\n" % (a.start, a.start + len(ids) - 1),
-            "- Copied into games/: **%d**" % counts["local"],
+            "- Copied into games/ this run: **%d**" % counts["local"],
+            "- Already copied before (skipped): %d" % counts["skipped"],
             "- Kept on Drive (too big): %d" % counts["drive"],
             "- Missing or private: %d" % counts["missing"],
             "- Failed to download (re-run this batch to retry): %d" % counts["failed"],
