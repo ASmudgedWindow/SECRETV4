@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-16 15:33:40 UTC",
+ "generated": "2026-10-16 19:51:55 UTC",
  "count": 2736,
  "games": [
   {
@@ -3161,7 +3161,7 @@
    "size": 169477764,
    "depends_on": [],
    "uses": [],
-   "note": "over 25 MB: keep on Drive"
+   "note": "over 10 MB: keep on Drive"
   },
   {
    "id": 176,
@@ -3907,7 +3907,7 @@
    "size": 66653891,
    "depends_on": [],
    "uses": [],
-   "note": "over 25 MB: keep on Drive"
+   "note": "over 10 MB: keep on Drive"
   },
   {
    "id": 219,
@@ -6084,7 +6084,7 @@
    "size": 121121169,
    "depends_on": [],
    "uses": [],
-   "note": "over 25 MB: keep on Drive"
+   "note": "over 10 MB: keep on Drive"
   },
   {
    "id": 341,
@@ -7362,7 +7362,7 @@
    "size": 55038646,
    "depends_on": [],
    "uses": [],
-   "note": "over 25 MB: keep on Drive"
+   "note": "over 10 MB: keep on Drive"
   },
   {
    "id": 412,
