@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'site/**'
+      - 'secretv4-launcher-kit/site/**'
 
 permissions:
   contents: write
@@ -25,7 +25,7 @@ jobs:
           node-version: 20
 
       - name: Build the site
-        working-directory: site
+        working-directory: secretv4-launcher-kit/site
         run: |
           npm install --no-audit --no-fund
           npm run build
@@ -34,8 +34,8 @@ jobs:
         run: |
           rm -rf assets
           mkdir assets
-          cp -r site/dist/assets/. assets/
-          cp site/dist/index.html index.html
+          cp -r secretv4-launcher-kit/site/dist/assets/. assets/
+          cp secretv4-launcher-kit/site/dist/index.html index.html
           touch .nojekyll
 
       - name: Save the changes
