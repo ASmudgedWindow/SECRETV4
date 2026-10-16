@@ -1,0 +1,456 @@
+{
+ "generated": "2026-10-16 11:54:10 UTC",
+ "count": 25,
+ "games": [
+  {
+   "id": 1,
+   "title": "A Dance of Fire and Ice",
+   "kind": "html",
+   "system": "",
+   "category": "library",
+   "drive_id": "1STu3mHiTbsOGiMHgXjXM_SzurGLV17TA",
+   "drive_url": "https://drive.google.com/file/d/1STu3mHiTbsOGiMHgXjXM_SzurGLV17TA/view",
+   "file": "clADOFAI.html",
+   "mode": "local",
+   "size": 1208,
+   "depends_on": [
+    "gh/paigerodeghero/academicwebsite",
+    "gh/udbsite/adofai"
+   ],
+   "uses": [],
+   "note": ""
+  },
+  {
+   "id": 2,
+   "title": "A Dark Room",
+   "kind": "html",
+   "system": "",
+   "category": "library",
+   "drive_id": "1nLJriNuBaHxMMEkbZZa1y8Il5MKUtsKs",
+   "drive_url": "https://drive.google.com/file/d/1nLJriNuBaHxMMEkbZZa1y8Il5MKUtsKs/view",
+   "file": "clADarkRoom.html",
+   "mode": "local",
+   "size": 9541,
+   "depends_on": [
+    "gh/doublespeakgames/adarkroom"
+   ],
+   "uses": [
+    "cookies/localStorage"
+   ],
+   "note": ""
+  },
+  {
+   "id": 3,
+   "title": "A Date with Death",
+   "kind": "html",
+   "system": "",
+   "category": "library",
+   "drive_id": "1oZFd5cB543O5x8RDvArskQXUtWsSdOoa",
+   "drive_url": "https://drive.google.com/file/d/1oZFd5cB543O5x8RDvArskQXUtWsSdOoa/view",
+   "file": "cladatewithdeath.html",
+   "mode": "local",
+   "size": 6422,
+   "depends_on": [
+    "gh/shayderrr/newports"
+   ],
+   "uses": [
+    "fetch/XHR"
+   ],
+   "note": ""
+  },
+  {
+   "id": 4,
+   "title": "A Day in the Office",
+   "kind": "html",
+   "system": "",
+   "category": "library",
+   "drive_id": "13LpkxUvS-Q-CGLp54r_TwqMBVJzi0LSQ",
+   "drive_url": "https://drive.google.com/file/d/13LpkxUvS-Q-CGLp54r_TwqMBVJzi0LSQ/view",
+   "file": "cladayintheoffice.html",
+   "mode": "local",
+   "size": 7313,
+   "depends_on": [
+    "gh/bubbls/UGS-Assets"
+   ],
+   "uses": [],
+   "note": ""
+  },
+  {
+   "id": 5,
+   "title": "Advent Neon",
+   "kind": "html",
+   "system": "",
+   "category": "library",
+   "drive_id": "1bkaxYha1Uzbv1-FJnXlPV0NGBVKZgAxp",
+   "drive_url": "https://drive.google.com/file/d/1bkaxYha1Uzbv1-FJnXlPV0NGBVKZgAxp/view",
+   "file": "cladventneon.html",
+   "mode": "local",
+   "size": 2995,
+   "depends_on": [
+    "gh/Stinkalistic/UGS"
+   ],
+   "uses": [
+    "fetch/XHR"
+   ],
+   "note": ""
+  },
+  {
+   "id": 6,
+   "title": "AdVenture Capitalist",
+   "kind": "html",
+   "system": "",
+   "category": "library",
+   "drive_id": "16xb8cR1lk7OlwDOPMVCbcNrMDpOeJN0Z",
+   "drive_url": "https://drive.google.com/file/d/16xb8cR1lk7OlwDOPMVCbcNrMDpOeJN0Z/view",
+   "file": "clAdventureCapatalist.html",
+   "mode": "local",
+   "size": 5494,
+   "depends_on": [],
+   "uses": [],
+   "note": ""
+  },
+  {
+   "id": 7,
+   "title": "Ahoy Survival",
+   "kind": "html",
+   "system": "",
+   "category": "library",
+   "drive_id": "1uJdD0jqT3QugoTLnYST-_HU861llbtfO",
+   "drive_url": "https://drive.google.com/file/d/1uJdD0jqT3QugoTLnYST-_HU861llbtfO/view",
+   "file": "clahoysurvival.html",
+   "mode": "local",
+   "size": 1726,
+   "depends_on": [
+    "gh/gertdoro/UnityExplorer",
+    "gh/lee2sman/everyday"
+   ],
+   "uses": [],
+   "note": ""
+  },
+  {
+   "id": 8,
+   "title": "Airline Tycoon Idle",
+   "kind": "html",
+   "system": "",
+   "category": "library",
+   "drive_id": "1AiJd7bwQUbIRDqNItb0pLst7yS3cuv-U",
+   "drive_url": "https://drive.google.com/file/d/1AiJd7bwQUbIRDqNItb0pLst7yS3cuv-U/view",
+   "file": "clairlinetycoonidle.html",
+   "mode": "local",
+   "size": 1216,
+   "depends_on": [
+    "gh/bubbls/UGS-Assets"
+   ],
+   "uses": [],
+   "note": ""
+  },
+  {
+   "id": 9,
+   "title": "Agar.io Lite",
+   "kind": "html",
+   "system": "",
+   "category": "library",
+   "drive_id": "18zcOCm55bDB9elXPGRKQSt-RBtADbna5",
+   "drive_url": "https://drive.google.com/file/d/18zcOCm55bDB9elXPGRKQSt-RBtADbna5/view",
+   "file": "clagariolite.html",
+   "mode": "local",
+   "size": 1248,
+   "depends_on": [
+    "gh/234sd4w5w45wers5tr-645758574456456/436874"
+   ],
+   "uses": [],
+   "note": ""
+  },
+  {
+   "id": 10,
+   "title": "Ages of Conflict",
+   "kind": "html",
+   "system": "",
+   "category": "library",
+   "drive_id": "1ou0QQS7UClBga8piPMUzdHzliiCsAgTc",
+   "drive_url": "https://drive.google.com/file/d/1ou0QQS7UClBga8piPMUzdHzliiCsAgTc/view",
+   "file": "clagesofconflict.html",
+   "mode": "local",
+   "size": 7047,
+   "depends_on": [
+    "gh/bubbls/UGS-Assets"
+   ],
+   "uses": [
+    "fetch/XHR"
+   ],
+   "note": ""
+  },
+  {
+   "id": 11,
+   "title": "Alien Sky Invasion",
+   "kind": "html",
+   "system": "",
+   "category": "library",
+   "drive_id": "1LnAxbh2fNWFF86pt3ouYG0-JDqMkhVec",
+   "drive_url": "https://drive.google.com/file/d/1LnAxbh2fNWFF86pt3ouYG0-JDqMkhVec/view",
+   "file": "clalienskyinvasion.html",
+   "mode": "local",
+   "size": 7521,
+   "depends_on": [
+    "gh/bubbls/UGS-Assets"
+   ],
+   "uses": [],
+   "note": ""
+  },
+  {
+   "id": 12,
+   "title": "Allocation",
+   "kind": "html",
+   "system": "",
+   "category": "library",
+   "drive_id": "18Jygrslr4iC7XOHFRXyvlhubkpouc6Kk",
+   "drive_url": "https://drive.google.com/file/d/18Jygrslr4iC7XOHFRXyvlhubkpouc6Kk/view",
+   "file": "clallocation.html",
+   "mode": "local",
+   "size": 55984,
+   "depends_on": [
+    "gh/bubbls/UGS-Assets"
+   ],
+   "uses": [],
+   "note": ""
+  },
+  {
+   "id": 13,
+   "title": "Amazing Strange Rope Police",
+   "kind": "html",
+   "system": "",
+   "category": "library",
+   "drive_id": "1AgbJcXCjM5z7SXMHMIcFVdEDAV73XoDj",
+   "drive_url": "https://drive.google.com/file/d/1AgbJcXCjM5z7SXMHMIcFVdEDAV73XoDj/view",
+   "file": "clstreangeropepolice.html",
+   "mode": "local",
+   "size": 171577,
+   "depends_on": [
+    "gh/st39/sdk",
+    "npm/jquery"
+   ],
+   "uses": [],
+   "note": ""
+  },
+  {
+   "id": 14,
+   "title": "Amidst the Sky",
+   "kind": "html",
+   "system": "",
+   "category": "library",
+   "drive_id": "1FvV4pdZa8osHqLKYMvZAk67LsHfiyktL",
+   "drive_url": "https://drive.google.com/file/d/1FvV4pdZa8osHqLKYMvZAk67LsHfiyktL/view",
+   "file": "clamidstthesky.html",
+   "mode": "local",
+   "size": 2740,
+   "depends_on": [
+    "gh/bubbls/UGS-Assets"
+   ],
+   "uses": [],
+   "note": ""
+  },
+  {
+   "id": 15,
+   "title": "Among Us",
+   "kind": "html",
+   "system": "",
+   "category": "library",
+   "drive_id": "1ZCT6pr5pp3ci0-qKWjH1ccJ9N-bF5KWL",
+   "drive_url": "https://drive.google.com/file/d/1ZCT6pr5pp3ci0-qKWjH1ccJ9N-bF5KWL/view",
+   "file": "clamongus.html",
+   "mode": "local",
+   "size": 1548,
+   "depends_on": [
+    "gh/gahaden/ags",
+    "gh/mamayaya1/game"
+   ],
+   "uses": [],
+   "note": ""
+  },
+  {
+   "id": 16,
+   "title": "Amorphous+",
+   "kind": "html",
+   "system": "",
+   "category": "library",
+   "drive_id": "1_uzOdX8pPTVHufMFztETTL1S__GHpVcT",
+   "drive_url": "https://drive.google.com/file/d/1_uzOdX8pPTVHufMFztETTL1S__GHpVcT/view",
+   "file": "clamorphous.html",
+   "mode": "local",
+   "size": 2340,
+   "depends_on": [
+    "gh/bubbls/UGS-file-encryption",
+    "gh/somer-sheff-73/xv"
+   ],
+   "uses": [
+    "ruffle"
+   ],
+   "note": ""
+  },
+  {
+   "id": 17,
+   "title": "Ancient Sins",
+   "kind": "html",
+   "system": "",
+   "category": "library",
+   "drive_id": "14B9MK7AAFSmzPTPtjrWILU_A8ToE-cdd",
+   "drive_url": "https://drive.google.com/file/d/14B9MK7AAFSmzPTPtjrWILU_A8ToE-cdd/view",
+   "file": "clancientsins.html",
+   "mode": "local",
+   "size": 13531,
+   "depends_on": [
+    "gh/Stinkalistic/junk"
+   ],
+   "uses": [
+    "fetch/XHR"
+   ],
+   "note": ""
+  },
+  {
+   "id": 18,
+   "title": "Angry Birds",
+   "kind": "html",
+   "system": "",
+   "category": "library",
+   "drive_id": "1Z2ClHb6sN4AmY47xj0jJiK2jLt89W9HL",
+   "drive_url": "https://drive.google.com/file/d/1Z2ClHb6sN4AmY47xj0jJiK2jLt89W9HL/view",
+   "file": "clangrybirds.html",
+   "mode": "local",
+   "size": 1754,
+   "depends_on": [
+    "gh/gertdoro/UnityExplorer",
+    "gh/lee2sman/everyday"
+   ],
+   "uses": [],
+   "note": ""
+  },
+  {
+   "id": 19,
+   "title": "Angry Birds 2",
+   "kind": "html",
+   "system": "",
+   "category": "library",
+   "drive_id": "18Jsyq2YJKZ4y9YQ_3Z34znkS546UUOpS",
+   "drive_url": "https://drive.google.com/file/d/18Jsyq2YJKZ4y9YQ_3Z34znkS546UUOpS/view",
+   "file": "clangrybirds2.html",
+   "mode": "local",
+   "size": 10461,
+   "depends_on": [
+    "gh/naotomori1/angrybirds2"
+   ],
+   "uses": [
+    "fetch/XHR"
+   ],
+   "note": ""
+  },
+  {
+   "id": 20,
+   "title": "Angry Birds Online",
+   "kind": "html",
+   "system": "",
+   "category": "library",
+   "drive_id": "11Te6BAQT3qeyJywM7ee6B-1tjP3cFJsu",
+   "drive_url": "https://drive.google.com/file/d/11Te6BAQT3qeyJywM7ee6B-1tjP3cFJsu/view",
+   "file": "clangrybirdsonline.html",
+   "mode": "local",
+   "size": 2180,
+   "depends_on": [
+    "gh/greeniYT/y"
+   ],
+   "uses": [],
+   "note": ""
+  },
+  {
+   "id": 21,
+   "title": "Angry Birds Showdown",
+   "kind": "html",
+   "system": "",
+   "category": "library",
+   "drive_id": "16ZRCq5beEAbuRu_H3p-ueZyeodn0NRt5",
+   "drive_url": "https://drive.google.com/file/d/16ZRCq5beEAbuRu_H3p-ueZyeodn0NRt5/view",
+   "file": "clangrybirdsshowdown.html",
+   "mode": "local",
+   "size": 1519,
+   "depends_on": [
+    "gh/bubbls/youtube-playables"
+   ],
+   "uses": [],
+   "note": ""
+  },
+  {
+   "id": 22,
+   "title": "Angry Birds Slingshot Frenzy",
+   "kind": "html",
+   "system": "",
+   "category": "library",
+   "drive_id": "1Co8gmyj4sxmEjuiNStuVzKl33_tkqKZw",
+   "drive_url": "https://drive.google.com/file/d/1Co8gmyj4sxmEjuiNStuVzKl33_tkqKZw/view",
+   "file": "clangrybirdsslingshotfrenzy.html",
+   "mode": "local",
+   "size": 5169,
+   "depends_on": [
+    "gh/UGBONTOP/firebaseport-angrybirds-remaster"
+   ],
+   "uses": [
+    "fetch/XHR"
+   ],
+   "note": ""
+  },
+  {
+   "id": 23,
+   "title": "Animal Crossing (GAME CUBE PORT)",
+   "kind": "html",
+   "system": "",
+   "category": "library",
+   "drive_id": "1XUVjr1J4PVCs2u08Rd2x1C0Et1_yQ-6w",
+   "drive_url": "https://drive.google.com/file/d/1XUVjr1J4PVCs2u08Rd2x1C0Et1_yQ-6w/view",
+   "file": "clanimalcrossing.html",
+   "mode": "local",
+   "size": 49661,
+   "depends_on": [
+    "gh/web-ports/ac-gamecube"
+   ],
+   "uses": [
+    "cookies/localStorage",
+    "fetch/XHR",
+    "service worker"
+   ],
+   "note": ""
+  },
+  {
+   "id": 24,
+   "title": "Antimatter Dimensions",
+   "kind": "html",
+   "system": "",
+   "category": "library",
+   "drive_id": "1_Uu6PTx_62dR6q83UQ4xoQSa4EutDo0Y",
+   "drive_url": "https://drive.google.com/file/d/1_Uu6PTx_62dR6q83UQ4xoQSa4EutDo0Y/view",
+   "file": "clantimatterdimensions.html",
+   "mode": "local",
+   "size": 2761,
+   "depends_on": [
+    "gh/IvarK/AntimatterDimensions"
+   ],
+   "uses": [],
+   "note": ""
+  },
+  {
+   "id": 25,
+   "title": "Ant Art Tycoon",
+   "kind": "html",
+   "system": "",
+   "category": "library",
+   "drive_id": "1EuABId80cKq1-FbHd8SO2j-p9d3mzDUC",
+   "drive_url": "https://drive.google.com/file/d/1EuABId80cKq1-FbHd8SO2j-p9d3mzDUC/view",
+   "file": "clantarttycoon.html",
+   "mode": "local",
+   "size": 12662,
+   "depends_on": [
+    "gh/deformed-steve/ant-art-tycoon-main",
+    "npm/phaser"
+   ],
+   "uses": [],
+   "note": ""
+  }
+ ]
+}
