@@ -1,0 +1,42 @@
+name: Mirror games
+
+on:
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "First file number (same numbering as the audit: 0, 500, 1000, ...)"
+        default: "0"
+      count:
+        description: "How many files in this batch"
+        default: "25"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: mirror-games
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy games from Drive
+        env:
+          DRIVE_API_KEY: ${{ secrets.DRIVE_API_KEY }}
+        run: python3 tools/mirror_games.py --start "${{ inputs.start }}" --count "${{ inputs.count }}" --out-dir games
+
+      - name: Save the changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A games
+          if git diff --cached --quiet; then
+            echo "Nothing new to save"
+          else
+            git commit -m "Mirror games ${{ inputs.start }} + ${{ inputs.count }}"
+            git pull --rebase origin ${{ github.ref_name }} || true
+            git push
+          fi
