@@ -1,4 +1,4 @@
-import { Check, Palette, Shield, AlertTriangle, Type, Image } from 'lucide-react';
+import { Check, Palette, Shield, AlertTriangle, Type, Image, HardDrive } from 'lucide-react';
 import { themes } from '@/data/themes';
 import { backgrounds } from '@/data/backgrounds';
 import type { Settings } from '@/hooks/useSettings';
@@ -144,6 +144,20 @@ export function SettingsTab({ settings, update }: SettingsTabProps) {
             description="Swaps letters across the whole site for characters that look the same (the SecretV4 title stays normal)"
             value={settings.lookalikeText}
             onChange={(v) => update({ lookalikeText: v })}
+          />
+        </div>
+
+        {/* Games */}
+        <div className="rounded-xl border p-5 animate-slide-up" style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', animationDelay: '105ms' }}>
+          <div className="flex items-center gap-3 mb-4">
+            <HardDrive size={18} style={{ color: 'var(--accent)' }} />
+            <h3 className="text-sm font-medium" style={{ color: 'var(--text)' }}>Games</h3>
+          </div>
+          <ToggleRow
+            title="Google Drive Links Only"
+            description="Off (default): games play right here on SecretV4. On: games never play here, they open as Google Drive links so you can download them."
+            value={settings.driveLinksOnly}
+            onChange={(v) => update({ driveLinksOnly: v })}
           />
         </div>
 

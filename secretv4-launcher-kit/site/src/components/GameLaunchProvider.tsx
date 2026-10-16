@@ -1,8 +1,9 @@
 import { createContext, useCallback, useContext, useEffect, useState, type MouseEvent, type ReactNode } from 'react';
-import { Download, FolderOpen, MousePointerClick, Lightbulb, Save, Gamepad2, Gauge } from 'lucide-react';
+import { AlertTriangle, Download, FolderOpen, MousePointerClick, Lightbulb, Save, Gamepad2, Gauge } from 'lucide-react';
 import { Modal } from '@/components/Modal';
 import type { LibraryGame } from '@/data/gameLibrary';
 import { GamePlayer } from '@/components/GamePlayer';
+import { getSettingsSnapshot } from '@/hooks/useSettings';
 import { findLocalGame, gameFileUrl, loadManifest } from '@/lib/manifest';
 
 const HIDE_KEY = 'secretv4-hide-run-guide';
@@ -37,7 +38,7 @@ const steps = [
   {
     icon: MousePointerClick,
     title: 'Open the game',
-    text: 'Press "Open game" below. Google Drive opens in a new tab.',
+    text: 'Press the button at the bottom of this window. Google Drive opens in a new tab.',
   },
   {
     icon: Download,
@@ -124,7 +125,9 @@ function EmulatorTips({ system }: { system?: string }) {
 }
 
 export function GameLaunchProvider({ children }: { children: ReactNode }) {
-  const [pending, setPending] = useState<{ url: string; system?: string; showBase: boolean; showTips: boolean } | null>(null);
+  const [pending, setPending] = useState<{ url: string; system?: string; showBase: boolean; showTips: boolean; reason: 'setting' | 'notHosted' } | null>(null);
+  // Seconds left before the Drive button unlocks (forces people to see the steps)
+  const [wait, setWait] = useState(0);
   const [dontShow, setDontShow] = useState(false);
   const [playing, setPlaying] = useState<{ title: string; fileUrl: string; driveUrl: string } | null>(null);
 
@@ -132,11 +135,19 @@ export function GameLaunchProvider({ children }: { children: ReactNode }) {
     void loadManifest();
   }, []);
 
+  useEffect(() => {
+    if (wait <= 0) return;
+    const t = window.setTimeout(() => setWait((w) => w - 1), 1000);
+    return () => window.clearTimeout(t);
+  }, [wait]);
+
   const onGameClick = useCallback<GameClick>((e, game) => {
     // Only game files on Google Drive need the guide
     if (!game.url.includes('drive.google.com')) return;
     // A copy hosted on this site plays right here instead of sending people to Drive
-    const local = findLocalGame(game.url);
+    // (unless "Google Drive Links Only" is turned on in Settings)
+    const driveOnly = getSettingsSnapshot().driveLinksOnly;
+    const local = driveOnly ? undefined : findLocalGame(game.url);
     if (local && local.file) {
       e.preventDefault();
       setPlaying({ title: game.title || local.title, fileUrl: gameFileUrl(local.file), driveUrl: game.url });
@@ -147,11 +158,12 @@ export function GameLaunchProvider({ children }: { children: ReactNode }) {
     if (!showBase && !showTips) return;
     e.preventDefault();
     setDontShow(false);
-    setPending({ url: game.url, system: game.system, showBase, showTips });
+    setPending({ url: game.url, system: game.system, showBase, showTips, reason: driveOnly ? 'setting' : 'notHosted' });
+    setWait(showBase ? 4 : 0);
   }, []);
 
   const proceed = () => {
-    if (!pending) return;
+    if (!pending || wait > 0) return;
     if (pending.showBase) {
       write('session', SEEN_KEY);
       if (dontShow) write('local', HIDE_KEY);
@@ -182,9 +194,29 @@ export function GameLaunchProvider({ children }: { children: ReactNode }) {
         >
           {pending.showBase && (
             <>
-          <p className="text-sm leading-relaxed mb-5" style={{ color: 'var(--text-dim)' }}>
-            Each game is a single file stored on Google Drive. Drive can't run it for you, so you download it once
-            and open it on your device. It only takes a few seconds.
+          <div
+            className="rounded-lg p-4 mb-4"
+            style={{ background: 'rgba(255, 59, 59, 0.14)', border: '2px solid #ff3b3b' }}
+          >
+            <div className="flex items-center gap-2 mb-1.5">
+              <AlertTriangle size={22} className="animate-pulse flex-shrink-0" style={{ color: '#ff3b3b' }} />
+              <p className="text-lg font-extrabold tracking-wide" style={{ color: '#ff3b3b' }}>
+                READ THIS!
+              </p>
+            </div>
+            <p className="text-sm font-semibold leading-snug" style={{ color: 'var(--text)' }}>
+              This game will NOT play on this site. Google Drive only gives you a file to download. If you just press
+              the button, you will end up on a Drive page and nothing will start.
+            </p>
+            <p className="text-xs mt-2 leading-relaxed" style={{ color: 'var(--text-dim)' }}>
+              {pending.reason === 'setting'
+                ? 'You are seeing this because "Google Drive Links Only" is turned on in Settings. Turn it off to play games on this site.'
+                : 'You are seeing this because this game is not hosted on this site (it is not copied here yet, or it is too big).'}
+            </p>
+          </div>
+
+          <p className="text-sm font-medium mb-3" style={{ color: 'var(--text)' }}>
+            Do these 3 steps:
           </p>
 
           <ol className="space-y-4 mb-5">
@@ -242,10 +274,17 @@ export function GameLaunchProvider({ children }: { children: ReactNode }) {
               </button>
               <button
                 onClick={proceed}
+                disabled={wait > 0}
                 className="px-4 py-2 rounded-lg text-sm font-medium"
-                style={{ background: 'var(--accent)', border: '1px solid var(--accent)', color: 'var(--bg)' }}
+                style={{
+                  background: 'var(--accent)',
+                  border: '1px solid var(--accent)',
+                  color: 'var(--bg)',
+                  opacity: wait > 0 ? 0.45 : 1,
+                  cursor: wait > 0 ? 'not-allowed' : 'pointer',
+                }}
               >
-                Open game
+                {wait > 0 ? `Read the steps (${wait})` : pending.showBase ? 'I read it, open Google Drive' : 'Open game'}
               </button>
             </div>
           </div>

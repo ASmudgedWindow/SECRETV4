@@ -8,6 +8,8 @@ export interface Settings {
   aboutBlankCloaking: boolean;
   closeWarning: boolean;
   lookalikeText: boolean;
+  /** When on, games open as Google Drive links instead of playing on this site */
+  driveLinksOnly: boolean;
   background: BackgroundId;
   /** How solid cards and panels are (lower = more of the background shows through) */
   panelOpacity: number;
@@ -20,6 +22,7 @@ const defaultSettings: Settings = {
   aboutBlankCloaking: true,
   closeWarning: true,
   lookalikeText: true,
+  driveLinksOnly: false,
   background: 'stars',
   panelOpacity: 0.45,
 };
@@ -53,6 +56,11 @@ const listeners = new Set<() => void>();
 function subscribe(listener: () => void) {
   listeners.add(listener);
   return () => listeners.delete(listener);
+}
+
+/** Current settings, for code that runs inside click handlers */
+export function getSettingsSnapshot(): Settings {
+  return current;
 }
 
 function updateSettings(patch: Partial<Settings>) {
