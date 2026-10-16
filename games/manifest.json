@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-16 20:07:08 UTC",
+ "generated": "2026-10-16 20:09:31 UTC",
  "count": 2736,
  "games": [
   {
@@ -51741,12 +51741,18 @@
    "category": "emulated",
    "drive_id": "1Mrr-eQVqUUFth-DX1U8aOYUcEJ-fl85V",
    "drive_url": "https://drive.google.com/file/d/1Mrr-eQVqUUFth-DX1U8aOYUcEJ-fl85V/view",
-   "file": null,
-   "mode": "failed",
+   "file": "clpokesoulsilver.html",
+   "mode": "local",
    "size": 3980,
-   "depends_on": [],
-   "uses": [],
-   "note": "HTTP 403 <html><head><meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\"/><title>Sorry...</title><style> body { font-family: verdana, arial, san"
+   "depends_on": [
+    "gh/bubblfan/emu",
+    "gh/bubbls/ugss"
+   ],
+   "uses": [
+    "emulatorjs",
+    "fetch/XHR"
+   ],
+   "note": ""
   },
   {
    "id": 4624,
@@ -52153,12 +52159,18 @@
    "category": "emulated",
    "drive_id": "1WTl6j_G-_UNEggGWTHV6rEcAFBc-IUKi",
    "drive_url": "https://drive.google.com/file/d/1WTl6j_G-_UNEggGWTHV6rEcAFBc-IUKi/view",
-   "file": null,
-   "mode": "failed",
+   "file": "clplankton.html",
+   "mode": "local",
    "size": 4014,
-   "depends_on": [],
-   "uses": [],
-   "note": "HTTP 403 <html><head><meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\"/><title>Sorry...</title><style> body { font-family: verdana, arial, san"
+   "depends_on": [
+    "gh/bubblfan/emu",
+    "gh/eazy-man/shHH"
+   ],
+   "uses": [
+    "emulatorjs",
+    "fetch/XHR"
+   ],
+   "note": ""
   },
   {
    "id": 4644,
