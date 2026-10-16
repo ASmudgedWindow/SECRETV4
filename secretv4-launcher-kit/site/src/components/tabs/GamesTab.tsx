@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { Search, Play, Star, Crown, Flame, Box, Gamepad2, Zap, Joystick } from 'lucide-react';
+import { Search, Play, Star, Crown, Flame, Box, Gamepad2, Zap, Joystick, Clock } from 'lucide-react';
 import { libraryGames, libraryLetters, gameLetter, type LibraryGame } from '@/data/gameLibrary';
 import {
   featuredGames,
@@ -10,12 +10,16 @@ import {
   emulatedSystems,
 } from '@/data/categories';
 import { useFavorites } from '@/hooks/useFavorites';
+import { usePlays } from '@/lib/plays';
 import { useGameClick } from '@/components/GameLaunchProvider';
 import { SubTabs, type SubTab } from '@/components/SubTabs';
 
-type CategoryId = 'featured' | 'all' | 'ragebait' | 'minecraft' | 'flash' | 'emulated';
+type CategoryId = 'recent' | 'featured' | 'all' | 'ragebait' | 'minecraft' | 'flash' | 'emulated';
+
+const gameById = new Map(libraryGames.map((g) => [g.id, g]));
 
 const categoryGames: Record<CategoryId, LibraryGame[]> = {
+  recent: [],
   featured: featuredGames,
   all: libraryGames,
   ragebait: rageBaitGames,
@@ -25,6 +29,7 @@ const categoryGames: Record<CategoryId, LibraryGame[]> = {
 };
 
 const tabs: SubTab<CategoryId>[] = [
+  { id: 'recent', label: 'Recent', icon: Clock },
   { id: 'featured', label: 'Featured', icon: Crown, gold: true },
   { id: 'all', label: `All Games (${libraryGames.length})`, icon: Gamepad2 },
   { id: 'ragebait', label: `Ragebait (${rageBaitGames.length})`, icon: Flame },
@@ -47,6 +52,34 @@ export function GamesTab() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
+  const plays = usePlays();
+
+  // Games opened most recently, newest first
+  const recentGames = useMemo(
+    () => plays.recent.map((id) => gameById.get(id)).filter((g): g is LibraryGame => !!g),
+    [plays.recent],
+  );
+
+  // Top 10 by number of plays, topped up with the hand-picked favorites when there are fewer than 10
+  const topGames = useMemo(() => {
+    const ranked = Object.entries(plays.counts)
+      .map(([id, n]) => ({ game: gameById.get(Number(id)), n, last: plays.last[id] ?? 0 }))
+      .filter((x): x is { game: LibraryGame; n: number; last: number } => !!x.game && x.n > 0)
+      .sort((a, b) => b.n - a.n || b.last - a.last)
+      .slice(0, 10)
+      .map((x) => x.game);
+    const taken = new Set(ranked.map((g) => g.id));
+    for (const g of featuredGames) {
+      if (ranked.length >= 10) break;
+      if (!taken.has(g.id)) ranked.push(g);
+    }
+    return ranked;
+  }, [plays.counts, plays.last]);
+
+  const hasPlays = Object.keys(plays.counts).length > 0;
+  const currentGames = category === 'recent' ? recentGames : category === 'featured' ? topGames : categoryGames[category];
+
+  const isRecent = category === 'recent';
   const isFeatured = category === 'featured';
   const isEmulated = category === 'emulated';
 
@@ -58,14 +91,14 @@ export function GamesTab() {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return categoryGames[category].filter((g) => {
+    return currentGames.filter((g) => {
       if (q && !g.title.toLowerCase().includes(q) && !(g.system ?? '').toLowerCase().includes(q)) return false;
       if (activeLetter && gameLetter(g) !== activeLetter) return false;
-      if (onlyFavs && !favorites.includes(g.id)) return false;
+      if (onlyFavs && !isFeatured && !isRecent && !favorites.includes(g.id)) return false;
       if (isEmulated && system && g.system !== system) return false;
       return true;
     });
-  }, [category, query, activeLetter, onlyFavs, favorites, system, isEmulated]);
+  }, [currentGames, query, activeLetter, onlyFavs, favorites, system, isEmulated, isFeatured, isRecent]);
 
   // Long lists show a page at a time and load more as you scroll
   useEffect(() => {
@@ -119,7 +152,7 @@ export function GamesTab() {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder={`Search ${categoryGames[category].length} games...`}
+            placeholder={`Search ${currentGames.length} games...`}
             className="flex-1 bg-transparent outline-none text-sm"
             style={{ color: 'var(--text)' }}
           />
@@ -151,7 +184,7 @@ export function GamesTab() {
         </div>
       )}
 
-      {!isFeatured && (
+      {!isFeatured && !isRecent && (
         <div className="flex-shrink-0 mb-4 flex flex-wrap gap-1">
           <button
             onClick={() => setActiveLetter(null)}
@@ -169,7 +202,7 @@ export function GamesTab() {
             Favorites{favorites.length ? ` (${favorites.length})` : ''}
           </button>
           {libraryLetters
-            .filter((l) => categoryGames[category].some((g) => gameLetter(g) === l))
+            .filter((l) => currentGames.some((g) => gameLetter(g) === l))
             .map((letter) => (
               <button
                 key={letter}
@@ -188,7 +221,15 @@ export function GamesTab() {
           <div className="flex items-center gap-2 mb-3">
             <Crown size={16} style={{ color: 'var(--gold)' }} />
             <p className="text-sm font-medium" style={{ color: 'var(--gold)' }}>
-              Hand-picked favorites
+              {hasPlays ? 'Your most played (topped up with hand-picked favorites)' : 'Hand-picked favorites'}
+            </p>
+          </div>
+        )}
+        {isRecent && !query && recentGames.length > 0 && (
+          <div className="flex items-center gap-2 mb-3">
+            <Clock size={16} style={{ color: 'var(--accent)' }} />
+            <p className="text-sm font-medium" style={{ color: 'var(--accent)' }}>
+              Recently played
             </p>
           </div>
         )}
@@ -196,9 +237,11 @@ export function GamesTab() {
         {filtered.length === 0 ? (
           <div className="flex items-center justify-center h-full">
             <p className="text-sm" style={{ color: 'var(--text-dim)' }}>
-              {onlyFavs && favorites.length === 0
-                ? 'No favorites yet — tap the star on a game.'
-                : 'No games found.'}
+              {isRecent && !query
+                ? 'Nothing here yet. Games you play on SecretV4 will show up here.'
+                : onlyFavs && favorites.length === 0
+                  ? 'No favorites yet — tap the star on a game.'
+                  : 'No games found.'}
             </p>
           </div>
         ) : (
@@ -237,7 +280,10 @@ export function GamesTab() {
                             className="text-[10px] font-bold tracking-widest mb-1 flex items-center gap-1"
                             style={{ color: 'var(--gold)' }}
                           >
-                            <Crown size={10} /> FEATURED
+                            <Crown size={10} />{' '}
+                            {(plays.counts[String(game.id)] ?? 0) > 0
+                              ? `#${topGames.findIndex((g) => g.id === game.id) + 1} · ${plays.counts[String(game.id)]} ${plays.counts[String(game.id)] === 1 ? 'PLAY' : 'PLAYS'}`
+                              : 'FEATURED'}
                           </p>
                         )}
                         <p

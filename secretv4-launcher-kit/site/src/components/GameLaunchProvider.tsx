@@ -4,6 +4,7 @@ import { Modal } from '@/components/Modal';
 import type { LibraryGame } from '@/data/gameLibrary';
 import { GamePlayer } from '@/components/GamePlayer';
 import { getSettingsSnapshot } from '@/hooks/useSettings';
+import { recordPlay } from '@/lib/plays';
 import { findLocalGame, gameFileUrl, loadManifest } from '@/lib/manifest';
 
 const HIDE_KEY = 'secretv4-hide-run-guide';
@@ -27,7 +28,7 @@ function write(storage: 'local' | 'session', key: string) {
   }
 }
 
-type GameClick = (e: MouseEvent<HTMLElement>, game: Pick<LibraryGame, 'url' | 'kind' | 'system'> & { title?: string }) => void;
+type GameClick = (e: MouseEvent<HTMLElement>, game: Pick<LibraryGame, 'url' | 'kind' | 'system'> & { id?: number; title?: string }) => void;
 
 const GameLaunchContext = createContext<GameClick>(() => {});
 
@@ -143,13 +144,17 @@ export function GameLaunchProvider({ children }: { children: ReactNode }) {
 
   const onGameClick = useCallback<GameClick>((e, game) => {
     // Only game files on Google Drive need the guide
-    if (!game.url.includes('drive.google.com')) return;
+    if (!game.url.includes('drive.google.com')) {
+      recordPlay(game.id); // opens on another site: counts as a play
+      return;
+    }
     // A copy hosted on this site plays right here instead of sending people to Drive
     // (unless "Google Drive Links Only" is turned on in Settings)
     const driveOnly = getSettingsSnapshot().driveLinksOnly;
     const local = driveOnly ? undefined : findLocalGame(game.url);
     if (local && local.file) {
       e.preventDefault();
+      recordPlay(game.id); // plays on this site: counts as a play (Drive downloads never do)
       setPlaying({ title: game.title || local.title, fileUrl: gameFileUrl(local.file), driveUrl: game.url });
       return;
     }
