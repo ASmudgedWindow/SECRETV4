@@ -130,7 +130,7 @@ export function GameLaunchProvider({ children }: { children: ReactNode }) {
   // Seconds left before the Drive button unlocks (forces people to see the steps)
   const [wait, setWait] = useState(0);
   const [dontShow, setDontShow] = useState(false);
-  const [playing, setPlaying] = useState<{ title: string; fileUrl: string; driveUrl: string } | null>(null);
+  const [playing, setPlaying] = useState<{ id?: number; title: string; fileUrl: string; driveUrl: string } | null>(null);
 
   useEffect(() => {
     void loadManifest();
@@ -155,7 +155,7 @@ export function GameLaunchProvider({ children }: { children: ReactNode }) {
     if (local && local.file) {
       e.preventDefault();
       recordPlay(game.id); // plays on this site: counts as a play (Drive downloads never do)
-      setPlaying({ title: game.title || local.title, fileUrl: gameFileUrl(local.file), driveUrl: game.url });
+      setPlaying({ id: game.id, title: game.title || local.title, fileUrl: gameFileUrl(local.file), driveUrl: game.url });
       return;
     }
     const showBase = !(read('local', HIDE_KEY) || read('session', SEEN_KEY));
@@ -186,6 +186,7 @@ export function GameLaunchProvider({ children }: { children: ReactNode }) {
       {children}
       {playing && (
         <GamePlayer
+          gameId={playing.id}
           title={playing.title}
           fileUrl={playing.fileUrl}
           driveUrl={playing.driveUrl}

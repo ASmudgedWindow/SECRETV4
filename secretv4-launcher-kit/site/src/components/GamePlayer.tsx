@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import { Download, ExternalLink, Maximize2, X } from 'lucide-react';
+import { Download, ExternalLink, Flag, Maximize2, X } from 'lucide-react';
+import { getSiteConfig, openLink } from '@/lib/siteConfig';
 
 interface GamePlayerProps {
+  gameId?: number;
   title: string;
   /** Address of the game file hosted on this site */
   fileUrl: string;
@@ -17,11 +19,24 @@ const btn = {
 } as const;
 
 /** Full-screen window that runs a hosted game in an iframe, with fallbacks if it fails. */
-export function GamePlayer({ title, fileUrl, driveUrl, onClose }: GamePlayerProps) {
+export function GamePlayer({ gameId, title, fileUrl, driveUrl, onClose }: GamePlayerProps) {
   const [loaded, setLoaded] = useState(false);
   const [slow, setSlow] = useState(false);
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
+  const [reported, setReported] = useState(false);
+  const { reportUrl } = getSiteConfig();
+
+  const report = () => {
+    const text = `Broken game: ${title} (id ${gameId ?? 'unknown'})`;
+    if (!/^mailto:/i.test(reportUrl)) {
+      // A form can't be pre-filled, so the game name is copied for pasting
+      void navigator.clipboard?.writeText(text).catch(() => {});
+      setReported(true);
+      window.setTimeout(() => setReported(false), 7000);
+    }
+    openLink(reportUrl, text, `${text}\n\nWhat went wrong?\n`);
+  };
   const frame = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
@@ -67,6 +82,11 @@ export function GamePlayer({ title, fileUrl, driveUrl, onClose }: GamePlayerProp
         <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs" style={btn}>
           <ExternalLink size={14} /> New tab
         </a>
+        {reportUrl && (
+          <button onClick={report} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs" style={btn}>
+            <Flag size={14} /> {reported ? 'Name copied: paste it in the form' : 'Report'}
+          </button>
+        )}
         <button onClick={onClose} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background: 'var(--accent)', border: '1px solid var(--accent)', color: 'var(--bg)' }}>
           <X size={14} /> Close
         </button>

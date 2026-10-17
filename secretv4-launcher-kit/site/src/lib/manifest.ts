@@ -1,3 +1,5 @@
+import { useSyncExternalStore } from 'react';
+
 /**
  * Reads games/manifest.json (written by the "Mirror games" workflow) so the site knows
  * which games have a copy hosted in this repo and can be played inside SecretV4.
@@ -11,6 +13,23 @@ export interface ManifestGame {
 }
 
 let byDriveId = new Map<string, ManifestGame>();
+let version = 0;
+const listeners = new Set<() => void>();
+function bump() {
+  version++;
+  listeners.forEach((l) => l());
+}
+
+/** Re-renders a component once the manifest has loaded, so badges and filters are correct */
+export function useManifestVersion(): number {
+  return useSyncExternalStore(
+    (cb) => {
+      listeners.add(cb);
+      return () => listeners.delete(cb);
+    },
+    () => version,
+  );
+}
 let loading: Promise<void> | null = null;
 
 /** Full address of a copied game file, e.g. https://you.github.io/repo/games/clADarkRoom.html */
@@ -30,10 +49,12 @@ export function loadManifest(): Promise<void> {
           if (g.drive_id && !map.has(g.drive_id)) map.set(g.drive_id, g);
         }
         byDriveId = map;
+        bump();
       })
       .catch(() => {
         // No manifest yet (or offline): every game just falls back to the Drive guide.
         byDriveId = new Map();
+        bump();
       });
   }
   return loading;
@@ -49,4 +70,12 @@ export function findLocalGame(url: string): ManifestGame | undefined {
   const id = driveIdFromUrl(url);
   const g = id ? byDriveId.get(id) : undefined;
   return g && g.mode === 'local' && g.file ? g : undefined;
+}
+
+export type PlayMode = 'here' | 'external' | 'drive';
+
+/** here = plays on this site, external = opens another website, drive = a Google Drive download */
+export function playMode(url: string, driveOnly: boolean): PlayMode {
+  if (!url.includes('drive.google.com')) return 'external';
+  return !driveOnly && findLocalGame(url) ? 'here' : 'drive';
 }

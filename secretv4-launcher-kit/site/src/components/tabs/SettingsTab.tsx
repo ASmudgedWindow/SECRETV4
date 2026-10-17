@@ -1,4 +1,6 @@
-import { Check, Palette, Shield, AlertTriangle, Type, Image, HardDrive } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { Check, Palette, Shield, AlertTriangle, Type, Image, HardDrive, Save, Download, Upload } from 'lucide-react';
+import { exportBackup, importBackup } from '@/lib/backup';
 import { themes } from '@/data/themes';
 import { backgrounds } from '@/data/backgrounds';
 import type { Settings } from '@/hooks/useSettings';
@@ -9,6 +11,26 @@ interface SettingsTabProps {
 }
 
 export function SettingsTab({ settings, update }: SettingsTabProps) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [backupMsg, setBackupMsg] = useState('');
+
+  const doExport = () => {
+    const n = exportBackup();
+    setBackupMsg(`Backup downloaded (${n} items). Keep the file somewhere safe.`);
+  };
+
+  const doImport = async (file: File | undefined) => {
+    if (!file) return;
+    try {
+      const n = await importBackup(file);
+      setBackupMsg(`Restored ${n} items. Reloading...`);
+      window.setTimeout(() => window.location.reload(), 1200);
+    } catch (err) {
+      setBackupMsg(err instanceof Error ? err.message : 'Could not restore that file.');
+    }
+    if (fileRef.current) fileRef.current.value = '';
+  };
+
   return (
     <div className="h-full overflow-y-auto -mr-2 pr-2">
       <div className="space-y-5">
@@ -159,6 +181,41 @@ export function SettingsTab({ settings, update }: SettingsTabProps) {
             value={settings.driveLinksOnly}
             onChange={(v) => update({ driveLinksOnly: v })}
           />
+        </div>
+
+        {/* Backup */}
+        <div className="rounded-xl border p-5 animate-slide-up" style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', animationDelay: '110ms' }}>
+          <div className="flex items-center gap-3 mb-4">
+            <Save size={18} style={{ color: 'var(--accent)' }} />
+            <h3 className="text-sm font-medium" style={{ color: 'var(--text)' }}>Save backup</h3>
+          </div>
+          <p className="text-xs leading-relaxed mb-3" style={{ color: 'var(--text-dim)' }}>
+            Your settings, favorites, play history and most game saves live in this browser only. Download a backup so you
+            can restore them if you clear your browser data or the site address changes. Some games (certain emulators
+            and big games) store saves in other places and may not be included. Only restore files you made yourself.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={doExport}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm"
+              style={{ background: 'var(--accent)', color: 'var(--bg)', border: '1px solid var(--accent)' }}
+            >
+              <Download size={14} /> Download backup
+            </button>
+            <button
+              onClick={() => fileRef.current?.click()}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm"
+              style={{ background: 'var(--bg-tertiary)', color: 'var(--text-dim)', border: '1px solid var(--border)' }}
+            >
+              <Upload size={14} /> Restore backup
+            </button>
+            <input ref={fileRef} type="file" accept=".json,application/json" className="hidden" onChange={(e) => void doImport(e.target.files?.[0])} />
+          </div>
+          {backupMsg && (
+            <p className="text-xs mt-3" style={{ color: 'var(--accent)' }}>
+              {backupMsg}
+            </p>
+          )}
         </div>
 
         {/* Warning notice */}

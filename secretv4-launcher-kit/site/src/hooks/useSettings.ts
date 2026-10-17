@@ -73,6 +73,11 @@ function updateSettings(patch: Partial<Settings>) {
   listeners.forEach((l) => l());
 }
 
+/** Watch a single setting from anywhere */
+export function useSetting<K extends keyof Settings>(key: K): Settings[K] {
+  return useSyncExternalStore(subscribe, () => current[key]);
+}
+
 export function useSettings() {
   const settings = useSyncExternalStore(subscribe, () => current);
   const update = useCallback(updateSettings, []);

@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { Info, Coffee } from 'lucide-react';
+import { Info, Coffee, Globe } from 'lucide-react';
+import { getSiteConfig } from '@/lib/siteConfig';
 import { SubTabs, type SubTab } from '@/components/SubTabs';
 import { BoredSection } from '@/components/bored/BoredSection';
 import { libraryGames } from '@/data/gameLibrary';
 
 function AboutSection() {
+  const { mirrors } = getSiteConfig();
   return (
     <div>
       <div className="space-y-4">
@@ -29,6 +31,33 @@ function AboutSection() {
             a sleek, cyberpunk-inspired interface with customizable dark themes and cloaking features.
           </p>
         </div>
+
+        {/* Backup addresses */}
+        {mirrors.length > 0 && (
+          <div className="rounded-xl border p-6 animate-slide-up" style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', animationDelay: '30ms' }}>
+            <div className="flex items-center gap-3 mb-2">
+              <Globe size={18} style={{ color: 'var(--accent)' }} />
+              <h3 className="text-sm font-medium" style={{ color: 'var(--text)' }}>Backup addresses</h3>
+            </div>
+            <p className="text-xs mb-3" style={{ color: 'var(--text-dim)' }}>
+              If this address stops working or gets blocked, try one of these. Same games, different address.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {mirrors.map((m) => (
+                <a
+                  key={m.url}
+                  href={m.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="game-card rounded-lg border px-3 py-2.5 text-sm truncate"
+                  style={{ background: 'var(--bg-tertiary)', borderColor: 'var(--border)', color: 'var(--text)' }}
+                >
+                  {m.name}
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Stats card */}
         <div

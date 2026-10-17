@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react';
+import { reportPlay } from '@/lib/stats';
 
 /**
  * Remembers which games were played, using only this browser's own storage.
@@ -52,6 +53,7 @@ export function recordPlay(id: number | undefined) {
   const now = Date.now();
   const key = String(id);
   const counted = now - (current.last[key] ?? 0) >= PLAY_COOLDOWN_MS;
+  if (counted) reportPlay(id); // also tell the site-wide counter, if one is set up
   current = {
     counts: counted ? { ...current.counts, [key]: (current.counts[key] ?? 0) + 1 } : current.counts,
     last: counted ? { ...current.last, [key]: now } : current.last,
