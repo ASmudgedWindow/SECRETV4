@@ -1,6 +1,5 @@
 import { useSyncExternalStore } from 'react';
 import { reportPlay } from '@/lib/stats';
-import { markPlayedToday } from '@/lib/progress';
 
 /**
  * Remembers which games were played, using only this browser's own storage.
@@ -51,7 +50,6 @@ function subscribe(listener: () => void) {
  */
 export function recordPlay(id: number | undefined) {
   if (typeof id !== 'number') return;
-  markPlayedToday();
   const now = Date.now();
   const key = String(id);
   const counted = now - (current.last[key] ?? 0) >= PLAY_COOLDOWN_MS;

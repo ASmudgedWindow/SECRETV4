@@ -4,6 +4,7 @@ import { libraryGames, type LibraryGame } from '@/data/gameLibrary';
 import { boredLinks } from '@/data/links';
 import { LinkGrid } from '@/components/LinkGrid';
 import { useGameClick } from '@/components/GameLaunchProvider';
+import { setFlag, setRecord } from '@/lib/progress';
 
 const btn = {
   background: 'var(--bg-tertiary)',
@@ -83,6 +84,7 @@ function ReactionTest() {
     } else if (state === 'go') {
       const t = Math.round(performance.now() - start.current);
       setMs(t);
+      setRecord('bestReaction', t);
       setBest((b) => (b === null || t < b ? t : b));
       setState('result');
     }
@@ -141,7 +143,10 @@ function ClickSpeed() {
   }, [running]);
 
   useEffect(() => {
-    if (done) setBest((b) => Math.max(b, clicks / DURATION));
+    if (done) {
+      setBest((b) => Math.max(b, clicks / DURATION));
+      setRecord('bestCps', clicks / DURATION);
+    }
   }, [done, clicks]);
 
   const click = () => {
@@ -177,7 +182,11 @@ function ClickSpeed() {
 function CoinAndDice() {
   const [result, setResult] = useState('—');
   const flip = () => setResult(Math.random() < 0.5 ? 'Heads' : 'Tails');
-  const roll = (sides: number) => setResult(`d${sides}: ${1 + Math.floor(Math.random() * sides)}`);
+  const roll = (sides: number) => {
+    const n = 1 + Math.floor(Math.random() * sides);
+    setResult(`d${sides}: ${n}`);
+    if (sides === 20 && n === 20) setFlag('nat20');
+  };
   return (
     <Card title="Coin & Dice" icon={Dices}>
       <p className="text-2xl font-mono font-bold mb-3" style={{ color: 'var(--accent)' }}>

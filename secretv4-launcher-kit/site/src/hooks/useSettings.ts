@@ -1,3 +1,4 @@
+import { setFlag } from '@/lib/progress';
 import { useEffect, useCallback, useSyncExternalStore } from 'react';
 import { themes, defaultTheme, type Theme } from '@/data/themes';
 import { isBackgroundId } from '@/data/backgrounds';
@@ -64,6 +65,12 @@ export function getSettingsSnapshot(): Settings {
 }
 
 function updateSettings(patch: Partial<Settings>) {
+  // Things the achievements care about
+  if (patch.themeId !== undefined && patch.themeId !== current.themeId) setFlag('themeChanged');
+  if (patch.background !== undefined && patch.background !== current.background) {
+    setFlag('backgroundChanged');
+    if (patch.background === 'none') setFlag('backgroundOff');
+  }
   current = { ...current, ...patch };
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(current));

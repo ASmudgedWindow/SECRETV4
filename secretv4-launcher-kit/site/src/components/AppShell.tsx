@@ -8,6 +8,7 @@ import { useSettings } from '@/hooks/useSettings';
 import { libraryGames } from '@/data/gameLibrary';
 import { GameLaunchProvider } from '@/components/GameLaunchProvider';
 import { AchievementWatcher } from '@/components/AchievementWatcher';
+import { Rickroll, openRickroll } from '@/components/Rickroll';
 import { useClickRipple } from '@/hooks/useClickRipple';
 
 type TabId = 'games' | 'tools' | 'stuff' | 'settings';
@@ -70,7 +71,9 @@ export function AppShell() {
               textShadow: `0 0 12px var(--accent-glow)`,
             }}
           >
-            SecretV4
+            Secret
+            <span onClick={openRickroll}>V</span>
+            4
           </h1>
         </div>
         <div className="flex items-center gap-3">
@@ -148,6 +151,7 @@ export function AppShell() {
       </div>
     </div>
     <AchievementWatcher />
+    <Rickroll />
     </GameLaunchProvider>
   );
 }

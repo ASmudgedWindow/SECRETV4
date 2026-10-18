@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Download, ExternalLink, Flag, Maximize2, ThumbsDown, ThumbsUp, X } from 'lucide-react';
 import { castVote, likedPercent, ratingsEnabled, useRatings } from '@/lib/ratings';
-import { addPlaySeconds } from '@/lib/progress';
+import { beginGameSession, endGameSession, watchFrame } from '@/lib/activity';
 import { getSiteConfig, openLink } from '@/lib/siteConfig';
 
 interface GamePlayerProps {
@@ -69,14 +69,15 @@ export function GamePlayer({ gameId, title, fileUrl, driveUrl, onClose }: GamePl
     };
   }, [fileUrl, attempt]);
 
-  // Time spent: counts every 5 seconds while the tab is visible and the game loaded
+  // Active time in this game: only counts while there is real input (see lib/activity.ts)
   useEffect(() => {
     if (gameId === undefined || failed) return;
-    const t = window.setInterval(() => {
-      if (document.visibilityState === 'visible') addPlaySeconds(gameId, 5);
-    }, 5000);
-    return () => window.clearInterval(t);
+    beginGameSession(gameId);
+    return endGameSession;
   }, [gameId, failed]);
+
+  // Clicks and keys inside the game never reach this page, so listen inside the game's frame as well
+  useEffect(() => (frame.current ? watchFrame(frame.current) : undefined), [attempt, failed, fileUrl]);
 
   const goFullscreen = () => {
     frame.current?.requestFullscreen?.().catch(() => {});

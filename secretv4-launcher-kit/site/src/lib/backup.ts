@@ -2,6 +2,8 @@
  * Save backup: copies everything this browser remembers for SecretV4 (settings, favorites, play history,
  * and the saves of games that keep them in browser storage) into a file, and restores it later.
  */
+import { setFlag } from '@/lib/progress';
+
 const MARKER = 'secretv4-backup';
 
 /** Downloads the backup file. Returns how many items were saved. */
@@ -27,6 +29,7 @@ export function exportBackup(): number {
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+  setFlag('backedUp');
   return Object.keys(data).length;
 }
 
