@@ -19,6 +19,7 @@ export function useFavorites() {
       const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
       try {
         localStorage.setItem(KEY, JSON.stringify(next));
+        window.dispatchEvent(new Event('secretv4-favorites'));
       } catch {
         // ignore
       }

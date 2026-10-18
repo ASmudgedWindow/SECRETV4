@@ -42,6 +42,25 @@ export function useGlobalTop(): TopEntry[] | null {
   );
 }
 
+/**
+ * A random anonymous ID for this browser (not tied to a name, account or address).
+ * The counter keeps only a scrambled copy so each browser gets one vote per game and one play per 10 minutes.
+ */
+export function voterId(): string {
+  try {
+    const saved = localStorage.getItem('secretv4-voter');
+    if (saved && /^[A-Za-z0-9-]{16,64}$/.test(saved)) return saved;
+    const fresh =
+      typeof crypto !== 'undefined' && 'randomUUID' in crypto
+        ? crypto.randomUUID()
+        : Array.from({ length: 4 }, () => Math.random().toString(36).slice(2, 10)).join('-');
+    localStorage.setItem('secretv4-voter', fresh);
+    return fresh;
+  } catch {
+    return '';
+  }
+}
+
 /** Tells the counter about one play. Fails silently. */
 export function reportPlay(id: number) {
   const { statsUrl } = getSiteConfig();
@@ -50,7 +69,7 @@ export function reportPlay(id: number) {
   fetch(`${statsUrl}/play`, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain' },
-    body: JSON.stringify({ id }),
+    body: JSON.stringify({ id, v: voterId() }),
     keepalive: true,
   }).catch(() => {});
 }

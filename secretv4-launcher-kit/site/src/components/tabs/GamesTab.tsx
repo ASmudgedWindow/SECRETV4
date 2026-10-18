@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { Search, Play, Star, Crown, Flame, Box, Gamepad2, Zap, Joystick, Clock } from 'lucide-react';
+import { Search, Play, Star, Crown, Flame, Box, Gamepad2, Zap, Joystick, Clock, ThumbsUp, Library, FolderPlus, FolderMinus, Pencil, Trash2, Plus } from 'lucide-react';
 import { libraryGames, libraryLetters, gameLetter, type LibraryGame } from '@/data/gameLibrary';
 import {
   featuredGames,
@@ -15,16 +15,20 @@ import { searchScore } from '@/lib/search';
 import { playMode, useManifestVersion } from '@/lib/manifest';
 import { useSetting } from '@/hooks/useSettings';
 import { useGlobalTop } from '@/lib/stats';
+import { likedPercent, ratingScore, ratingsEnabled, useRatings } from '@/lib/ratings';
 import { useGameClick } from '@/components/GameLaunchProvider';
+import { MAX_COLLECTIONS, createCollection, deleteCollection, renameCollection, toggleInCollection, useCollections } from '@/lib/collections';
+import { AddToCollectionModal, ConfirmModal, NameModal } from '@/components/CollectionDialogs';
 import { SubTabs, type SubTab } from '@/components/SubTabs';
 
-type CategoryId = 'recent' | 'featured' | 'all' | 'ragebait' | 'minecraft' | 'flash' | 'emulated';
+type CategoryId = 'recent' | 'featured' | 'collections' | 'all' | 'ragebait' | 'minecraft' | 'flash' | 'emulated';
 
 const gameById = new Map(libraryGames.map((g) => [g.id, g]));
 
 const categoryGames: Record<CategoryId, LibraryGame[]> = {
   recent: [],
   featured: featuredGames,
+  collections: [],
   all: libraryGames,
   ragebait: rageBaitGames,
   minecraft: minecraftGames,
@@ -35,6 +39,7 @@ const categoryGames: Record<CategoryId, LibraryGame[]> = {
 const tabs: SubTab<CategoryId>[] = [
   { id: 'recent', label: 'Recent', icon: Clock },
   { id: 'featured', label: 'Featured', icon: Crown, gold: true },
+  { id: 'collections', label: 'Collections', icon: Library },
   { id: 'all', label: `All Games (${libraryGames.length})`, icon: Gamepad2 },
   { id: 'ragebait', label: `Ragebait (${rageBaitGames.length})`, icon: Flame },
   { id: 'minecraft', label: `Minecraft (${minecraftGames.length})`, icon: Box },
@@ -50,9 +55,18 @@ export function GamesTab() {
   const [activeLetter, setActiveLetter] = useState<string | null>(null);
   const [onlyFavs, setOnlyFavs] = useState(false);
   const [playableOnly, setPlayableOnly] = useState(false);
+  const [topRated, setTopRated] = useState(false);
+  const { ratings } = useRatings();
+  const ratingsOn = ratingsEnabled();
   const manifestVersion = useManifestVersion();
   const driveOnly = useSetting('driveLinksOnly');
   const [system, setSystem] = useState<string | null>(null);
+  const collections = useCollections();
+  const [activeCollection, setActiveCollection] = useState<string | null>(null);
+  const [dialog, setDialog] = useState<
+    { type: 'add'; gameId: number; title: string } | { type: 'new' } | { type: 'rename' } | { type: 'delete' } | null
+  >(null);
+  const selectedCollection = collections.find((c) => c.id === activeCollection) ?? collections[0] ?? null;
   const [limit, setLimit] = useState(PAGE_SIZE);
   const { favorites, toggle } = useFavorites();
   const onGameClick = useGameClick();
@@ -103,10 +117,16 @@ export function GamesTab() {
 
   const hasPlays = Object.keys(plays.counts).length > 0;
   const isGlobal = !!globalTop && globalTop.length > 0;
-  const currentGames = category === 'recent' ? recentGames : category === 'featured' ? topGames : categoryGames[category];
+  const collectionGames = useMemo(
+    () => (selectedCollection ? selectedCollection.games.map((id) => gameById.get(id)).filter((g): g is LibraryGame => !!g) : []),
+    [selectedCollection],
+  );
+  const currentGames =
+    category === 'recent' ? recentGames : category === 'featured' ? topGames : category === 'collections' ? collectionGames : categoryGames[category];
 
   const isRecent = category === 'recent';
   const isFeatured = category === 'featured';
+  const isCollections = category === 'collections';
   const isEmulated = category === 'emulated';
 
   const switchCategory = (id: CategoryId) => {
@@ -122,23 +142,25 @@ export function GamesTab() {
       const score = q ? searchScore(g, q) : 1;
       if (q && score === 0) continue;
       if (activeLetter && gameLetter(g) !== activeLetter) continue;
-      if (onlyFavs && !isFeatured && !isRecent && !favorites.includes(g.id)) continue;
-      if (playableOnly && !isFeatured && !isRecent && playMode(g.url, driveOnly) === 'drive') continue;
+      if (onlyFavs && !isFeatured && !isRecent && !isCollections && !favorites.includes(g.id)) continue;
+      if (playableOnly && !isFeatured && !isRecent && !isCollections && playMode(g.url, driveOnly) === 'drive') continue;
       if (isEmulated && system && g.system !== system) continue;
       out.push({ game: g, score });
     }
     // Best matches first when searching
     if (q) out.sort((a, b) => b.score - a.score);
+    // "Top rated" puts well-liked games first; games without enough votes keep their order after them
+    if (topRated && !isFeatured && !isRecent && !isCollections) out.sort((a, b) => ratingScore(ratings.get(b.game.id)) - ratingScore(ratings.get(a.game.id)));
     return out.map((x) => x.game);
     // manifestVersion: re-check which games are playable once the manifest has loaded
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentGames, query, activeLetter, onlyFavs, favorites, system, isEmulated, isFeatured, isRecent, playableOnly, driveOnly, manifestVersion]);
+  }, [currentGames, query, activeLetter, onlyFavs, favorites, system, isEmulated, isFeatured, isRecent, isCollections, playableOnly, driveOnly, manifestVersion, topRated, ratings]);
 
   // Long lists show a page at a time and load more as you scroll
   useEffect(() => {
     setLimit(PAGE_SIZE);
     if (scrollRef.current) scrollRef.current.scrollTop = 0;
-  }, [category, query, activeLetter, onlyFavs, system, playableOnly]);
+  }, [category, query, activeLetter, onlyFavs, system, playableOnly, topRated]);
 
   const visible = filtered.slice(0, limit);
   const hasMore = filtered.length > limit;
@@ -218,7 +240,41 @@ export function GamesTab() {
         </div>
       )}
 
-      {!isFeatured && !isRecent && (
+      {isCollections && (
+        <div className="flex-shrink-0 mb-4 flex flex-wrap items-center gap-1">
+          {collections.map((c) => (
+            <button
+              key={c.id}
+              onClick={() => setActiveCollection(c.id)}
+              className="px-2.5 py-1 text-xs rounded-md transition-all"
+              style={chip(selectedCollection?.id === c.id)}
+            >
+              {c.name} ({c.games.length})
+            </button>
+          ))}
+          {collections.length < MAX_COLLECTIONS && (
+            <button
+              onClick={() => setDialog({ type: 'new' })}
+              className="px-2.5 py-1 text-xs rounded-md transition-all flex items-center gap-1"
+              style={chip(false)}
+            >
+              <Plus size={11} /> New collection
+            </button>
+          )}
+          {selectedCollection && (
+            <span className="flex items-center gap-1 ml-auto">
+              <button onClick={() => setDialog({ type: 'rename' })} className="px-2.5 py-1 text-xs rounded-md flex items-center gap-1" style={chip(false)}>
+                <Pencil size={11} /> Rename
+              </button>
+              <button onClick={() => setDialog({ type: 'delete' })} className="px-2.5 py-1 text-xs rounded-md flex items-center gap-1" style={chip(false)}>
+                <Trash2 size={11} /> Delete
+              </button>
+            </span>
+          )}
+        </div>
+      )}
+
+      {!isFeatured && !isRecent && !isCollections && (
         <div className="flex-shrink-0 mb-4 flex flex-wrap gap-1">
           <button
             onClick={() => setActiveLetter(null)}
@@ -243,6 +299,16 @@ export function GamesTab() {
             <Play size={11} fill={playableOnly ? 'currentColor' : 'none'} />
             Playable only
           </button>
+          {ratingsOn && (
+            <button
+              onClick={() => setTopRated(!topRated)}
+              className="px-2.5 py-1 text-xs rounded-md transition-all flex items-center gap-1"
+              style={chip(topRated)}
+            >
+              <ThumbsUp size={11} fill={topRated ? 'currentColor' : 'none'} />
+              Top rated
+            </button>
+          )}
           {libraryLetters
             .filter((l) => currentGames.some((g) => gameLetter(g) === l))
             .map((letter) => (
@@ -285,7 +351,11 @@ export function GamesTab() {
             <p className="text-sm text-center" style={{ color: 'var(--text-dim)' }}>
               {isRecent && !query
                 ? 'Nothing here yet. Games you play on SecretV4 will show up here.'
-                : onlyFavs && favorites.length === 0
+                : isCollections && !query
+                  ? selectedCollection
+                    ? 'This collection is empty. Use the folder button on a game to add it.'
+                    : 'No collections yet. Use the folder button on any game, or press New collection.'
+                  : onlyFavs && favorites.length === 0
                   ? 'No favorites yet — tap the star on a game.'
                   : 'No games found.'}
             </p>
@@ -317,7 +387,7 @@ export function GamesTab() {
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => onGameClick(e, game)}
-                      className={`flex items-center justify-between gap-2 pr-12 ${
+                      className={`flex items-center justify-between gap-2 pr-20 ${
                         isFeatured ? 'p-6' : 'p-4'
                       }`}
                     >
@@ -344,6 +414,11 @@ export function GamesTab() {
                           <span style={{ color: mode === 'drive' ? 'var(--text-dim)' : 'var(--accent)' }}>
                             {mode === 'here' ? 'PLAYS HERE' : mode === 'external' ? 'OPENS SITE' : 'DOWNLOAD'}
                           </span>
+                          {likedPercent(ratings.get(game.id)) !== null && (
+                            <span className="inline-flex items-center gap-0.5">
+                              <ThumbsUp size={9} /> {likedPercent(ratings.get(game.id))}%
+                            </span>
+                          )}
                         </p>
                       </div>
                       <Play
@@ -352,6 +427,22 @@ export function GamesTab() {
                         style={{ color: isFeatured ? 'var(--gold)' : 'var(--accent)' }}
                       />
                     </a>
+                    <button
+                      onClick={() =>
+                        isCollections && selectedCollection
+                          ? toggleInCollection(selectedCollection.id, game.id)
+                          : setDialog({ type: 'add', gameId: game.id, title: game.title })
+                      }
+                      aria-label={isCollections ? 'Remove from this collection' : 'Add to a collection'}
+                      title={isCollections ? 'Remove from this collection' : 'Add to a collection'}
+                      className="absolute right-9 top-1/2 -translate-y-1/2 p-1"
+                    >
+                      {isCollections ? (
+                        <FolderMinus size={15} style={{ color: 'var(--text-dim)' }} />
+                      ) : (
+                        <FolderPlus size={15} style={{ color: 'var(--text-dim)' }} />
+                      )}
+                    </button>
                     <button
                       onClick={() => toggle(game.id)}
                       aria-label={fav ? 'Remove favorite' : 'Add favorite'}
@@ -381,6 +472,42 @@ export function GamesTab() {
           </>
         )}
       </div>
+      {dialog?.type === 'add' && (
+        <AddToCollectionModal gameId={dialog.gameId} gameTitle={dialog.title} onClose={() => setDialog(null)} />
+      )}
+      {dialog?.type === 'new' && (
+        <NameModal
+          title="New collection"
+          initial=""
+          confirmLabel="Create"
+          onSave={(name) => {
+            const id = createCollection(name);
+            if (id) setActiveCollection(id);
+          }}
+          onClose={() => setDialog(null)}
+        />
+      )}
+      {dialog?.type === 'rename' && selectedCollection && (
+        <NameModal
+          title="Rename collection"
+          initial={selectedCollection.name}
+          confirmLabel="Save"
+          onSave={(name) => renameCollection(selectedCollection.id, name)}
+          onClose={() => setDialog(null)}
+        />
+      )}
+      {dialog?.type === 'delete' && selectedCollection && (
+        <ConfirmModal
+          title="Delete collection"
+          message={`Delete "${selectedCollection.name}"? The games themselves are not affected.`}
+          confirmLabel="Delete"
+          onConfirm={() => {
+            deleteCollection(selectedCollection.id);
+            setActiveCollection(null);
+          }}
+          onClose={() => setDialog(null)}
+        />
+      )}
     </div>
   );
 }

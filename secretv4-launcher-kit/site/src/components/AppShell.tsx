@@ -7,6 +7,7 @@ import { SettingsTab } from '@/components/tabs/SettingsTab';
 import { useSettings } from '@/hooks/useSettings';
 import { libraryGames } from '@/data/gameLibrary';
 import { GameLaunchProvider } from '@/components/GameLaunchProvider';
+import { AchievementWatcher } from '@/components/AchievementWatcher';
 import { useClickRipple } from '@/hooks/useClickRipple';
 
 type TabId = 'games' | 'tools' | 'stuff' | 'settings';
@@ -146,6 +147,7 @@ export function AppShell() {
         </main>
       </div>
     </div>
+    <AchievementWatcher />
     </GameLaunchProvider>
   );
 }

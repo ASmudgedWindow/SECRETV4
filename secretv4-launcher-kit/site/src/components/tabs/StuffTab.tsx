@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Info, Coffee, Globe } from 'lucide-react';
+import { Info, Coffee, Globe, Trophy } from 'lucide-react';
+import { StatsSection } from '@/components/StatsSection';
 import { getSiteConfig } from '@/lib/siteConfig';
 import { SubTabs, type SubTab } from '@/components/SubTabs';
 import { BoredSection } from '@/components/bored/BoredSection';
@@ -117,10 +118,11 @@ function AboutSection() {
   );
 }
 
-type StuffSection = 'about' | 'bored';
+type StuffSection = 'about' | 'stats' | 'bored';
 
 const sections: SubTab<StuffSection>[] = [
   { id: 'about', label: 'About', icon: Info },
+  { id: 'stats', label: 'Stats', icon: Trophy },
   { id: 'bored', label: 'Bored', icon: Coffee },
 ];
 
@@ -130,7 +132,7 @@ export function StuffTab() {
     <div className="h-full flex flex-col">
       <SubTabs tabs={sections} active={section} onChange={setSection} />
       <div className="flex-1 overflow-y-auto -mr-2 pr-2">
-        {section === 'about' ? <AboutSection /> : <BoredSection />}
+        {section === 'about' ? <AboutSection /> : section === 'stats' ? <StatsSection /> : <BoredSection />}
       </div>
     </div>
   );

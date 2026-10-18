@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { Download, ExternalLink, Flag, Maximize2, X } from 'lucide-react';
+import { Download, ExternalLink, Flag, Maximize2, ThumbsDown, ThumbsUp, X } from 'lucide-react';
+import { castVote, likedPercent, ratingsEnabled, useRatings } from '@/lib/ratings';
+import { addPlaySeconds } from '@/lib/progress';
 import { getSiteConfig, openLink } from '@/lib/siteConfig';
 
 interface GamePlayerProps {
@@ -26,6 +28,10 @@ export function GamePlayer({ gameId, title, fileUrl, driveUrl, onClose }: GamePl
   const [attempt, setAttempt] = useState(0);
   const [reported, setReported] = useState(false);
   const { reportUrl } = getSiteConfig();
+  const { ratings, mine } = useRatings();
+  const ratingsOn = ratingsEnabled() && gameId !== undefined;
+  const myVote = gameId !== undefined ? mine[String(gameId)] : undefined;
+  const liked = gameId !== undefined ? likedPercent(ratings.get(gameId)) : null;
 
   const report = () => {
     const text = `Broken game: ${title} (id ${gameId ?? 'unknown'})`;
@@ -63,6 +69,15 @@ export function GamePlayer({ gameId, title, fileUrl, driveUrl, onClose }: GamePl
     };
   }, [fileUrl, attempt]);
 
+  // Time spent: counts every 5 seconds while the tab is visible and the game loaded
+  useEffect(() => {
+    if (gameId === undefined || failed) return;
+    const t = window.setInterval(() => {
+      if (document.visibilityState === 'visible') addPlaySeconds(gameId, 5);
+    }, 5000);
+    return () => window.clearInterval(t);
+  }, [gameId, failed]);
+
   const goFullscreen = () => {
     frame.current?.requestFullscreen?.().catch(() => {});
   };
@@ -76,6 +91,31 @@ export function GamePlayer({ gameId, title, fileUrl, driveUrl, onClose }: GamePl
         <h2 className="text-sm font-semibold mr-auto truncate" style={{ color: 'var(--text)' }}>
           {title}
         </h2>
+        {ratingsOn && gameId !== undefined && (
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => castVote(gameId, 1)}
+              aria-label="Thumbs up"
+              title="Thumbs up"
+              className="flex items-center px-2.5 py-1.5 rounded-lg text-xs"
+              style={myVote === 1 ? { ...btn, color: 'var(--accent)', border: '1px solid var(--accent)' } : btn}
+            >
+              <ThumbsUp size={14} fill={myVote === 1 ? 'currentColor' : 'none'} />
+            </button>
+            <button
+              onClick={() => castVote(gameId, -1)}
+              aria-label="Thumbs down"
+              title="Thumbs down"
+              className="flex items-center px-2.5 py-1.5 rounded-lg text-xs"
+              style={myVote === -1 ? { ...btn, color: '#ff6b6b', border: '1px solid #ff6b6b' } : btn}
+            >
+              <ThumbsDown size={14} fill={myVote === -1 ? 'currentColor' : 'none'} />
+            </button>
+            <span className="text-xs ml-1" style={{ color: 'var(--text-dim)' }}>
+              {liked !== null ? `${liked}% liked` : 'Rate this game'}
+            </span>
+          </div>
+        )}
         <button onClick={goFullscreen} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs" style={btn}>
           <Maximize2 size={14} /> Fullscreen
         </button>
