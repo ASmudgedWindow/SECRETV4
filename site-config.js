@@ -18,5 +18,5 @@ window.SECRETV4_SITE = {
   ownerTools: true,
 
   // How often (in seconds) an open tab checks in for the dashboard. Minimum 15.
-  pulseSeconds: 15,
+  pulseSeconds: 25,
 };
