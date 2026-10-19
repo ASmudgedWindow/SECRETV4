@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Check, Palette, Shield, AlertTriangle, Type, Image, HardDrive, Save, Download, Upload } from 'lucide-react';
+import { Check, Palette, Shield, AlertTriangle, Type, Image, HardDrive, Save, Download, Upload, Eye } from 'lucide-react';
 import { exportBackup, importBackup } from '@/lib/backup';
 import { themes } from '@/data/themes';
 import { backgrounds } from '@/data/backgrounds';
@@ -180,6 +180,20 @@ export function SettingsTab({ settings, update }: SettingsTabProps) {
             description="Off (default): games play right here on SecretV4. On: games never play here, they open as Google Drive links so you can download them."
             value={settings.driveLinksOnly}
             onChange={(v) => update({ driveLinksOnly: v })}
+          />
+        </div>
+
+        {/* Privacy */}
+        <div className="rounded-xl border p-5 animate-slide-up" style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', animationDelay: '108ms' }}>
+          <div className="flex items-center gap-3 mb-4">
+            <Eye size={18} style={{ color: 'var(--accent)' }} />
+            <h3 className="text-sm font-medium" style={{ color: 'var(--text)' }}>Online status</h3>
+          </div>
+          <ToggleRow
+            title="Show me as online"
+            description="On (default): the site owner can see, anonymously, that your browser is online and which page or game you're on, and can send you surprises. No name, address or location is shared. Off: nothing is sent and no surprises arrive."
+            value={settings.remoteOk}
+            onChange={(v) => update({ remoteOk: v })}
           />
         </div>
 

@@ -14,6 +14,10 @@ export interface SiteConfig {
   statsUrl: string;
   /** Other addresses of the site, shown in Stuff > About */
   mirrors: Mirror[];
+  /** Set to false to turn the owner dashboard check-ins off completely */
+  ownerTools: boolean;
+  /** How often (in seconds) an open tab checks in for the owner dashboard */
+  pulseSeconds: number;
 }
 
 function cleanUrl(v: unknown, allowMail: boolean): string {
@@ -37,7 +41,11 @@ export function getSiteConfig(): SiteConfig {
       if (url) mirrors.push({ name: typeof item.name === 'string' && item.name.trim() ? item.name.trim() : url, url });
     }
   }
-  cached = { reportUrl: cleanUrl(raw.reportUrl, true), statsUrl: cleanUrl(raw.statsUrl, false).replace(/\/+$/, ''), mirrors };
+  cached = { reportUrl: cleanUrl(raw.reportUrl, true), statsUrl: cleanUrl(raw.statsUrl, false).replace(/\/+$/, ''),
+    mirrors,
+    ownerTools: raw.ownerTools !== false,
+    pulseSeconds: Math.max(15, Math.min(600, Number(raw.pulseSeconds) || 30)),
+  };
   return cached;
 }
 

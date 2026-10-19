@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>SecretV4 Admin</title>
+<style>
+  :root { color-scheme: dark; --bg:#0a0e0f; --panel:#0f1719; --line:#1d2b2e; --text:#e6f1f2; --dim:#8aa2a6; --accent:#00fff0; --bad:#ff5c5c; --ok:#3fcf7a; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:14px/1.45 system-ui, sans-serif; }
+  main { max-width: 1100px; margin: 0 auto; padding: 20px 14px 60px; }
+  h1 { font-size: 20px; margin: 0 0 4px; letter-spacing: .04em; }
+  h2 { font-size: 13px; margin: 0 0 10px; color: var(--dim); text-transform: uppercase; letter-spacing: .12em; font-weight: 600; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+  label { display:block; font-size: 12px; color: var(--dim); margin-bottom: 4px; }
+  input, select, button { font: inherit; color: var(--text); background: #0b1213; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
+  input, select { width: 100%; }
+  button { cursor: pointer; background: #111d1f; }
+  button:hover { border-color: var(--accent); }
+  button.primary { background: var(--accent); color: #031213; border-color: var(--accent); font-weight: 600; }
+  button.danger { border-color: var(--bad); color: var(--bad); }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  .row { display:flex; gap:10px; flex-wrap: wrap; align-items: end; }
+  .grow { flex: 1 1 200px; }
+  .muted { color: var(--dim); font-size: 12px; }
+  .err { color: var(--bad); min-height: 1.3em; margin: 8px 0 0; }
+  .tablewrap { overflow-x: auto; }
+  table { width:100%; border-collapse: collapse; min-width: 720px; }
+  th, td { text-align:left; padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th { font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; }
+  td.wrap { white-space: normal; }
+  .dot { display:inline-block; width:9px; height:9px; border-radius:50%; background:#444; margin-right:6px; }
+  .dot.on { background: var(--ok); box-shadow: 0 0 8px var(--ok); }
+  tr.off td { color: var(--dim); }
+  .link { background:none; border:none; padding:0 4px; color: var(--accent); font-size:12px; }
+  #log { max-height: 160px; overflow-y: auto; font: 12px/1.6 ui-monospace, monospace; color: var(--dim); }
+  .top { display:flex; justify-content: space-between; align-items:center; gap:10px; flex-wrap: wrap; margin-bottom: 14px; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <section id="login" class="card" style="max-width:420px;margin:60px auto 0">
+    <h1>SecretV4 Admin</h1>
+    <p class="muted" style="margin:0 0 14px">Owner dashboard. Nothing here works without your admin key.</p>
+    <label for="key">Admin key</label>
+    <input id="key" type="password" autocomplete="off" spellcheck="false">
+    <div style="height:10px"></div>
+    <label for="base">Counter address (your Cloudflare Worker)</label>
+    <input id="base" placeholder="https://secretv4-stats.yourname.workers.dev" spellcheck="false">
+    <div style="height:12px"></div>
+    <button id="connect" class="primary">Connect</button>
+    <p id="loginMsg" class="err"></p>
+  </section>
+
+  <section id="app" hidden>
+    <div class="top">
+      <div>
+        <h1>SecretV4 Admin</h1>
+        <div class="muted"><span id="onlineCount">0</span> online now &middot; updates every 10 seconds &middot; actions arrive within about 30 seconds</div>
+      </div>
+      <div class="row">
+        <label style="margin:0;display:flex;gap:6px;align-items:center"><input id="showOff" type="checkbox" style="width:auto"> show recently offline (24 h)</label>
+        <button id="refresh">Refresh</button>
+        <button id="signout">Sign out</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Send an action</h2>
+      <div class="row">
+        <div class="grow"><label for="action">Action</label>
+          <select id="action">
+            <option value="rickroll">Rickroll</option>
+            <option value="message">Show a message</option>
+            <option value="close_game">Close the open game</option>
+            <option value="close_tab">Close the site tab</option>
+            <option value="reload">Reload the site</option>
+            <option value="give_all">Give ALL achievements</option>
+            <option value="give_one">Give the selected achievement</option>
+          </select></div>
+        <div class="grow" id="msgBox" hidden><label for="msg">Message (max 200 characters)</label><input id="msg" maxlength="200"></div>
+        <div class="grow" id="achBox" hidden><label for="ach">Achievement</label><select id="ach"></select></div>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <button id="sendSel" class="primary">Send to selected (0)</button>
+        <button id="sendAll" class="danger">Send to everyone online (0)</button>
+        <span class="muted">Actions expire after 2 minutes. Devices that turned off "Show me as online" in Settings never appear here.</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Devices</h2>
+      <div class="row" style="margin-bottom:8px">
+        <button id="selOnline">Select all online</button>
+        <button id="selNone">Clear selection</button>
+      </div>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th></th><th>Device</th><th>Doing</th><th>Browser</th><th>Active</th><th>Achievements</th><th>Last seen</th></tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+      <p id="empty" class="muted" hidden>Nobody is online right now.</p>
+    </div>
+
+    <div class="card"><h2>Log</h2><div id="log"></div></div>
+  </section>
+</main>
+
+<script src="./site-config.js"></script>
+<script>
+(function () {
+  var ACH = [{"id":"first-game","name":"First Game","rarity":"common","section":"Games played"},{"id":"games-10","name":"Getting Started","rarity":"common","section":"Games played"},{"id":"games-50","name":"Regular Player","rarity":"rare","section":"Games played"},{"id":"games-100","name":"Century","rarity":"epic","section":"Games played"},{"id":"games-500","name":"Half a Thousand","rarity":"legendary","section":"Games played"},{"id":"games-1000","name":"Game Veteran","rarity":"nolife","section":"Games played"},{"id":"fav-1","name":"First Favorite","rarity":"common","section":"Favorites"},{"id":"fav-5","name":"Starred","rarity":"common","section":"Favorites"},{"id":"fav-20","name":"Collector","rarity":"rare","section":"Favorites"},{"id":"fav-100","name":"Hoarder","rarity":"epic","section":"Favorites"},{"id":"theme-changed","name":"Fresh Look","rarity":"common","section":"Customizing"},{"id":"background-changed","name":"New Scenery","rarity":"common","section":"Customizing"},{"id":"active-5m","name":"Just Visiting","rarity":"common","section":"Active time"},{"id":"active-20m","name":"Settling In","rarity":"common","section":"Active time"},{"id":"active-1h","name":"Hooked","rarity":"rare","section":"Active time"},{"id":"active-5h","name":"Part-Timer","rarity":"rare","section":"Active time"},{"id":"active-12h","name":"Full Shift","rarity":"epic","section":"Active time"},{"id":"active-24h","name":"A Whole Day","rarity":"epic","section":"Active time"},{"id":"active-48h","name":"Two Days Gone","rarity":"legendary","section":"Active time"},{"id":"active-100h","name":"Hundred Hours","rarity":"legendary","section":"Active time"},{"id":"active-1000h","name":"HOW DO YOU EVEN DO THIS?!","rarity":"nolife","section":"Active time"},{"id":"session-10m","name":"Warmed Up","rarity":"common","section":"One game, one session"},{"id":"session-30m","name":"In the Zone","rarity":"rare","section":"One game, one session"},{"id":"session-1h","name":"Hour of Power","rarity":"rare","section":"One game, one session"},{"id":"session-3h","name":"Deep Dive","rarity":"epic","section":"One game, one session"},{"id":"session-5h","name":"No Breaks","rarity":"epic","section":"One game, one session"},{"id":"session-10h","name":"Iron Thumbs","rarity":"legendary","section":"One game, one session"},{"id":"session-24h","name":"Touch grass","rarity":"nolife","section":"One game, one session"},{"id":"streak-2","name":"Back Again","rarity":"common","section":"Streaks"},{"id":"streak-5","name":"On a Roll","rarity":"common","section":"Streaks"},{"id":"streak-7","name":"Week Warrior","rarity":"rare","section":"Streaks"},{"id":"streak-12","name":"Dozen Days","rarity":"rare","section":"Streaks"},{"id":"streak-20","name":"Habit Formed","rarity":"epic","section":"Streaks"},{"id":"streak-30","name":"Monthly Regular","rarity":"epic","section":"Streaks"},{"id":"streak-40","name":"Forty Days","rarity":"epic","section":"Streaks"},{"id":"streak-50","name":"Half Century","rarity":"legendary","section":"Streaks"},{"id":"streak-75","name":"Seventy-Five Alive","rarity":"legendary","section":"Streaks"},{"id":"streak-100","name":"Hundred Days","rarity":"legendary","section":"Streaks"},{"id":"streak-200","name":"Two Hundred Days","rarity":"nolife","section":"Streaks"},{"id":"streak-365","name":"A Full Year","rarity":"nolife","section":"Streaks"},{"id":"organized","name":"Organized","rarity":"common","section":"Extras"},{"id":"curator","name":"Curator","rarity":"rare","section":"Extras"},{"id":"librarian","name":"Librarian","rarity":"epic","section":"Extras"},{"id":"explorer","name":"Explorer","rarity":"rare","section":"Extras"},{"id":"retro-fan","name":"Retro Fan","rarity":"common","section":"Extras"},{"id":"flashback","name":"Flashback","rarity":"common","section":"Extras"},{"id":"backed-up","name":"Backed Up","rarity":"common","section":"Extras"},{"id":"night-owl","name":"Night Owl","rarity":"rare","section":"Extras"},{"id":"full-day","name":"Full Day","rarity":"epic","section":"Extras"},{"id":"cps-10","name":"Okay pretty fast","rarity":"secret","section":"Secret"},{"id":"cps-20","name":"OKAY VERY FAST","rarity":"secret","section":"Secret"},{"id":"cps-50","name":"Wow nice autoclicker","rarity":"secret","section":"Secret"},{"id":"rt-300","name":"Quick Draw","rarity":"secret","section":"Secret"},{"id":"rt-200","name":"Snap Reaction","rarity":"secret","section":"Secret"},{"id":"rt-100","name":"Faster Than Thought","rarity":"secret","section":"Secret"},{"id":"rt-50","name":"Impossible?","rarity":"secret","section":"Secret"},{"id":"nat-20","name":"Natural 20","rarity":"secret","section":"Secret"},{"id":"boring","name":"Boringgg","rarity":"secret","section":"Secret"},{"id":"rickroll","name":"GET RICKROLLED!!!!","rarity":"secret","section":"Secret"},{"id":"konami","name":"Old School","rarity":"secret","section":"Secret"}];
+  var RARITY = { common: 'Common', rare: 'Rare', epic: 'Epic', legendary: 'Legendary', nolife: 'No-Life', secret: 'SECRET' };
+
+  var $ = function (id) { return document.getElementById(id); };
+  var state = { key: '', base: '', devices: [], selected: {}, timer: 0 };
+
+  // Everything that came from visitors is shown with textContent only, never as HTML.
+  function el(tag, text, cls) { var e = document.createElement(tag); if (text !== undefined) e.textContent = String(text); if (cls) e.className = cls; return e; }
+
+  function api(path, body) {
+    var payload = { key: state.key };
+    for (var k in body) payload[k] = body[k];
+    return fetch(state.base + path, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok || j.error) throw new Error(j.error || ('Error ' + r.status)); return j; }); });
+  }
+
+  function dur(sec) {
+    sec = Math.max(0, Math.floor(sec || 0));
+    if (sec < 60) return sec + 's';
+    if (sec < 3600) return Math.floor(sec / 60) + ' min';
+    return (sec / 3600).toFixed(1).replace(/\.0$/, '') + ' hr';
+  }
+  function ago(sec) { return sec < 5 ? 'just now' : dur(sec) + ' ago'; }
+
+  function log(text) {
+    var d = el('div', new Date().toLocaleTimeString() + '  ' + text);
+    var box = $('log'); box.insertBefore(d, box.firstChild);
+  }
+
+  function name(d) { return d.label || ('Device ' + d.id.slice(0, 6)); }
+
+  function render() {
+    var showOff = $('showOff').checked, now = state.now || Math.floor(Date.now() / 1000);
+    var list = state.devices.filter(function (d) { return d.online || showOff; })
+      .sort(function (a, b) { return (b.online - a.online) || (b.seen - a.seen); });
+    var onlineCount = state.devices.filter(function (d) { return d.online; }).length;
+    $('onlineCount').textContent = onlineCount;
+    $('empty').hidden = list.length > 0;
+    var tbody = $('rows'); tbody.textContent = '';
+    list.forEach(function (d) {
+      var tr = el('tr', undefined, d.online ? '' : 'off');
+      var c0 = el('td'); var cb = document.createElement('input'); cb.type = 'checkbox'; cb.style.width = 'auto';
+      cb.checked = !!state.selected[d.id]; cb.disabled = !d.online;
+      cb.onchange = function () { if (cb.checked) state.selected[d.id] = true; else delete state.selected[d.id]; counts(); };
+      c0.appendChild(cb); tr.appendChild(c0);
+      var c1 = el('td'); var dot = el('span', '', 'dot' + (d.online ? ' on' : '')); c1.appendChild(dot); c1.appendChild(document.createTextNode(name(d)));
+      var rn = el('button', 'rename', 'link'); rn.onclick = function () {
+        var n = prompt('Name for this device (blank to clear):', d.label || ''); if (n === null) return;
+        api('/admin/label', { device: d.id, name: n }).then(load).catch(function (e) { log('Rename failed: ' + e.message); });
+      };
+      c1.appendChild(rn); tr.appendChild(c1);
+      var i = d.info || {};
+      var doing = i.game ? ('Playing ' + i.game) : (i.page ? ('On ' + i.page) : '-');
+      tr.appendChild(el('td', doing, 'wrap'));
+      tr.appendChild(el('td', i.ua || '-'));
+      tr.appendChild(el('td', dur(i.active)));
+      tr.appendChild(el('td', (i.ach || 0) + ' / ' + ACH.length));
+      tr.appendChild(el('td', d.online ? ago(now - d.seen) : ('offline, ' + ago(now - d.seen))));
+      tbody.appendChild(tr);
+    });
+    counts();
+  }
+
+  function counts() {
+    var sel = Object.keys(state.selected).filter(function (id) { return state.devices.some(function (d) { return d.id === id && d.online; }); }).length;
+    var on = state.devices.filter(function (d) { return d.online; }).length;
+    $('sendSel').textContent = 'Send to selected (' + sel + ')'; $('sendSel').disabled = sel === 0;
+    $('sendAll').textContent = 'Send to everyone online (' + on + ')'; $('sendAll').disabled = on === 0;
+  }
+
+  function load() {
+    return api('/admin/devices', {}).then(function (j) {
+      state.devices = j.devices || []; state.now = j.now; render();
+    });
+  }
+
+  function actionLabel() { var s = $('action'); return s.options[s.selectedIndex].text; }
+
+  function send(targets, who) {
+    var type = $('action').value, text = $('msg').value, ach = $('ach').value;
+    if (type === 'message' && !text.trim()) { alert('Type a message first.'); return; }
+    var extra = type === 'give_one' ? ' (' + $('ach').options[$('ach').selectedIndex].text + ')' : '';
+    if (who === 'everyone' && !confirm(actionLabel() + extra + ' to EVERYONE online?')) return;
+    var jobs = targets.map(function (t) { return api('/admin/send', { type: type, target: t, text: text, achievement: ach }); });
+    Promise.all(jobs).then(function () { log(actionLabel() + extra + ' sent to ' + who); })
+      .catch(function (e) { log('Send failed: ' + e.message); alert(e.message); });
+  }
+
+  function connect(key, base) {
+    state.key = key; state.base = base.replace(/\/+$/, '');
+    $('loginMsg').textContent = 'Connecting...';
+    api('/admin/devices', {}).then(function (j) {
+      sessionStorage.setItem('v4admin', JSON.stringify({ key: state.key, base: state.base }));
+      state.devices = j.devices || []; state.now = j.now;
+      $('login').hidden = true; $('app').hidden = false; $('loginMsg').textContent = ''; render();
+      clearInterval(state.timer);
+      state.timer = setInterval(function () { if (document.visibilityState === 'visible') load().catch(function () {}); }, 10000);
+    }).catch(function (e) { $('loginMsg').textContent = e.message || 'Could not connect.'; });
+  }
+
+  // setup
+  ACH.forEach(function (a) { var o = document.createElement('option'); o.value = a.id; o.textContent = a.name + ' (' + RARITY[a.rarity] + ')'; $('ach').appendChild(o); });
+  $('action').onchange = function () { $('msgBox').hidden = this.value !== 'message'; $('achBox').hidden = this.value !== 'give_one'; };
+  $('connect').onclick = function () { connect($('key').value, $('base').value.trim()); };
+  $('key').onkeydown = function (e) { if (e.key === 'Enter') $('connect').click(); };
+  $('refresh').onclick = function () { load().catch(function (e) { log('Refresh failed: ' + e.message); }); };
+  $('showOff').onchange = render;
+  $('selOnline').onclick = function () { state.devices.forEach(function (d) { if (d.online) state.selected[d.id] = true; }); render(); };
+  $('selNone').onclick = function () { state.selected = {}; render(); };
+  $('sendSel').onclick = function () { send(Object.keys(state.selected).filter(function (id) { return state.devices.some(function (d) { return d.id === id && d.online; }); }), 'the selected devices'); };
+  $('sendAll').onclick = function () { send(['*'], 'everyone'); };
+  $('signout').onclick = function () { sessionStorage.removeItem('v4admin'); clearInterval(state.timer); state.key = ''; $('key').value = ''; $('app').hidden = true; $('login').hidden = false; };
+
+  var cfg = window.SECRETV4_SITE || {};
+  var saved = null; try { saved = JSON.parse(sessionStorage.getItem('v4admin') || 'null'); } catch (e) {}
+  $('base').value = (saved && saved.base) || cfg.statsUrl || '';
+  if (saved && saved.key) connect(saved.key, saved.base);
+})();
+</script>
+</body>
+</html>

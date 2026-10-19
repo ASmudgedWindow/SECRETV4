@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Trophy } from 'lucide-react';
 import { ACHIEVEMENTS, isDone, useAchievementContext } from '@/lib/achievements';
 import { startActivityTracking } from '@/lib/activity';
+import { startRemote } from '@/lib/remote';
 import { dismissToast, unlockAchievements, useProgress, useToasts, type Toast } from '@/lib/progress';
 import { RARITIES } from '@/lib/rarity';
 
@@ -13,6 +14,7 @@ export function AchievementWatcher() {
 
   useEffect(() => {
     startActivityTracking();
+    startRemote();
   }, []);
 
   useEffect(() => {

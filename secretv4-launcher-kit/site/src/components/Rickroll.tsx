@@ -21,8 +21,14 @@ export function Rickroll() {
   useEffect(() => {
     const update = () => setIsOpen(open);
     listeners.add(update);
+    const onClose = () => {
+      open = false;
+      listeners.forEach((l) => l());
+    };
+    window.addEventListener('secretv4-close-game', onClose);
     return () => {
       listeners.delete(update);
+      window.removeEventListener('secretv4-close-game', onClose);
     };
   }, []);
 

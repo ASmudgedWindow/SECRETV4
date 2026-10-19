@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Download, ExternalLink, Flag, Maximize2, ThumbsDown, ThumbsUp, X } from 'lucide-react';
 import { castVote, likedPercent, ratingsEnabled, useRatings } from '@/lib/ratings';
 import { beginGameSession, endGameSession, watchFrame } from '@/lib/activity';
+import { setPresenceGame } from '@/lib/presence';
 import { getSiteConfig, openLink } from '@/lib/siteConfig';
 
 interface GamePlayerProps {
@@ -68,6 +69,11 @@ export function GamePlayer({ gameId, title, fileUrl, driveUrl, onClose }: GamePl
       window.clearTimeout(timer);
     };
   }, [fileUrl, attempt]);
+
+  useEffect(() => {
+    setPresenceGame(title);
+    return () => setPresenceGame('');
+  }, [title]);
 
   // Active time in this game: only counts while there is real input (see lib/activity.ts)
   useEffect(() => {

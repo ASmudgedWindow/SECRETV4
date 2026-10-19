@@ -136,6 +136,13 @@ export function GameLaunchProvider({ children }: { children: ReactNode }) {
     void loadManifest();
   }, []);
 
+  // The owner tools can close whatever game is open
+  useEffect(() => {
+    const close = () => setPlaying(null);
+    window.addEventListener('secretv4-close-game', close);
+    return () => window.removeEventListener('secretv4-close-game', close);
+  }, []);
+
   useEffect(() => {
     if (wait <= 0) return;
     const t = window.setTimeout(() => setWait((w) => w - 1), 1000);

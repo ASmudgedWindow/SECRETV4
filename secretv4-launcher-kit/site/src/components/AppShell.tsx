@@ -9,6 +9,8 @@ import { libraryGames } from '@/data/gameLibrary';
 import { GameLaunchProvider } from '@/components/GameLaunchProvider';
 import { AchievementWatcher } from '@/components/AchievementWatcher';
 import { Rickroll, openRickroll } from '@/components/Rickroll';
+import { RemoteMessage } from '@/components/RemoteMessage';
+import { setPresencePage } from '@/lib/presence';
 import { useClickRipple } from '@/hooks/useClickRipple';
 
 type TabId = 'games' | 'tools' | 'stuff' | 'settings';
@@ -28,6 +30,7 @@ const navItems: NavItem[] = [
 
 export function AppShell() {
   const [activeTab, setActiveTab] = useState<TabId>('games');
+  useEffect(() => setPresencePage(activeTab), [activeTab]);
   const { settings, update, theme } = useSettings();
   useClickRipple();
 
@@ -152,6 +155,7 @@ export function AppShell() {
     </div>
     <AchievementWatcher />
     <Rickroll />
+    <RemoteMessage />
     </GameLaunchProvider>
   );
 }

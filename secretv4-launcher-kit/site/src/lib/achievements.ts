@@ -3,8 +3,8 @@ import { libraryGames, type LibraryGame } from '@/data/gameLibrary';
 import { rageBaitGames } from '@/data/categories';
 import { usePlays } from '@/lib/plays';
 import { useCollections, type Collection } from '@/lib/collections';
-import { useProgress } from '@/lib/progress';
-import type { Rarity } from '@/lib/rarity';
+import { getProgress, unlockAchievements, useProgress } from '@/lib/progress';
+import { RARITIES, type Rarity } from '@/lib/rarity';
 
 const gameById = new Map(libraryGames.map((g) => [g.id, g]));
 const rageIds = new Set(rageBaitGames.map((g) => g.id));
@@ -271,5 +271,16 @@ export function useAchievementContext(): Context {
         flags: progress.flags,
       }),
     [plays.counts, collections, progress, favorites],
+  );
+}
+
+/** Unlocks achievements directly (used by the owner tools). Already-unlocked ones are skipped. */
+export function grantAchievements(ids: string[] | 'all') {
+  const have = getProgress().unlocked;
+  const list = ACHIEVEMENTS.filter((x) => (ids === 'all' || ids.includes(x.id)) && !have[x.id]);
+  if (list.length === 0) return;
+  unlockAchievements(
+    list.map((x) => ({ id: x.id, name: x.name, description: x.description, rarity: x.rarity })),
+    (r) => RARITIES[r].order,
   );
 }
