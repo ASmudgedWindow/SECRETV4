@@ -183,18 +183,17 @@ export function SettingsTab({ settings, update }: SettingsTabProps) {
           />
         </div>
 
-        {/* Privacy */}
+        {/* Notice */}
         <div className="rounded-xl border p-5 animate-slide-up" style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', animationDelay: '108ms' }}>
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-3 mb-3">
             <Eye size={18} style={{ color: 'var(--accent)' }} />
-            <h3 className="text-sm font-medium" style={{ color: 'var(--text)' }}>Online status</h3>
+            <h3 className="text-sm font-medium" style={{ color: 'var(--text)' }}>Notice</h3>
           </div>
-          <ToggleRow
-            title="Show me as online"
-            description="On (default): the site owner can see, anonymously, that your browser is online and which page or game you're on, and can send you surprises. No name, address or location is shared. Off: nothing is sent and no surprises arrive."
-            value={settings.remoteOk}
-            onChange={(v) => update({ remoteOk: v })}
-          />
+          <p className="text-xs leading-relaxed" style={{ color: 'var(--text-dim)' }}>
+            By using SecretV4 you agree that the site owner can see, anonymously, that your browser is online and which page
+            or game you're on. No name, address or location is shared. You also agree that you may get rickrolled, shown a
+            message, have your game closed or your page reloaded, or get some free achievements. It's all just for fun.
+          </p>
         </div>
 
         {/* Backup */}

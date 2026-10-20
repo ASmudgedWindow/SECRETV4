@@ -5,7 +5,7 @@ import type { LibraryGame } from '@/data/gameLibrary';
 import { GamePlayer } from '@/components/GamePlayer';
 import { getSettingsSnapshot } from '@/hooks/useSettings';
 import { recordPlay } from '@/lib/plays';
-import { findLocalGame, gameFileUrl, loadManifest } from '@/lib/manifest';
+import { findLocalGame, gameFileUrl, loadManifest, randomLocalGame } from '@/lib/manifest';
 
 const HIDE_KEY = 'secretv4-hide-run-guide';
 const SEEN_KEY = 'secretv4-run-guide-seen';
@@ -136,11 +136,19 @@ export function GameLaunchProvider({ children }: { children: ReactNode }) {
     void loadManifest();
   }, []);
 
-  // The owner tools can close whatever game is open
+  // The owner tools can close whatever game is open, or open a random one
   useEffect(() => {
     const close = () => setPlaying(null);
+    const random = () => {
+      const g = randomLocalGame();
+      if (g && g.file) setPlaying({ id: g.id, title: g.title, fileUrl: gameFileUrl(g.file), driveUrl: g.drive_url || '' });
+    };
     window.addEventListener('secretv4-close-game', close);
-    return () => window.removeEventListener('secretv4-close-game', close);
+    window.addEventListener('secretv4-random-game', random);
+    return () => {
+      window.removeEventListener('secretv4-close-game', close);
+      window.removeEventListener('secretv4-random-game', random);
+    };
   }, []);
 
   useEffect(() => {

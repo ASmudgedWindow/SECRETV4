@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ExternalLink, X } from 'lucide-react';
 import { setFlag } from '@/lib/progress';
 
-const VIDEO = 'dQw4w9WgXcQ';
+const VIDEO = 'xvFZjo5PgG0';
 let open = false;
 const listeners = new Set<() => void>();
 
@@ -13,7 +13,7 @@ export function openRickroll() {
   listeners.forEach((l) => l());
 }
 
-/** Full-screen player for the official video, closed with the X or Escape */
+/** Full-screen player for the rickroll video, closed with the X or Escape */
 export function Rickroll() {
   const [isOpen, setIsOpen] = useState(open);
   const box = useRef<HTMLDivElement>(null);

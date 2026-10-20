@@ -10,6 +10,8 @@ export interface ManifestGame {
   drive_id: string;
   file: string | null;
   mode: 'local' | 'drive' | 'missing' | 'failed';
+  category?: string;
+  drive_url?: string;
 }
 
 let byDriveId = new Map<string, ManifestGame>();
@@ -78,4 +80,12 @@ export type PlayMode = 'here' | 'external' | 'drive';
 export function playMode(url: string, driveOnly: boolean): PlayMode {
   if (!url.includes('drive.google.com')) return 'external';
   return !driveOnly && findLocalGame(url) ? 'here' : 'drive';
+}
+
+/** A random game that is hosted on this site (regular HTML games first, since they are the most reliable) */
+export function randomLocalGame(): ManifestGame | undefined {
+  const all = [...byDriveId.values()].filter((g) => g.mode === 'local' && g.file);
+  const html = all.filter((g) => g.category === 'library');
+  const pool = html.length ? html : all;
+  return pool[Math.floor(Math.random() * pool.length)];
 }

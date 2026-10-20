@@ -1,15 +1,14 @@
 import { getSiteConfig } from '@/lib/siteConfig';
 import { voterId } from '@/lib/stats';
-import { getSettingsSnapshot } from '@/hooks/useSettings';
 import { getProgress } from '@/lib/progress';
 import { getPresence } from '@/lib/presence';
 import { ACHIEVEMENTS, grantAchievements } from '@/lib/achievements';
 import { openRickroll } from '@/components/Rickroll';
 import { showRemoteMessage } from '@/components/RemoteMessage';
+import { bananaCursor, comic, confetti, countdown, emojiRain, flip, invert, rainbow, shake, stopAllEffects } from '@/lib/trolls';
 
 /**
- * Owner tools. Every 30 seconds by default (only while the tab is visible, and only if "Show me as online" is on in
- * Settings) this browser tells the counter it is online and which page or game it is on, and picks up any
+ * Owner tools. Every 30 seconds by default (only while the tab is visible) this browser tells the counter it is online and which page or game it is on, and picks up any
  * actions the site owner queued. The site only ever runs the fixed actions listed in run() below.
  */
 let cursor: number | null = null;
@@ -58,6 +57,39 @@ export function run(c: RemoteCommand) {
       if (typeof id === 'string' && ACHIEVEMENTS.some((a) => a.id === id)) grantAchievements([id]);
       break;
     }
+    case 'confetti':
+      confetti();
+      break;
+    case 'emoji_rain':
+      emojiRain(typeof c.payload?.emoji === 'string' ? c.payload.emoji : '');
+      break;
+    case 'flip':
+      flip();
+      break;
+    case 'invert':
+      invert();
+      break;
+    case 'rainbow':
+      rainbow();
+      break;
+    case 'shake':
+      shake();
+      break;
+    case 'comic':
+      comic();
+      break;
+    case 'banana':
+      bananaCursor();
+      break;
+    case 'countdown_rickroll':
+      countdown(openRickroll);
+      break;
+    case 'random_game':
+      window.dispatchEvent(new Event('secretv4-random-game'));
+      break;
+    case 'stop_effects':
+      stopAllEffects();
+      break;
     default:
       break; // unknown: ignore
   }
@@ -66,7 +98,6 @@ export function run(c: RemoteCommand) {
 async function pulse() {
   const { statsUrl, ownerTools } = getSiteConfig();
   if (!statsUrl || ownerTools === false || document.visibilityState !== 'visible') return;
-  if (!getSettingsSnapshot().remoteOk) return;
   const now = Date.now();
   if (now - lastPulse < 10_000) return;
   lastPulse = now;

@@ -11,8 +11,6 @@ export interface Settings {
   lookalikeText: boolean;
   /** When on, games open as Google Drive links instead of playing on this site */
   driveLinksOnly: boolean;
-  /** Lets the site owner see this browser is online and send it surprises. On by default. */
-  remoteOk: boolean;
   background: BackgroundId;
   /** How solid cards and panels are (lower = more of the background shows through) */
   panelOpacity: number;
@@ -26,7 +24,6 @@ const defaultSettings: Settings = {
   closeWarning: true,
   lookalikeText: true,
   driveLinksOnly: false,
-  remoteOk: true,
   background: 'stars',
   panelOpacity: 0.45,
 };
