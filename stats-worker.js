@@ -26,7 +26,11 @@ const MIN_VOTES_SHARED = 3;       // games with fewer votes are not listed (the 
 const MAX_ID = 100000;
 const ONLINE_WINDOW = 180;        // a device counts as online if it checked in within this many seconds
 const COMMAND_TTL = 120;          // commands older than this are never delivered
-const ACTIONS = ['rickroll', 'message', 'close_game', 'close_tab', 'reload', 'give_all', 'give_one'];
+const ACTIONS = [
+  'rickroll', 'message', 'close_game', 'close_tab', 'reload', 'give_all', 'give_one',
+  // harmless temporary gags
+  'confetti', 'emoji_rain', 'flip', 'invert', 'rainbow', 'shake', 'comic', 'banana', 'countdown_rickroll', 'random_game', 'stop_effects',
+];
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -233,7 +237,7 @@ export default {
         if (blocked) return blocked;
 
         if (url.pathname === '/admin/devices') {
-          const { results } = await env.DB.prepare('SELECT id, first, seen, info, label FROM devices WHERE seen > ? ORDER BY seen DESC LIMIT 200')
+          const { results } = await env.DB.prepare("SELECT id, first, seen, info, label FROM devices WHERE seen > ? OR label != '' ORDER BY seen DESC LIMIT 200")
             .bind(now - 86400)
             .all();
           return json({
@@ -252,6 +256,9 @@ export default {
             const text = clean(data.text, 200);
             if (!text) return json({ error: 'The message is empty.' }, 400);
             payload = { text };
+          }
+          if (data.type === 'emoji_rain') {
+            payload = { emoji: clean(data.text, 8) };
           }
           if (data.type === 'give_one') {
             if (!/^[a-z0-9-]{1,40}$/.test(String(data.achievement))) return json({ error: 'bad achievement' }, 400);
@@ -288,5 +295,5 @@ async function maybeCleanUp(env, now) {
   await env.DB.prepare('DELETE FROM recent WHERE t < ?').bind(now - 3600).run();
   await env.DB.prepare('DELETE FROM ipcap WHERE b < ?').bind(Math.floor(now / 3600) - 1).run();
   await env.DB.prepare('DELETE FROM commands WHERE t < ?').bind(now - 3600).run();
-  await env.DB.prepare('DELETE FROM devices WHERE seen < ?').bind(now - 172800).run();
+  await env.DB.prepare("DELETE FROM devices WHERE seen < ? AND label = ''").bind(now - 172800).run(); // named devices are kept
 }
