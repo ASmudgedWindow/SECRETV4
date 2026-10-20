@@ -58,10 +58,10 @@
     <div class="top">
       <div>
         <h1>SecretV4 Admin</h1>
-        <div class="muted"><span id="onlineCount">0</span> online now &middot; updates every 10 seconds &middot; actions arrive within about 30 seconds</div>
+        <div class="muted"><span id="onlineCount">0</span> online now &middot; updates every 10 seconds &middot; actions arrive within about 30 seconds &middot; named devices always stay in the list</div>
       </div>
       <div class="row">
-        <label style="margin:0;display:flex;gap:6px;align-items:center"><input id="showOff" type="checkbox" style="width:auto"> show recently offline (24 h)</label>
+        <label style="margin:0;display:flex;gap:6px;align-items:center"><input id="showOff" type="checkbox" style="width:auto"> show unnamed devices seen in the last 24 h</label>
         <button id="refresh">Refresh</button>
         <button id="signout">Sign out</button>
       </div>
@@ -72,21 +72,37 @@
       <div class="row">
         <div class="grow"><label for="action">Action</label>
           <select id="action">
-            <option value="rickroll">Rickroll</option>
-            <option value="message">Show a message</option>
-            <option value="close_game">Close the open game</option>
-            <option value="close_tab">Close the site tab</option>
-            <option value="reload">Reload the site</option>
-            <option value="give_all">Give ALL achievements</option>
-            <option value="give_one">Give the selected achievement</option>
+            <optgroup label="Classic">
+              <option value="rickroll">Rickroll</option>
+              <option value="countdown_rickroll">Countdown, then rickroll</option>
+              <option value="message">Show a message</option>
+              <option value="close_game">Close the open game</option>
+              <option value="close_tab">Close the site tab</option>
+              <option value="reload">Reload the site</option>
+              <option value="give_all">Give ALL achievements</option>
+              <option value="give_one">Give the selected achievement</option>
+            </optgroup>
+            <optgroup label="Trolls (they undo themselves)">
+              <option value="confetti">Confetti (5 s)</option>
+              <option value="emoji_rain">Emoji rain (11 s)</option>
+              <option value="flip">Flip the page upside down (15 s)</option>
+              <option value="invert">Invert the colors (15 s)</option>
+              <option value="rainbow">Slow rainbow colors (20 s)</option>
+              <option value="shake">Wobble the page (3 s)</option>
+              <option value="comic">Comic Sans everywhere (30 s)</option>
+              <option value="banana">Banana mouse cursor (30 s)</option>
+              <option value="random_game">Open a random game</option>
+              <option value="stop_effects">Stop all effects now</option>
+            </optgroup>
           </select></div>
         <div class="grow" id="msgBox" hidden><label for="msg">Message (max 200 characters)</label><input id="msg" maxlength="200"></div>
+        <div class="grow" id="emojiBox" hidden><label for="emoji">Emoji (blank = pizza)</label><input id="emoji" maxlength="8"></div>
         <div class="grow" id="achBox" hidden><label for="ach">Achievement</label><select id="ach"></select></div>
       </div>
       <div class="row" style="margin-top:12px">
         <button id="sendSel" class="primary">Send to selected (0)</button>
         <button id="sendAll" class="danger">Send to everyone online (0)</button>
-        <span class="muted">Actions expire after 2 minutes. Devices that turned off "Show me as online" in Settings never appear here.</span>
+        <span class="muted">Actions expire after 2 minutes. A device keeps its name when its tab is closed and reopened (until that browser's data is cleared).</span>
       </div>
     </div>
 
@@ -98,7 +114,7 @@
       </div>
       <div class="tablewrap">
         <table>
-          <thead><tr><th></th><th>Device</th><th>Doing</th><th>Browser</th><th>Active</th><th>Achievements</th><th>Last seen</th></tr></thead>
+          <thead><tr><th></th><th>Device</th><th>Doing</th><th>Browser</th><th>Active</th><th>Achievements</th><th>Last seen</th><th>First seen</th></tr></thead>
           <tbody id="rows"></tbody>
         </table>
       </div>
@@ -145,7 +161,7 @@
 
   function render() {
     var showOff = $('showOff').checked, now = state.now || Math.floor(Date.now() / 1000);
-    var list = state.devices.filter(function (d) { return d.online || showOff; })
+    var list = state.devices.filter(function (d) { return d.online || showOff || d.label; })
       .sort(function (a, b) { return (b.online - a.online) || (b.seen - a.seen); });
     var onlineCount = state.devices.filter(function (d) { return d.online; }).length;
     $('onlineCount').textContent = onlineCount;
@@ -158,11 +174,13 @@
       cb.onchange = function () { if (cb.checked) state.selected[d.id] = true; else delete state.selected[d.id]; counts(); };
       c0.appendChild(cb); tr.appendChild(c0);
       var c1 = el('td'); var dot = el('span', '', 'dot' + (d.online ? ' on' : '')); c1.appendChild(dot); c1.appendChild(document.createTextNode(name(d)));
-      var rn = el('button', 'rename', 'link'); rn.onclick = function () {
+      var rn = el('button', d.label ? 'rename' : 'name it', 'link'); rn.onclick = function () {
         var n = prompt('Name for this device (blank to clear):', d.label || ''); if (n === null) return;
         api('/admin/label', { device: d.id, name: n }).then(load).catch(function (e) { log('Rename failed: ' + e.message); });
       };
-      c1.appendChild(rn); tr.appendChild(c1);
+      c1.appendChild(rn);
+      if (d.online && now - d.first < 300) { var nw = el('span', 'NEW', 'link'); nw.style.color = 'var(--ok)'; nw.style.fontWeight = '700'; c1.appendChild(nw); }
+      tr.appendChild(c1);
       var i = d.info || {};
       var doing = i.game ? ('Playing ' + i.game) : (i.page ? ('On ' + i.page) : '-');
       tr.appendChild(el('td', doing, 'wrap'));
@@ -170,6 +188,7 @@
       tr.appendChild(el('td', dur(i.active)));
       tr.appendChild(el('td', (i.ach || 0) + ' / ' + ACH.length));
       tr.appendChild(el('td', d.online ? ago(now - d.seen) : ('offline, ' + ago(now - d.seen))));
+      tr.appendChild(el('td', ago(now - d.first)));
       tbody.appendChild(tr);
     });
     counts();
@@ -191,7 +210,7 @@
   function actionLabel() { var s = $('action'); return s.options[s.selectedIndex].text; }
 
   function send(targets, who) {
-    var type = $('action').value, text = $('msg').value, ach = $('ach').value;
+    var type = $('action').value, text = type === 'emoji_rain' ? $('emoji').value : $('msg').value, ach = $('ach').value;
     if (type === 'message' && !text.trim()) { alert('Type a message first.'); return; }
     var extra = type === 'give_one' ? ' (' + $('ach').options[$('ach').selectedIndex].text + ')' : '';
     if (who === 'everyone' && !confirm(actionLabel() + extra + ' to EVERYONE online?')) return;
@@ -214,7 +233,7 @@
 
   // setup
   ACH.forEach(function (a) { var o = document.createElement('option'); o.value = a.id; o.textContent = a.name + ' (' + RARITY[a.rarity] + ')'; $('ach').appendChild(o); });
-  $('action').onchange = function () { $('msgBox').hidden = this.value !== 'message'; $('achBox').hidden = this.value !== 'give_one'; };
+  $('action').onchange = function () { $('msgBox').hidden = this.value !== 'message'; $('achBox').hidden = this.value !== 'give_one'; $('emojiBox').hidden = this.value !== 'emoji_rain'; };
   $('connect').onclick = function () { connect($('key').value, $('base').value.trim()); };
   $('key').onkeydown = function (e) { if (e.key === 'Enter') $('connect').click(); };
   $('refresh').onclick = function () { load().catch(function (e) { log('Refresh failed: ' + e.message); }); };
