@@ -4,29 +4,33 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>SecretV4 Admin</title>
+<title>SecretV4 Staff</title>
 <style>
-  :root { color-scheme: dark; --bg:#0a0e0f; --panel:#0f1719; --line:#1d2b2e; --text:#e6f1f2; --dim:#8aa2a6; --accent:#00fff0; --bad:#ff5c5c; --ok:#3fcf7a; }
+  :root { color-scheme: dark; --bg:#0a0e0f; --panel:#0f1719; --line:#1d2b2e; --text:#e6f1f2; --dim:#8aa2a6; --accent:#00fff0; --owner:#ffb454; --bad:#ff5c5c; --ok:#3fcf7a; --warn:#ffd24d; }
   * { box-sizing: border-box; }
   body { margin:0; background:var(--bg); color:var(--text); font:14px/1.45 system-ui, sans-serif; }
-  main { max-width: 1100px; margin: 0 auto; padding: 20px 14px 60px; }
-  h1 { font-size: 20px; margin: 0 0 4px; letter-spacing: .04em; }
+  main { max-width: 1100px; margin: 0 auto; padding: 18px 14px 60px; }
+  h1 { font-size: 20px; margin: 0; letter-spacing: .04em; }
   h2 { font-size: 13px; margin: 0 0 10px; color: var(--dim); text-transform: uppercase; letter-spacing: .12em; font-weight: 600; }
+  h3 { font-size: 15px; margin: 0 0 6px; }
   .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+  .card.owner { border-left: 3px solid var(--owner); }
   label { display:block; font-size: 12px; color: var(--dim); margin-bottom: 4px; }
-  input, select, button { font: inherit; color: var(--text); background: #0b1213; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
-  input, select { width: 100%; }
+  input, select, textarea, button { font: inherit; color: var(--text); background: #0b1213; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
+  input, select, textarea { width: 100%; }
+  textarea { resize: vertical; }
   button { cursor: pointer; background: #111d1f; }
   button:hover { border-color: var(--accent); }
   button.primary { background: var(--accent); color: #031213; border-color: var(--accent); font-weight: 600; }
   button.danger { border-color: var(--bad); color: var(--bad); }
+  button.owner { border-color: var(--owner); color: var(--owner); }
   button:disabled { opacity: .45; cursor: not-allowed; }
   .row { display:flex; gap:10px; flex-wrap: wrap; align-items: end; }
-  .grow { flex: 1 1 200px; }
+  .grow { flex: 1 1 180px; }
   .muted { color: var(--dim); font-size: 12px; }
   .err { color: var(--bad); min-height: 1.3em; margin: 8px 0 0; }
   .tablewrap { overflow-x: auto; }
-  table { width:100%; border-collapse: collapse; min-width: 720px; }
+  table { width:100%; border-collapse: collapse; min-width: 560px; }
   th, td { text-align:left; padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
   th { font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; }
   td.wrap { white-space: normal; }
@@ -34,113 +38,120 @@
   .dot.on { background: var(--ok); box-shadow: 0 0 8px var(--ok); }
   tr.off td { color: var(--dim); }
   .link { background:none; border:none; padding:0 4px; color: var(--accent); font-size:12px; }
-  #log { max-height: 160px; overflow-y: auto; font: 12px/1.6 ui-monospace, monospace; color: var(--dim); }
-  .top { display:flex; justify-content: space-between; align-items:center; gap:10px; flex-wrap: wrap; margin-bottom: 14px; }
+  .tag { display:inline-block; font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; border:1px solid var(--line); border-radius:6px; padding:1px 6px; margin-left:6px; }
+  .tag.owner { color: var(--owner); border-color: var(--owner); }
+  .tag.admin { color: var(--accent); border-color: var(--accent); }
+  .top { display:flex; justify-content: space-between; align-items:center; gap:10px; flex-wrap: wrap; margin-bottom: 12px; }
+  nav { margin-bottom: 14px; }
+  .navgroup { display:flex; gap:6px; flex-wrap: wrap; align-items:center; margin-bottom: 6px; }
+  .navlabel { font-size: 10px; text-transform: uppercase; letter-spacing: .14em; color: var(--dim); width: 92px; }
+  .navlabel.owner { color: var(--owner); }
+  nav button { padding: 6px 12px; }
+  nav button.active { border-color: var(--accent); color: var(--accent); background:#0d2224; }
+  nav button.ownerpage { border-color: #4a3a20; }
+  nav button.ownerpage.active { border-color: var(--owner); color: var(--owner); background:#211a0e; }
+  .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+  .tool { text-align:left; padding: 12px; }
+  .tool b { display:block; margin-bottom:2px; }
+  .tool span { color: var(--dim); font-size: 12px; }
+  .stat { font-size: 26px; font-weight: 700; color: var(--accent); }
+  .banner { border-color: var(--accent); }
+  .banner.helper { border-color: var(--warn); }
+  .codebox { margin-top: 12px; padding: 12px; border: 1px dashed var(--warn); border-radius: 10px; }
+  .code { font: 700 20px/1.3 ui-monospace, monospace; letter-spacing: .08em; color: var(--warn); word-break: break-all; }
+  .mono { font-family: ui-monospace, monospace; font-size: 12px; }
+  .picker { position: relative; }
+  .results { border:1px solid var(--line); border-radius:8px; margin-top:4px; max-height: 220px; overflow-y:auto; background:#0b1213; }
+  .results button { display:block; width:100%; text-align:left; border:none; border-bottom:1px solid var(--line); border-radius:0; }
+  .chips { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+  .chip { border:1px solid var(--line); border-radius:999px; padding:3px 10px; font-size:12px; }
+  #log div { font: 12px/1.7 ui-monospace, monospace; color: var(--dim); border-bottom: 1px solid var(--line); padding: 2px 0; white-space: normal; }
   [hidden] { display: none !important; }
 </style>
 </head>
 <body>
 <main>
-  <section id="login" class="card" style="max-width:420px;margin:60px auto 0">
-    <h1>SecretV4 Admin</h1>
-    <p class="muted" style="margin:0 0 14px">Owner dashboard. Nothing here works without your admin key.</p>
-    <label for="key">Admin key</label>
+  <section id="login" class="card" style="max-width:440px;margin:50px auto 0">
+    <h1>SecretV4 Staff</h1>
+    <p class="muted" style="margin:4px 0 14px">Owner, admin and helper sign-in. Nothing here works without a key or code.</p>
+    <label for="key">Admin key, admin passphrase or helper code</label>
     <input id="key" type="password" autocomplete="off" spellcheck="false">
     <div style="height:10px"></div>
     <label for="base">Counter address (your Cloudflare Worker)</label>
     <input id="base" placeholder="https://secretv4-stats.yourname.workers.dev" spellcheck="false">
     <div style="height:12px"></div>
-    <button id="connect" class="primary">Connect</button>
+    <div class="row"><button id="connect" class="primary">Sign in</button><button id="myid">Show my browser ID</button></div>
+    <p class="muted" style="margin-top:12px">Admins: open this page in the same browser you use on SecretV4 (your browser is part of your sign-in), then enter the passphrase the owner gave you. New admin? Press "Show my browser ID" and send it to the owner.</p>
     <p id="loginMsg" class="err"></p>
+    <p id="myidOut" class="mono" style="word-break:break-all"></p>
   </section>
 
   <section id="app" hidden>
     <div class="top">
-      <div>
-        <h1>SecretV4 Admin</h1>
-        <div class="muted"><span id="onlineCount">0</span> online now &middot; updates every 10 seconds &middot; actions arrive within about 30 seconds &middot; named devices always stay in the list</div>
-      </div>
-      <div class="row">
-        <label style="margin:0;display:flex;gap:6px;align-items:center"><input id="showOff" type="checkbox" style="width:auto"> show unnamed devices seen in the last 24 h</label>
-        <button id="refresh">Refresh</button>
-        <button id="signout">Sign out</button>
-      </div>
+      <div><h1>SecretV4 Staff</h1><div class="muted" id="subtitle"></div></div>
+      <div class="row"><button id="refresh">Refresh</button><button id="signout">Sign out</button></div>
     </div>
-
-    <div class="card">
-      <h2>Send an action</h2>
-      <div class="row">
-        <div class="grow"><label for="action">Action</label>
-          <select id="action">
-            <optgroup label="Classic">
-              <option value="rickroll">Rickroll</option>
-              <option value="countdown_rickroll">Countdown, then rickroll</option>
-              <option value="message">Show a message</option>
-              <option value="close_game">Close the open game</option>
-              <option value="close_tab">Close the site tab</option>
-              <option value="reload">Reload the site</option>
-              <option value="give_all">Give ALL achievements</option>
-              <option value="give_one">Give the selected achievement</option>
-            </optgroup>
-            <optgroup label="Trolls (they undo themselves)">
-              <option value="confetti">Confetti (5 s)</option>
-              <option value="emoji_rain">Emoji rain (11 s)</option>
-              <option value="flip">Flip the page upside down (15 s)</option>
-              <option value="invert">Invert the colors (15 s)</option>
-              <option value="rainbow">Slow rainbow colors (20 s)</option>
-              <option value="shake">Wobble the page (3 s)</option>
-              <option value="comic">Comic Sans everywhere (30 s)</option>
-              <option value="banana">Banana mouse cursor (30 s)</option>
-              <option value="random_game">Open a random game</option>
-              <option value="stop_effects">Stop all effects now</option>
-            </optgroup>
-          </select></div>
-        <div class="grow" id="msgBox" hidden><label for="msg">Message (max 200 characters)</label><input id="msg" maxlength="200"></div>
-        <div class="grow" id="emojiBox" hidden><label for="emoji">Emoji (blank = pizza)</label><input id="emoji" maxlength="8"></div>
-        <div class="grow" id="achBox" hidden><label for="ach">Achievement</label><select id="ach"></select></div>
-      </div>
-      <div class="row" style="margin-top:12px">
-        <button id="sendSel" class="primary">Send to selected (0)</button>
-        <button id="sendAll" class="danger">Send to everyone online (0)</button>
-        <span class="muted">Actions expire after 2 minutes. A device keeps its name when its tab is closed and reopened (until that browser's data is cleared).</span>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>Devices</h2>
-      <div class="row" style="margin-bottom:8px">
-        <button id="selOnline">Select all online</button>
-        <button id="selNone">Clear selection</button>
-      </div>
-      <div class="tablewrap">
-        <table>
-          <thead><tr><th></th><th>Device</th><th>Doing</th><th>Browser</th><th>Active</th><th>Achievements</th><th>Last seen</th><th>First seen</th></tr></thead>
-          <tbody id="rows"></tbody>
-        </table>
-      </div>
-      <p id="empty" class="muted" hidden>Nobody is online right now.</p>
-    </div>
-
-    <div class="card"><h2>Log</h2><div id="log"></div></div>
+    <div id="banner" class="card banner" hidden></div>
+    <nav id="nav"></nav>
+    <div id="page"></div>
   </section>
 </main>
 
 <script src="./site-config.js"></script>
 <script>
 (function () {
-  var ACH = [{"id":"first-game","name":"First Game","rarity":"common","section":"Games played"},{"id":"games-10","name":"Getting Started","rarity":"common","section":"Games played"},{"id":"games-50","name":"Regular Player","rarity":"rare","section":"Games played"},{"id":"games-100","name":"Century","rarity":"epic","section":"Games played"},{"id":"games-500","name":"Half a Thousand","rarity":"legendary","section":"Games played"},{"id":"games-1000","name":"Game Veteran","rarity":"nolife","section":"Games played"},{"id":"fav-1","name":"First Favorite","rarity":"common","section":"Favorites"},{"id":"fav-5","name":"Starred","rarity":"common","section":"Favorites"},{"id":"fav-20","name":"Collector","rarity":"rare","section":"Favorites"},{"id":"fav-100","name":"Hoarder","rarity":"epic","section":"Favorites"},{"id":"theme-changed","name":"Fresh Look","rarity":"common","section":"Customizing"},{"id":"background-changed","name":"New Scenery","rarity":"common","section":"Customizing"},{"id":"active-5m","name":"Just Visiting","rarity":"common","section":"Active time"},{"id":"active-20m","name":"Settling In","rarity":"common","section":"Active time"},{"id":"active-1h","name":"Hooked","rarity":"rare","section":"Active time"},{"id":"active-5h","name":"Part-Timer","rarity":"rare","section":"Active time"},{"id":"active-12h","name":"Full Shift","rarity":"epic","section":"Active time"},{"id":"active-24h","name":"A Whole Day","rarity":"epic","section":"Active time"},{"id":"active-48h","name":"Two Days Gone","rarity":"legendary","section":"Active time"},{"id":"active-100h","name":"Hundred Hours","rarity":"legendary","section":"Active time"},{"id":"active-1000h","name":"HOW DO YOU EVEN DO THIS?!","rarity":"nolife","section":"Active time"},{"id":"session-10m","name":"Warmed Up","rarity":"common","section":"One game, one session"},{"id":"session-30m","name":"In the Zone","rarity":"rare","section":"One game, one session"},{"id":"session-1h","name":"Hour of Power","rarity":"rare","section":"One game, one session"},{"id":"session-3h","name":"Deep Dive","rarity":"epic","section":"One game, one session"},{"id":"session-5h","name":"No Breaks","rarity":"epic","section":"One game, one session"},{"id":"session-10h","name":"Iron Thumbs","rarity":"legendary","section":"One game, one session"},{"id":"session-24h","name":"Touch grass","rarity":"nolife","section":"One game, one session"},{"id":"streak-2","name":"Back Again","rarity":"common","section":"Streaks"},{"id":"streak-5","name":"On a Roll","rarity":"common","section":"Streaks"},{"id":"streak-7","name":"Week Warrior","rarity":"rare","section":"Streaks"},{"id":"streak-12","name":"Dozen Days","rarity":"rare","section":"Streaks"},{"id":"streak-20","name":"Habit Formed","rarity":"epic","section":"Streaks"},{"id":"streak-30","name":"Monthly Regular","rarity":"epic","section":"Streaks"},{"id":"streak-40","name":"Forty Days","rarity":"epic","section":"Streaks"},{"id":"streak-50","name":"Half Century","rarity":"legendary","section":"Streaks"},{"id":"streak-75","name":"Seventy-Five Alive","rarity":"legendary","section":"Streaks"},{"id":"streak-100","name":"Hundred Days","rarity":"legendary","section":"Streaks"},{"id":"streak-200","name":"Two Hundred Days","rarity":"nolife","section":"Streaks"},{"id":"streak-365","name":"A Full Year","rarity":"nolife","section":"Streaks"},{"id":"organized","name":"Organized","rarity":"common","section":"Extras"},{"id":"curator","name":"Curator","rarity":"rare","section":"Extras"},{"id":"librarian","name":"Librarian","rarity":"epic","section":"Extras"},{"id":"explorer","name":"Explorer","rarity":"rare","section":"Extras"},{"id":"retro-fan","name":"Retro Fan","rarity":"common","section":"Extras"},{"id":"flashback","name":"Flashback","rarity":"common","section":"Extras"},{"id":"backed-up","name":"Backed Up","rarity":"common","section":"Extras"},{"id":"night-owl","name":"Night Owl","rarity":"rare","section":"Extras"},{"id":"full-day","name":"Full Day","rarity":"epic","section":"Extras"},{"id":"cps-10","name":"Okay pretty fast","rarity":"secret","section":"Secret"},{"id":"cps-20","name":"OKAY VERY FAST","rarity":"secret","section":"Secret"},{"id":"cps-50","name":"Wow nice autoclicker","rarity":"secret","section":"Secret"},{"id":"rt-300","name":"Quick Draw","rarity":"secret","section":"Secret"},{"id":"rt-200","name":"Snap Reaction","rarity":"secret","section":"Secret"},{"id":"rt-100","name":"Faster Than Thought","rarity":"secret","section":"Secret"},{"id":"rt-50","name":"Impossible?","rarity":"secret","section":"Secret"},{"id":"nat-20","name":"Natural 20","rarity":"secret","section":"Secret"},{"id":"boring","name":"Boringgg","rarity":"secret","section":"Secret"},{"id":"rickroll","name":"GET RICKROLLED!!!!","rarity":"secret","section":"Secret"},{"id":"konami","name":"Old School","rarity":"secret","section":"Secret"}];
+  var GAMES = [[1,"A Dance of Fire and Ice"],[2,"A Dark Room"],[3,"A Date with Death"],[4,"A Day in the Office"],[5,"Advent Neon"],[6,"AdVenture Capitalist"],[7,"Ahoy Survival"],[8,"Airline Tycoon Idle"],[9,"Agar.io Lite"],[10,"Ages of Conflict"],[11,"Alien Sky Invasion"],[12,"Allocation"],[13,"Amazing Strange Rope Police"],[14,"Amidst the Sky"],[15,"Among Us"],[16,"Amorphous+"],[17,"Ancient Sins"],[18,"Angry Birds"],[19,"Angry Birds 2"],[20,"Angry Birds Online"],[21,"Angry Birds Showdown"],[22,"Angry Birds Slingshot Frenzy"],[23,"Animal Crossing (GAME CUBE PORT)"],[24,"Antimatter Dimensions"],[25,"Ant Art Tycoon"],[26,"Apes vs Helium"],[27,"Aquapark.io"],[28,"Arcade Volley"],[29,"Archery World Tour"],[30,"Archesspelago"],[31,"Arsonate"],[32,"Are We There Yet?"],[33,"Arthur's Nightmare"],[34,"Ascent"],[35,"Assessment Examination"],[36,"As Duty Demands"],[37,"Asteroids"],[38,"A Small World Cup"],[39,"Aviamasters"],[40,"Babel Tower"],[41,"Baby Chicco Adventure"],[42,"Baby Sniper in Vietnam"],[43,"Backrooms"],[44,"Backrooms 2D"],[45,"Bacon May Die"],[46,"Bad Bodyguards"],[47,"Bad Monday Simulator"],[48,"Bad Parenting"],[49,"Bad Piggies Latest"],[50,"Bad Time Simulator"],[51,"Baldi's Basics"],[52,"Baldi's Basics Remastered"],[53,"Baldi's Basics The Ultra Decompile"],[54,"Baldi’s Fun New School Ultimate"],[55,"Ballistic"],[56,"Balls and Bricks"],[57,"Ball Blast"],[58,"Ballz"],[59,"Banana Simulator"],[60,"Bank Robbery 1"],[61,"Bank Robbery 2"],[62,"Barry Has a Secret"],[63,"Bart Blast (made by Epick)"],[64,"Bas"],[65,"Baseball Bros"],[66,"Basket Battle"],[67,"Basket Bros"],[68,"Basket Random"],[69,"Basket Slam Dunk 2"],[70,"Basketball FRVR"],[71,"Basketball Legends 2020"],[72,"Basketball Stars"],[73,"Basketball Superstars"],[74,"Batter Up"],[75,"Battles"],[76,"Battle Karts"],[77,"Battle Simulator"],[78,"Beach Boxing Simulator"],[79,"Bears Us"],[80,"Bergentruck 201x"],[81,"BFDIA 5b"],[82,"BFDI Branches"],[83,"Big Flappy Tower Tiny Square"],[84,"Big ICE Tower Tiny Square"],[85,"Big NEON Tower Tiny Square"],[86,"Big Shot Boxing"],[87,"Big Tower Tiny Square"],[88,"Big Tower Tiny Square 2"],[89,"Bio Evil 4"],[90,"Bit Burner"],[91,"BitLife"],[92,"Bit Planes"],[93,"Blackjack"],[94,"Blastronaut"],[95,"Blaze Drifter"],[96,"Blight Borne"],[97,"Block Blast"],[98,"Block Blast 2"],[99,"Blockpost"],[100,"Block the Pig"],[101,"Blocky Demolition Derby"],[102,"Blocky Snakes"],[103,"Blood Tournament"],[104,"Bloodmoney"],[105,"Blumgi Racers"],[106,"Blumgi Rocket"],[107,"Bob the Robber 2"],[108,"Bob the Robber 5"],[109,"Boba Simulator"],[110,"Boom Slingers"],[111,"Bottle Cracks"],[112,"Bottle Jump 3D"],[113,"Bounce Masters"],[114,"Bounce Back"],[115,"Bouncy Basketball"],[116,"Bouncy Motors"],[117,"Bounty of One"],[118,"Bowmasters"],[119,"Boxing Random"],[120,"Brawl Simulator 3D"],[121,"Brawl Stars Remake"],[122,"Breadskate Forever"],[123,"Bridge Race"],[124,"Brotato"],[125,"BTD6 (scratch)"],[126,"BuildNow GG"],[127,"Build-Defend"],[128,"Bunny Land"],[129,"Burger and Frights"],[130,"Burrito Bison Launcha Libre"],[131,"Buster Jam"],[132,"Cannonballs 3D"],[133,"Candy Box 1"],[134,"Capybara Clicker"],[135,"Untitled game 135"],[136,"Call of Battle"],[137,"Captchaware"],[138,"Capuchin"],[139,"Car Crash 3"],[140,"Car Drawing"],[141,"Car King Arena"],[142,"Car Ramp vs Police Chase"],[143,"Cartoon Network Table Tennis Ultimate Tournament"],[144,"CaseOh's Basics in Eating and Fast Food"],[145,"Castle Wars Modern"],[146,"Cat Mario"],[147,"Cats Love Cake 2"],[148,"Cave Crawler"],[149,"Cave Story"],[150,"Celeste Pico"],[151,"Celeste 2"],[152,"Cell Machine"],[153,"Cell to Singularity"],[154,"Champion Island"],[155,"Chaos Faction 2"],[156,"Cheese Chompers 3D"],[157,"Cheese Is the Reason"],[158,"Cheese Rolling"],[159,"Chicken Cs"],[160,"Cheshire in a Chatroom"],[161,"Chess Classic"],[162,"Chicken Scream"],[163,"Chicken War"],[164,"Choppy Orc"],[165,"Circlo O2"],[166,"Civiballs"],[167,"Civiballs 2"],[168,"Clash of Vikings"],[169,"Class of '09"],[170,"Cleanup.io"],[171,"Cluster Rush"],[172,"Coal LLC"],[173,"Cold Pines"],[174,"Coffee Maker"],[175,"Colorbox Mustard"],[176,"Combo Pool"],[177,"Command and Conquer Red Alert"],[178,"Command and Conquer Tiberian Dawn"],[179,"Cookie Clicker"],[180,"Cookie Clicker (Mod Menu)"],[181,"Core Ball"],[182,"Cold Front"],[183,"Count Masters: Stickman Games"],[184,"Counter Snipe"],[185,"Crank It"],[186,"!"],[187,"Crazy Cars"],[188,"Crazy Cattle 3D"],[189,"Crazy Chicken 3D"],[190,"Crazy Crash Landing"],[191,"Crazy Motorcycle"],[192,"Crazy Plane Landing"],[193,"Creature Card Idle"],[194,"Crossy Road"],[195,"C.S 1.6"],[196,"CS:GO Clicker"],[197,"Customer Support"],[198,"Curse of the Lich King"],[199,"Cut the Rope"],[200,"cuttherope"],[201,"cuttherope"],[202,"Cyber Bung Racing"],[203,"Dadish"],[204,"Dandy's World Clicker"],[205,"Dan the Man"],[206,"Dank Tomb"],[207,"Dash Arena"],[208,"Dash Party"],[209,"Date with Iraq"],[210,"Dead Estate"],[211,"Dead Plate"],[212,"Dead Seat"],[213,"Deadly Descent"],[214,"Death Chase"],[215,"Death Run"],[216,"Deepest Sword"],[217,"Deltarune"],[218,"A Different Snowgrave"],[219,"Delta Traveler"],[220,"Demolition Derby: Crash Racing"],[221,"Demon Bluff"],[222,"Die in the Dungeon"],[223,"Dig Out of Prison"],[224,"Dire Decks"],[225,"Doblox"],[226,"Dodeca Dragons"],[227,"Doge Miner"],[228,"Doge Miner 2"],[229,"Dome Romantik"],[230,"Doki Doki Literature Club"],[231,"Doodle Jump"],[232,"Doom But It’s Half Life 2"],[233,"Doom (Emscripten)"],[234,"Doom Gallery Experience"],[235,"Doom Zio"],[236,"Doom Ori"],[237,"Doors Castle"],[238,"Double Barrel Sniper"],[239,"Draw Climber"],[240,"Draw the Line"],[241,"DTA6"],[242,"Dreader"],[243,"Dread Head Parkour"],[244,"Dr. Weed Gaster"],[245,"Drift Boss"],[246,"Drift Hunters"],[247,"Drift Simulator"],[248,"Drive In Russia"],[249,"Drive Mad"],[250,"Driven Wild"],[251,"Dimensional Incident"],[252,"Duck Life: Space"],[253,"Duck Life: Battle"],[254,"Ducklings.io"],[255,"Dud"],[256,"Duke Nukem 3D"],[257,"Dumb Ways to Die"],[258,"Dune Dash"],[259,"Dungeon Deck"],[260,"Dungeon Raid"],[261,"Dungeons And Degenerate Gamblers"],[262,"Dungeons And Degenerate Gamblers Debug"],[263,"Dunk Shot"],[264,"Duke Nukem 2"],[265,"Dusk Child"],[266,"Dying Dreams"],[267,"Eagle Ride"],[268,"Edelweiss"],[269,"Edy's Car Simulator"],[270,"Effing Hail"],[271,"Egg"],[272,"Eggy Car"],[273,"Elastic Face"],[274,"Elytra Flight"],[275,"Enchain"],[276,"Endacopia"],[277,"Escalating Duel"],[278,"Escape School Duel"],[279,"Escape Road"],[280,"Escape Road 2"],[281,"Escape Road 3"],[282,"Escape Road City 2"],[283,"Eugene's Life"],[284,"Euroaural Song Contest 2D"],[285,"Evil Glitch"],[286,"Evolution"],[287,"Exoplanet Observation"],[288,"Extreme Run 3D"],[289,"Fall Guys"],[290,"Fashion Battle"],[291,"Fears to Fathom: Home Alone"],[292,"Fear Assessment (DEMO)"],[293,"Feed the Void"],[294,"Final Earth 2"],[295,"Find the Alien"],[296,"Fire Blob"],[297,"Fireboy and Watergirl 2"],[298,"Fireboy and Watergirl 3"],[299,"Fish Eat Getting Big"],[300,"Fisquarium"],[301,"Five Nights at Candy’s 1"],[302,"Five Nights at Candy's 2"],[303,"Five Nights at Baldi's (Redone)"],[304,"Five Nights at Epstein's"],[305,"Five Nights at Frick Bear's 3"],[306,"Five Nights at Winston's"],[307,"Five Nights At Shrek’s Hotel"],[308,"Five Nights at Yoshi's"],[309,"Flappy Dunk (currently broken)"],[310,"Fluidism"],[311,"FNAF"],[312,"FNAF 2"],[313,"FNAF 3"],[314,"FNAF 4"],[315,"FNAF 4 Halloween"],[316,"FNAF Pizzeria Simulator"],[317,"FNAF Ultimate Custom Night"],[318,"FNAF Sister Location"],[319,"FNAF Shooter"],[320,"FNAF World"],[321,"FNAF 3 Remastered"],[322,"Football Bros"],[323,"Football Legends"],[324,"Folder Dungeon"],[325,"Fork 'n' Sausage"],[326,"Fortzone Battle Royale"],[327,"Freegemas"],[328,"From Rust to Ash"],[329,"Fruit Ninja"],[330,"Fused 240"],[331,"Funny Battle Simulator"],[332,"Funny Battle Simulator 2"],[333,"Funny Mad Racing"],[334,"Funny Shooter 2"],[335,"Generic Fighter Maybe"],[336,"Geometry Dash Breeze"],[337,"Geometry Dash Lite"],[338,"Geometry Dash (Scratch)"],[339,"Geometry Dash Subzero (scratch)"],[340,"Geometry Dash Wave"],[341,"Also Geometry Dash Wave"],[342,"Geometry Vibes"],[343,"George and the Printer"],[344,"Getaway Shootout"],[345,"Getting Over It (Scratch)"],[346,"Get on Top"],[347,"Get Yoked"],[348,"Gimme the Airpod"],[349,"Gladihoppers"],[350,"GL Fighters"],[351,"Glory Hunters"],[352,"Gobble"],[353,"Going Balls"],[354,"Gold Digger FRVR"],[355,"Gold Miner"],[356,"Golf Battle"],[357,"Golf Sunday"],[358,"Google Baseball"],[359,"Google Dino"],[360,"GoreScript Classic"],[361,"Gorilla Tag"],[362,"Go to Bed"],[363,"Grand Action Simulator: New York"],[364,"Grand Escape Prison"],[365,"Grand Theft Auto III"],[366,"Grand Shift Auto"],[367,"Greener Grass Awaits"],[368,"Granny"],[369,"Granny 2"],[370,"Granny 3"],[371,"Granny Creepy"],[372,"Granny Nightmare"],[373,"Granny Online"],[374,"Gravity"],[375,"Gravity Mod"],[376,"Grey Box Testing"],[377,"Grindcraft"],[378,"GRN"],[379,"Grow a Garden"],[380,"Growmi"],[381,"Grow Your Garden"],[382,"Growden.io"],[383,"GTA Mods"],[384,"Guess Their Answer"],[385,"Guncho"],[386,"Gun Knight"],[387,"Gunnight"],[388,"Gun Spin"],[389,"Gym Stack"],[390,"Half-Life"],[391,"Handshakes"],[392,"Handulam+"],[393,"Hanger 2"],[394,"Happy Room"],[395,"Hardware Tycoon"],[396,"Harold's Bad Day"],[397,"Harvest.io"],[398,"Haunted School"],[399,"Hei$t"],[400,"Helix Jump"],[401,"Hellron"],[402,"Helltaker"],[403,"Help No Brakes"],[404,"Hero 3 Flying Robot"],[405,"Hextris"],[406,"Hinohomo"],[407,"Hide N Seek"],[408,"High Stakes"],[409,"Highway Racer"],[410,"Hill Climb Racing Lite"],[411,"Hill Climb Racing 2 (scratch)"],[412,"Hit8ox"],[413,"Hitstun Fly"],[414,"Hole.io"],[415,"Horntale"],[416,"Hole Battle"],[417,"Hooked"],[418,"Hot Wax"],[419,"House of Hazards"],[420,"Hover Racer Drive"],[421,"Huggy Wuggy Pixel"],[422,"Human Expenditure Program"],[423,"Hungry Knight"],[424,"Hungry Lamu"],[425,"Hungry Lamu 2"],[426,"Hypper Sandbox"],[427,"Ice Dodo"],[428,"Ice Fishing"],[429,"Icy Purple Head"],[430,"Idle Breakout"],[431,"Idle Dice"],[432,"Idle Football Manager"],[433,"Idle Idle Game Dev"],[434,"Idle Miner Tycoon"],[435,"Indian Truck Simulator"],[436,"Infinite Craft"],[437,"Ink Game"],[438,"Insomniary"],[439,"Intellisphere"],[440,"Into Ruins"],[441,"Into the Deep Web"],[442,"Irori"],[443,"Iron Snout"],[444,"Islander"],[445,"Is That a Gubby? (Baldi mod)"],[446,"It Gets So Lonely Here"],[447,"I Wanna Be the Guy"],[448,"Jailbreak Obby"],[449,"Jazz Jackrabbit"],[450,".html"],[451,"Jazz Jackrabbit 2"],[452,"Jefflings"],[453,"Jelly Drift"],[454,"Jelly Mario"],[455,"Jelly Truck"],[456,"Jetpack Joyride"],[457,"Jetski Race"],[458,"Jet Rush"],[459,"Johnny Trigger"],[460,"Johnny Upgrade"],[461,"Journey Downhill"],[462,"JSVecX"],[463,"Jumbo Mario"],[464,"Jumping Shell"],[465,"Jungle Deer Hunting"],[466,"Just Fall LOL"],[467,"Just a Platformer"],[468,"Just a Platformer Editor 1"],[469,"Just a Platformer Editor 2"],[470,"Just Hit the Button"],[471,"Just One Boss"],[472,"Kalikan"],[473,"Kanye Zone"],[474,"Karate Bros"],[475,"Karlson"],[476,"Karlson 2D"],[477,"Kart Bros"],[478,"Kill Over"],[479,"Kim Jong Un Tile Puzzle"],[480,"Kill the Ice Age Baby Adventure"],[481,"Kirby Soft and Wet"],[482,"Klifur"],[483,".html"],[484,"Knock Knock"],[485,"Konkr.io"],[486,"Kour.io"],[487,"KS2 Teams"],[488,"Lacey's Flash Games"],[489,"Last Horizon"],[490,"Leader Strike"],[491,"Leaf Blower Revolution"],[492,"Leap and Avoid 2"],[493,"Legion Breaker"],[494,"Level Devil"],[495,"Level Up - Mario Minigames Mayhem"],[496,"Let It Consume"],[497,"Lever Warriors"],[498,"Little Alchemy 2"],[499,"Little Runmo"],[500,"Lobotomy Dash"],[501,"Lock the Door"],[502,"Low Knight"],[503,"Lucky Blocks Obby"],[504,"Madalin Stunt Cars 2"],[505,"Madalin Stunt Cars Multiplayer"],[506,"Madness 2010"],[507,"Mad Skills Motocross 2"],[508,"Mad Stick"],[509,"Madness The Stand"],[510,"Mage Tower Idle Defense"],[511,"Make Sure It's Closed"],[512,"Managod"],[513,"Marble Racer"],[514,"Mari0"],[515,"Mario VS Luigi Online"],[516,"Masked Forces Unlimited"],[517,"Medal of Honor"],[518,"Melon Playground"],[519,"Mega Chess"],[520,"Meow.io"],[521,"Merge Round Racers"],[522,"Mimic"],[523,"Mind Wave"],[524,"Mine Shooter"],[525,"Mine Cart"],[526,"Minecraft Case Sim"],[527,"Minecraft Parkour"],[528,"Minecraft Pocket Edition"],[529,"Minecraft Shooter"],[530,"Minesweeper Plus"],[531,"Mini Crossword"],[532,"Mini Flips"],[533,"Mini Shooters"],[534,"Mini Tooth"],[535,"Money Rush"],[536,"Monster Derby"],[537,"Monster Tracks"],[538,"Monster Truck Port Stunt"],[539,"Monkey Mart"],[540,"Mom I'm Sleeping"],[541,"Moto Road Rash"],[542,"Moto X3M"],[543,"Moto X3M 2"],[544,"Moto X3M 3"],[545,"Moto X3M Pool Party"],[546,"Moto X3M Spooky Land"],[547,"Moto X3M Winter"],[548,"Mountain Bike Racer"],[549,"Mr. Racer - Car Racing"],[550,"Mr. Mine"],[551,"Murder"],[552,"MX Offroad Master"],[553,"My Teardrop"],[554,"Neon Blaster"],[555,"Net Attack"],[556,"Neverending Legacy"],[557,"Next Door"],[558,"N-Gon"],[559,"NGU Idle"],[560,"Nightclub Showdown"],[561,"Night Cat Survival"],[562,"Nimrods"],[563,"Ninja Obby Parkour"],[564,"Noob Miner"],[565,"Not Your Pawn"],[566,"Nubby's Number Factory"],[567,"Nuts and Bolts Screwing Puzzle"],[568,"Obby 1 Jump per Click"],[569,"Obby Climb for Brainrots"],[570,"Obby Cart"],[571,"Obby 99 Will Lose"],[572,"Obby But You’re On a Bike"],[573,"Obby For Lumber"],[574,"Obby Rainbow Tower"],[575,"Obby Robby - Only Up"],[576,"Obby Slide"],[577,"Obby Swing"],[578,"Obby Swing For brainrots"],[579,"Obby With Friends"],[580,"Obby Yard Sale"],[581,"Odd Bot Out"],[582,"Offline Paradise"],[583,"Oh Flip"],[584,"Omega Layers"],[585,"Omega Nugget Clicker"],[586,"One Bit Adventure"],[587,"One Night as Freddy"],[588,"OneShot (Old)"],[589,"Only Up"],[590,"Outhold"],[591,"Overburden"],[592,"Öoo"],[593,"ʘ"],[594,"Operius"],[595,"Opposite Day"],[596,"Orb of Creation"],[597,"osu!"],[598,"OvO"],[599,"OvO 2"],[600,"OVO 3 Dimensions"],[601,"Paper.io"],[602,"Paper.io 3D"],[603,"Paper.io Mania"],[604,"Parking Fury"],[605,"Parking Fury 2"],[606,"Parking Fury 3"],[607,"Parking Rush"],[608,"Penguin Diner"],[609,"Pereelous"],[610,"Perfect Hotel"],[611,"Pet World"],[612,"Phasma"],[613,"Pico Driller"],[614,"Pico Hot"],[615,"Pico Life"],[616,"Pico Night Punkin"],[617,"Pumpkin Run 64"],[618,"Pieces of Cake"],[619,"Ping Pong Chaos"],[620,"Pink Bike"],[621,"Pixel Battlegrounds.io"],[622,"Pixel Combat 2"],[623,"Pixel Gun"],[624,"Pixel Shooter"],[625,"Pixel Speedrun"],[626,"Pixel Warfare"],[627,"Pizza Tower"],[628,"Planet Life"],[629,"Plangman"],[630,"Plants vs. Zombies 2 Gardenless"],[631,"Plants vs Zombies Modded"],[632,"Please Don't Touch Anything"],[633,"Plinko"],[634,"Plonky"],[635,"Pogo 3D"],[636,"Pou"],[637,"Pokemon Academy Life: Forever!"],[638,"PokéPath TD"],[639,"Pom Gets Wi-Fi"],[640,"Postal"],[641,"Police Pursuit 2"],[642,"Poly Track old ver"],[643,"Polytrack"],[644,"Poor Bunny"],[645,"Portal 2D"],[646,"Porklike"],[647,"Porter"],[648,"Prank Call Tung Tung Tung Sahur Clicker"],[649,"Prestige Tree"],[650,"Pretend It’s Not There"],[651,"Processor Tycoon"],[652,"Prodigy (old version by Entrapta)"],[653,"Prodigy (old version by Entrapta) (2)"],[654,"Possess Quest"],[655,"Praxis Fighter X"],[656,"Pull Frog"],[657,"Puppet Hockey"],[658,"Puppet Master"],[659,"Push Your Luck"],[660,"Quake III Arena"],[661,"Quantum Clicker"],[662,"Rabbit Hole 106"],[663,"Ragdoll Archers"],[664,"Ragdoll Drop"],[665,"Ragdoll Hit"],[666,"Ragdoll Runners"],[667,"Ragdoll Soccer"],[668,"Raldi's Crackhouse"],[669,"Raven Base"],[670,"Reacticore"],[671,"Real Flight Simulator"],[672,"Recoil"],[673,"Red Ball 4"],[674,"Red Handed"],[675,"Red Tie Runner"],[676,"Red vs. Blue"],[677,"Red vs. Blue War"],[678,"Repo (Bad)"],[679,"Resizer"],[680,"Retro Bowl"],[681,"Retro Bowl College"],[682,"Retro Highway"],[683,"Retro Ping Pong"],[684,"Return to Riddle School"],[685,"Revolution Idle"],[686,"Rhythm Hell"],[687,"Riddle Middle School"],[688,"Rise Higher"],[689,"Roulette Hero"],[690,"Robby Blocks"],[691,"Rocket League"],[692,"RocketGoal.io"],[693,"Rocketpult"],[694,"Rocket Soccer Derby"],[695,"Rodha"],[696,"Roller Baller"],[697,"Rolling Sky"],[698,"Rolly Vortex"],[699,"Rooftop Snipers"],[700,"Untitled game 700"],[701,"Rooftop Snipers 2"],[702,"Rooftop Run"],[703,"Room Clicker"],[704,"Roulette Knight"],[705,"Run 3"],[706,"Run from Withered Fox"],[707,"Running Fred"],[708,"Russian Buckshot Roulette"],[709,"Russian Car Driver"],[710,"Russian Sandbox"],[711,"Russian CS GO-6"],[712,"Sandbox City"],[713,"Sandboxels"],[714,"Sandtris"],[715,"Saihate Station"],[716,"Santy"],[717,"Satryn"],[718,"Saul Goodman Run"],[719,"Sausage Flip"],[720,"Scale the Depths"],[721,"Scampton the Great Fight Recreate"],[722,"Scarlet Shift"],[723,"Scary Teacher 3D"],[724,"Scary Shawarma"],[725,"Schoolboy Runaway"],[726,"Scrap Metal 3"],[727,"Scuba Bear"],[728,"Sea Mongrel"],[729,"Self"],[730,"Serenitrove"],[731,"Seven Days In Purgatory"],[732,"Silk Melody"],[733,"Shadow Courier"],[734,"Shape Transform"],[735,"Shift"],[736,"Shift 2"],[737,"shift2"],[738,"Shift at Midnight"],[739,"Shogun Showdown"],[740,"Short Life"],[741,"Shot Out 4"],[742,"Shred Mill"],[743,"Shred Sauce"],[744,"Side Effects"],[745,"Silhouette Showdown"],[746,"Six Cats Under"],[747,"Six Ways to Die"],[748,"Skibidi in the Backrooms"],[749,"Skibidi Shooter"],[750,"Skibidi toilet.io"],[751,"Skinwalker"],[752,"Sky Race 3D"],[753,"Sky Riders"],[754,"Slenderman: The 8 Pages"],[755,"Slendytubbies"],[756,"Slice It All"],[757,"Slice Master"],[758,"Slide in the Woods"],[759,"Slipways"],[760,"Slither.io"],[761,"Slope"],[762,"Slope 2 Player"],[763,"Slope 3"],[764,"Slot Or Not"],[765,"Slow Roads"],[766,"Smash Karts"],[767,"Smash Hit (Ripoff)"],[768,"Snake Like"],[769,"Sniper Shot"],[770,"Sniper V2"],[771,"Snowball.io"],[772,"Snowboard Obby"],[773,"Snow Rider 3D"],[774,"Alt Snow Rider"],[775,"Snow Road"],[776,"Soccer Bros"],[777,"Soccer Random"],[778,"Soda Simulator"],[779,"Solar Sandbox"],[780,"Solar Smash"],[781,"Sonic 1 Mobile"],[782,"Sonic 2 Mobile"],[783,"Sonic and the Falling Star"],[784,"Sonic Robo Blast 2"],[785,"Sonic CD"],[786,"Sonic Mania Plus"],[787,"Sonic.EXE Original"],[788,"Sonic Revert"],[789,"Sort the Court"],[790,"Soul Jumper"],[791,"Spacebar Clicker"],[792,"Space Company"],[793,"Space Wars: Battleground"],[794,"Space Waves"],[795,"Speed Per Click"],[796,"Speed Stars"],[797,"Spelunky Classic HD"],[798,"Spiral Roll"],[799,"Sprinter"],[800,"Sprunked"],[801,"Sprunki"],[802,"Sprunki Clicker"],[803,"Sprunki Pyramixed"],[804,"Squid Playground"],[805,"Stack Ball.io"],[806,"Stacktris"],[807,"State.io"],[808,"Station 141"],[809,"Station Meltdown"],[810,"Station Saturn"],[811,"Steal A Brainrot"],[812,"Summer Rider 3D"],[813,"Steal A Brainrot Duel"],[814,"Also Steal A Brainrot"],[815,"Another Steal a Brainrot"],[816,"Stealth Master"],[817,"Steel Surge Revolution"],[818,"Steep Descent"],[819,"Stick Archers Battle"],[820,"Stick Defenders"],[821,"Stick Duels: The War"],[822,"Stick Fighter"],[823,"Stick With It"],[824,"Stick Jet Challenge"],[825,"Stickman and Guns"],[826,"Stickman Clash"],[827,"Stickman Duel"],[828,"Stickman GTA City"],[829,"Stickman Hook"],[830,"Stickman Kingdom Clash"],[831,"Stickman Kombat 2D"],[832,"Stick Merge"],[833,"Stick Slasher"],[834,"Stone Grass Mowing Simulator"],[835,"Strikeforce Kitty"],[836,"Strikeforce Kitty 2"],[837,"Strikeforce Kitty Last Stand"],[838,"Strikeforce Kitty League"],[839,"Striker Dummies"],[840,"Subway Surfers: Barcelona"],[841,"Subway Surfers: Beijing"],[842,"Subway Surfers: Berlin"],[843,"Subway Surfers: Buenos Aires"],[844,"Subway Surfers: Havana"],[845,"Subway Surfers: Houston"],[846,"Subway Surfers: Iceland"],[847,"Subway Surfers: London"],[848,"Subway Surfers: Mexico"],[849,"Subway Surfers: Miami"],[850,"Subway Surfers: Monaco"],[851,"Subway Surfers: New Orleans"],[852,"Subway Surfers: San Francisco"],[853,"Subway Surfers: St. Petersburg"],[854,"Subway Surfers: Winter Holiday"],[855,"Subway Surfers: Zurich"],[856,"Sugary Spire UNHAM"],[857,"Suika Game"],[858,"Suika Pico"],[859,"Super Car Rush"],[860,"Super Cold"],[861,"Super Dark Deception"],[862,"Superdrome Bugs"],[863,"Super Falling Fred"],[864,"Superhot"],[865,"Super Hotline Miami"],[866,"Super Kid Adventure"],[867,"Super Liquid Soccer"],[868,"Super Mario 63 Redux"],[869,"Super Mario 64 (WebGL)"],[870,"Super Mario 64 Coop DX"],[871,"Super Mario Bros."],[872,"Super Mario Bros. Remastered"],[873,"Super Mario Construct"],[874,"Super Momos Crushers"],[875,"Super Monkey Ball 1 & 2"],[876,"Super Oliver World"],[877,"Super Onion Boy 2"],[878,"Super Pickleball Adventure"],[879,"Super Santa Kicker"],[880,"Super Santa Kicker 2"],[881,"Super Smash Bros. Melee"],[882,"Supreme Duelist"],[883,"Supreme Duelist 2019"],[884,"Survev.io"],[885,"carkingarena"],[886,"Survival Race v2"],[887,"Survivor.io"],[888,"Sushi Unroll"],[889,"Switch"],[890,"Switchblade"],[891,"Sword Fight"],[892,"Taco Stand"],[893,"Table Tanks"],[894,"Table Tennis World Tour"],[895,"Tag"],[896,"Also Tag"],[897,"Tag (coolmathgames)"],[898,"Tail of the Dragon"],[899,"Taisei Project"],[900,"Tall.io"],[901,"Tank Pixel"],[902,"Tanuki Sunset"],[903,"Tap Road"],[904,"Telephone Trouble"],[905,"Temple Run 2"],[906,"Tempo Overdose"],[907,"Terra"],[908,"Territorial.io"],[909,"Tzusuki Maze"],[910,"The Dead Seat"],[911,"The Dude"],[912,"The End Of Disney"],[913,"The Man From The Window"],[914,"There is No Game"],[915,"Thermomorph"],[916,"The Sun and Moon"],[917,"The Visitor"],[918,"They Are Coming"],[919,"Thief Puzzle"],[920,"Three Goblets"],[921,"Throw a Potato"],[922,"Throw a Potato Again"],[923,"Thwack"],[924,"Time Shooter 2"],[925,"Time Shooter 3"],[926,"Time Warriors"],[927,"Tiny Fishing"],[928,"Toastarling"],[929,"Toasterball"],[930,"Tomb of the Mask"],[931,"Tomorrow and Yesterday"],[932,"Top Speed Racing 3D"],[933,"Tower Blocks"],[934,"Tower Crash 3D"],[935,"Tower Wizard"],[936,"Townscraper"],[937,"Trace"],[938,"Traffic Jam 3D"],[939,"Tralalero Tralala: Escape Tung Tung Tung Sahur"],[940,"Trapped with Jester"],[941,"Trap the Cat"],[942,"Treacherous Trials"],[943,"Treacherous Trials Part 2"],[944,"Trees Hate You"],[945,"Triachnid"],[946,"Trivia Crack"],[947,"Tube Jumpers"],[948,"Tung Sahur Horror"],[949,"Tung Tung Basics (t cubed or t³)"],[950,"Tung Tung Tung Sahur Obby"],[951,"Tunnel Rush"],[952,"Better Tunnel Rush"],[953,"Two Ball 3D"],[954,"UFO Swamp Odyssey"],[955,"Ultimate Car Driving Simulator"],[956,"Ultrakill (buggy)"],[957,"Other Car Driving Simulator"],[958,"Uncanny Cat Golf"],[959,"Underneath"],[960,"Undertale: Last Breath"],[961,"Undertale Yellow"],[962,"Unfair Undyne"],[963,"Unicycle Hero"],[964,"Unitres Dreams"],[965,"UNO"],[966,"UNO No Mercy"],[967,"Untime"],[968,"Upslash"],[969,"Uvuvwevwevwe Onyetenvewve Ugwemubwem Ossas"],[970,"UZG"],[971,"Vampire Survivors"],[972,"Vapor Trails"],[973,"Vex 3"],[974,"Vex 3 Xmas"],[975,"Vex 4"],[976,"Vex 5"],[977,"Vex 6"],[978,"Vex 7"],[979,"Vex 8"],[980,"Vex Challenges"],[981,"Vexx3M"],[982,"Vexx3M 2"],[983,"Villager"],[984,"Vincent: Mansion of the Dead"],[985,"Volleyball Challenge"],[986,"Volley Random"],[987,"Vortex"],[988,"Wacky Flip"],[989,"War the Knight"],[990,"Waterpool.io"],[991,"Waterworks"],[992,"Wavedash"],[993,"Wave Road 3D"],[994,"Waverun"],[995,"We Become What We Behold"],[996,"WebFishing"],[997,"Web Dashers"],[998,"Wermhole"],[999,"Wheelie Bike"],[1000,"Winter Falling"],[1001,"Witchcraft TD"],[1002,"Wolfenstein 3D Emscripten"],[1003,"Woodworm"],[1004,"Wordle"],[1005,"Wrassling"],[1006,"Wrestle Bros"],[1007,"XOR"],[1008,"Yandere Simulator"],[1009,"Yohoho.io"],[1010,"Yohoho.io (2)"],[1011,"Your Turn to Die"],[1012,"You vs 100 Skibidi"],[1013,"Yume Nikki"],[1014,"Zen Word"],[1015,"Zombie Road"],[1016,"Zombie Rush"],[1017,"Zombotron Reboot"],[1018,"Zrist"],[2001,"Minecraft 1.8.8 (EaglecraftX)"],[2002,"Minecraft 1.12.2"],[2003,"Minecraft 1.11.2"],[2004,"Minecraft 1.9"],[2005,"Minecraft 1.7.3"],[2006,"Minecraft 1.5.2"],[2007,"Minecraft Beta 1.3"],[2008,"Minecraft Alpha 1.2.6"],[2009,"Minecraft Indev"],[2010,"Eagler Forge"],[2011,"Eaglercraft 26.2"],[2012,"Eaglercraft Lite"],[2013,"Eaglercraft Magic"],[2014,"Eaglercraft Nebula"],[2015,"EaglerCraft Odd Future"],[2016,"Eaglercraft Shadow"],[2017,"Eaglercraft Sky"],[2018,"Eaglercraft Tech"],[2019,"Eaglercraft Ultimate"],[2020,"Eaglercraft Winston Horror"],[2021,"EaglercraftX 1.16"],[2022,"EaglercraftX 1.20.6"],[2023,"Archimedes Client"],[2024,"Astra Client"],[2025,"Ayuncraft"],[2026,"CoderCraft"],[2027,"EB Client"],[2028,"Explore Modpack"],[2029,"Fuschia X"],[2030,"GX Client"],[2031,"JMO Client"],[2032,"Justin Client"],[2033,"Kerosene Client"],[2034,"Kozmo Client"],[2035,"Lambda Client"],[2036,"Lumine Client"],[2037,"Mega Client"],[2038,"Modern Client"],[2039,"Modern Client (v2)"],[2040,"Minecraft Prismarine Client"],[2041,"Nit Client"],[2042,"Nova Client"],[2043,"Pi Client"],[2044,"Pixel Client"],[2045,"Precision Client"],[2046,"Prism Client"],[2047,"Reborn Client"],[2048,"Reflex Client"],[2049,"Resent Client"],[2050,"Skyfactory"],[2051,"Solar Client"],[2052,"Starlike Client"],[2053,"Tuff Client"],[2054,"UT15 Tuff Client"],[2055,"UwU Client"],[2056,"Wurst Client"],[2057,"Zeta Client"],[2058,"Eagler Forge Mods"],[3001,"Ruffle Emulator"],[3002,"10 Bullets"],[3003,"10 More Bullets"],[3004,"1 On 1 Soccer"],[3005,"1 On 1 Tennis"],[3006,"3 Pandas"],[3007,"3 Pandas Night"],[3008,"3 Pandas Brazil"],[3009,"3 Pandas Fantasy"],[3010,"3 Pandas Japan"],[3011,"3 Slices 2"],[3012,"40xescape"],[3013,"60 Seconds Burger Run"],[3014,"60 Seconds Santa Run"],[3015,"8 Ball Pool"],[3016,"Abandoned"],[3017,"Abandoned 3"],[3018,"Absolute Madness"],[3019,"Ace Gangster Taxi"],[3020,"Achievement Unlocked"],[3021,"Achievement Unlocked 2"],[3022,"Achievement Unlocked 3"],[3023,"Achilles"],[3024,"Achilles 2"],[3025,"Age of War"],[3026,"Age of War 2"],[3027,"A Koopa's Revenge"],[3028,"A Koopa's Revenge 2"],[3029,"Alien Hominid"],[3030,"Alien Transporter"],[3031,"Amigo Pancho"],[3032,"Amigo Pancho 2"],[3033,"Amigo Pancho 3"],[3034,"Amigo Pancho 4"],[3035,"Amigo Pancho 5"],[3036,"Amigo Pancho 6"],[3037,"Amigo Pancho 7"],[3038,"Ambulance Rush"],[3039,"Angry Birds Space"],[3040,"Animator Vs Animation Game (Special Edition)"],[3041,"Apple Shooter"],[3042,"Apple Worm"],[3043,"Armor Mayhem 2"],[3044,"Avalanche"],[3045,"Awesome Pirates"],[3046,"Awesome Planes"],[3047,"Awesome Tanks"],[3048,"Awesome Tanks 2"],[3049,"Axis Football League"],[3050,"Backyard Baseball"],[3051,"Bad Ice Cream"],[3052,"Bad Ice Cream 2"],[3053,"Bad Ice Cream 3"],[3054,"Bad Piggies"],[3055,"Bad Piggies 2018"],[3056,"Bandit Gunslingers"],[3057,"Basketball Legends"],[3058,"Bash the Computer"],[3059,"Bearbarians"],[3060,"Bejeweled Twist"],[3061,"Big Time Butter Baron"],[3062,"Binding of Isaac Demo"],[3063,"Binding of Isaac Wrath of The Lamb"],[3064,"Binding of Isaac: Wrath of the Lamb Eternal Edition"],[3065,"Blackjack"],[3066,"Blackjack Battle"],[3067,"Blacksmith Lab"],[3068,"Black Knight"],[3069,"Bleach vs. Naruto"],[3070,"Blob's Story 2"],[3071,"Bloons"],[3072,"Bloons 2"],[3073,"Bloons Player Pack 1"],[3074,"Bloons Player Pack 2"],[3075,"Bloons Player Pack 3"],[3076,"Bloons Player Pack 4"],[3077,"Bloons Player Pack 5"],[3078,"Bloxorz"],[3079,"Bob the Robber"],[3080,"Boxhead 2play Rooms"],[3081,"Boxhead Nightmare"],[3082,"Boxing Live 2"],[3083,"BTD1"],[3084,"BTD2"],[3085,"BTD3"],[3086,"BTD4"],[3087,"BTD5"],[3088,"Bubble Shooter"],[3089,"Bubble Shooter Pirate"],[3090,"Bubble Tanks"],[3091,"Bubble Tanks 2"],[3092,"Bubble Tanks 3"],[3093,"Bubble Tanks Arenas"],[3094,"Bubble Tanks Tower Defense"],[3095,"Burrito Bison"],[3096,"Burrito Bison Revenge"],[3097,"Cactus Mccoy"],[3098,"Cactus Mccoy 2"],[3099,"Castaway"],[3100,"Car Eats Car 2 Deluxe"],[3101,"Cat Mario"],[3102,"Cellar Door"],[3103,"Checkers"],[3104,"Chess"],[3105,"Chibi Knight"],[3106,"Chuzzle"],[3107,"Civiballs"],[3108,"Civiballs 2"],[3109,"Clash N Slash"],[3110,"Clear Vision"],[3111,"Clear Vision 2"],[3112,"Clear Vision 3"],[3113,"Clear Vision 4"],[3114,"Clear Vision 5"],[3115,"Clubby The Seal"],[3116,"Codename Gordon"],[3117,"Cover Orange"],[3118,"Cover Orange 2"],[3119,"Cover Orange Players Pack"],[3120,"Cover Orange Players Pack 2"],[3121,"Cover Orange Players Pack 3"],[3122,"Cover Orange Journey Gangsters"],[3123,"Cover Orange Journey Knights"],[3124,"Cover Orange Journey Pirates"],[3125,"Cover Orange Journey Space"],[3126,"Crazy Penguin Catapult"],[3127,"Creeper World 2"],[3128,"Crunchball 3000"],[3129,"Curve Ball"],[3130,"Dadgame"],[3131,"Dad n Me"],[3132,"Dead Frontier Outbreak"],[3133,"Dead Frontier Outbreak 2"],[3134,"Dead Zed"],[3135,"Dead Zed 2"],[3136,"Decision"],[3137,"Decision 2"],[3138,"Decision 3"],[3139,"Decision Medieval"],[3140,"Deeper Sleep"],[3141,"Defend Your Castle"],[3142,"Defend Your Nuts"],[3143,"Defend Your Nuts 2"],[3144,"Diamond Hollow"],[3145,"Diamond Hollow 2"],[3146,"Dig to China"],[3147,"Dino Run"],[3148,"Dino Run: Enter Planet D"],[3149,"Dino Run: Marathon of Doom"],[3150,"Don't Escape"],[3151,"Don't Escape 2"],[3152,"Don't Escape 3"],[3153,"Doodle Jump"],[3154,"Doom 2D"],[3155,"Doom Triple Pack"],[3156,"Douchebag Life"],[3157,"Douchebag Workout"],[3158,"Douchebag Workout 2"],[3159,"Dragon Ball Z: Devolution"],[3160,"Duck Life"],[3161,"Duck Life 2"],[3162,"Duck Life 3"],[3163,"Duck Life 4"],[3164,"Duck Life 5"],[3165,"Dune Buggy"],[3166,"Dumpling"],[3167,"Earn to Die"],[3168,"Earn to Die 2"],[3169,"Earth Taken"],[3170,"Earth Taken 2"],[3171,"Earth Taken 3"],[3172,"Effing Hail"],[3173,"Effing Machines"],[3174,"Effing Worms"],[3175,"Effing Zombies"],[3176,"Electricman 2"],[3177,"Endless War 4"],[3178,"Endless War 5"],[3179,"Endless War 7"],[3180,"Epic Battle Fantasy 5"],[3181,"Exit Path"],[3182,"Factory Balls"],[3183,"Factory Balls 2"],[3184,"Factory Balls 3"],[3185,"Factory Balls 4"],[3186,"Fairy Tale vs. One Piece"],[3187,"Fancy Pants Adventure"],[3188,"Fancy Pants Adventure 2"],[3189,"Fancy Pants Adventure: World 3"],[3190,"Fancy Pants Adventure 4 Part 1"],[3191,"Fancy Pants Adventure 4 Part 2"],[3192,"Fancy Snowboarding"],[3193,"Five Fights at Freddies"],[3194,"Fatty Genius"],[3195,"Feed Us 2"],[3196,"Feed Us 3"],[3197,"Feed Us 4"],[3198,"Feed Us 5"],[3199,"Final Fantasy Sonic X Episode 1"],[3200,"Final Fantasy Sonic X Episode 2"],[3201,"Final Fantasy Sonic X Episode 3"],[3202,"Final Fantasy Sonic X Episode 4"],[3203,"Final Fantasy Sonic X Episode 5"],[3204,"Final Fantasy Sonic X Episode 6 part 1"],[3205,"Final Fantasy Sonic X Episode 6 part 2"],[3206,"Final Ninja"],[3207,"Fireboy and Watergirl"],[3208,"Flappy Bird"],[3209,"Flood Runner"],[3210,"Flood Runner 2"],[3211,"Flood Runner 3"],[3212,"Flood Runner 4"],[3213,"Focus"],[3214,"Free Rider"],[3215,"Free Rider 2"],[3216,"Free Rider 3"],[3217,"Gachaverse"],[3218,"Gangsta Bean"],[3219,"Gangsta Bean 2"],[3220,"Gangster Bros"],[3221,"Get to the Top Although There Is No Top"],[3222,"Goal South Africa"],[3223,"G-Switch"],[3224,"G-Switch 2"],[3225,"Gun Blood"],[3226,"Gun Mayhem"],[3227,"Gun Mayhem 2"],[3228,"Gun Mayhem Redux"],[3229,"Hands of War"],[3230,"Hanger"],[3231,"Happy Wheels"],[3232,"Haunt The House"],[3233,"Heli Attack 3"],[3234,"Henry Stickmin Breaking The Bank"],[3235,"Henry Stickmin Escaping The Prison"],[3236,"Henry Stickmin Fleeing The Complex"],[3237,"Henry Stickmin Infiltrating The Airship"],[3238,"Henry Stickmin Stealing The Diamond"],[3239,"Hipster Kickball"],[3240,"Hobo"],[3241,"Hobo 2"],[3242,"Hobo 3"],[3243,"Hobo 4"],[3244,"Hobo 5"],[3245,"Hobo 6"],[3246,"Hobo 7"],[3247,"Hobo vs. Zombies"],[3248,"Home Sheep Home"],[3249,"Hot Dog Bush"],[3250,"Hungry Pumpkin"],[3251,"IndestructoTank"],[3252,"IndestructoTank Anniversary Edition"],[3253,"IndestructoTank 2"],[3254,"Innkeeper"],[3255,"Interactive Buddy"],[3256,"Into Space"],[3257,"Into Space 2"],[3258,"Into Space 3"],[3259,"Intrusion"],[3260,"IQ Ball"],[3261,"Jacksmith"],[3262,"Jellydad Hero"],[3263,"Kitten Cannon"],[3264,"Knightmare Tower"],[3265,"Learn to Fly"],[3266,"Learn to Fly 2"],[3267,"Learn to Fly 2 Hacked"],[3268,"Learn to Fly 3"],[3269,"Learn to Fly 3 (debug)"],[3270,"Learn to Fly Idle"],[3271,"Learn to Fly Idle hacked"],[3272,"Line Rider"],[3273,"Lonewolf"],[3274,"Los Angeles Shark"],[3275,"Madness Accelerant"],[3276,"Madness Ambulation"],[3277,"Madness Combat Defense"],[3278,"Madness Combat FPS Fueled by Hot Dogs"],[3279,"Madness Gemini"],[3280,"Madness Hydraulic"],[3281,"Madness Interactive"],[3282,"Madness Off Color"],[3283,"Madness Premediation"],[3284,"Madness Project Nexus"],[3285,"Madness Retaliation"],[3286,"Monster Truck Curfew"],[3287,"Mario Combat"],[3288,"Mastermind World Conqueror"],[3289,"Matrix Rampage"],[3290,"Meatboy"],[3291,"Medieval Shark"],[3292,"Mega Miner"],[3293,"Micro Life"],[3294,"Miami Shark"],[3295,"Mighty Knight"],[3296,"Mighty Knight 2"],[3297,"Minecraft Tower Defense"],[3298,"MineCaves"],[3299,"Mindscape"],[3300,"Min Hero"],[3301,"Miragine War"],[3302,"Motherload"],[3303,"Multitask"],[3304,"Mutilate a Doll"],[3305,"My Friend Pedro"],[3306,"My Friend Pedro Arena"],[3307,"N"],[3308,"Natural Selection"],[3309,"Nblox"],[3310,"Neon Rider"],[3311,"Newgrounds Rumble"],[3312,"New Super Bowser World"],[3313,"New York Shark"],[3314,"Nickelodeon Super Brawl 2"],[3315,"Ninja Brawl"],[3316,"Nitrome Must Die"],[3317,"Obey the Game"],[3318,"One Piece Fighting"],[3319,"Orange Roulette"],[3320,"Pandemic 2"],[3321,"Papa Louie Night Hunt 2"],[3322,"Papa Louie When Burgers Attack"],[3323,"Papa Louie When Pizzas Attack"],[3324,"Papa Louie When Sundaes Attack"],[3325,"Papa's Bakeria"],[3326,"Papa's Burgeria"],[3327,"Papa's Cheeseria"],[3328,"Papa's Cupcakeria"],[3329,"Papa's Donuteria"],[3330,"Papa's Freezeria"],[3331,"Papa's Hot Doggeria"],[3332,"Papa's Pancakeria"],[3333,"Papa's Pastaria"],[3334,"Papa's Pizzeria"],[3335,"Papa's Scooperia"],[3336,"Papa's Sushiria"],[3337,"Papa's Taco mia"],[3338,"Papa's Wingeria"],[3339,"Peacekeeper"],[3340,"Peggle"],[3341,"Penalty kicks"],[3342,"Penguin Pass"],[3343,"Pico's School"],[3344,"Pico Vs Bear DX"],[3345,"Pixel Quest: the Lost Idols"],[3346,"Plants vs. Zombies"],[3347,"Plazma Burst"],[3348,"Pokémon Tower Defense"],[3349,"Portal Defenders Fast Break"],[3350,"Portal Defenders Tower Defence"],[3351,"Portal Flash"],[3352,"Potatoman Seeks The Troof"],[3353,"Potty Racers 1"],[3354,"Potty Racers 2"],[3355,"Potty Racers 3"],[3356,"Pre Civilization Bronze Age"],[3357,"Prehistoric Shark"],[3358,"Primary"],[3359,"Punch the Trump"],[3360,"QWOP"],[3361,"Raft Wars"],[3362,"Raft Wars 2"],[3363,"Ragdoll.io"],[3364,"Ragdoll Achievement"],[3365,"Ray Part 1"],[3366,"Ray Part 2"],[3367,"Raze"],[3368,"Raze 2"],[3369,"Raze 3"],[3370,"Reach the Core"],[3371,"Rebuild"],[3372,"Rebuild 2"],[3373,"Red Ball"],[3374,"Red Ball 2"],[3375,"Red Ball 3"],[3376,"Red Ball 4"],[3377,"Red Ball 4 vol.2"],[3378,"Red Ball 4 vol.3"],[3379,"Reign of Centipede"],[3380,"Renegades"],[3381,"Resort Empire"],[3382,"Return Man"],[3383,"Return Man 2"],[3384,"Ricochet Kills 2"],[3385,"Riddle School"],[3386,"Riddle School 2"],[3387,"Riddle School 3"],[3388,"Riddle School 4"],[3389,"Riddle School 5"],[3390,"Riddle Transfer"],[3391,"Riddle Transfer 2"],[3392,"Riddle University"],[3393,"Road of Fury"],[3394,"Road of the Dead"],[3395,"Road of the Dead 2"],[3396,"Rocket Jump"],[3397,"Roly-Poly Monsters"],[3398,"Rubble Trouble 1"],[3399,"Rubble Trouble 2"],[3400,"Rubble Trouble 3"],[3401,"Run"],[3402,"Run 2"],[3403,"Sands of the Coliseum"],[3404,"SAS Zombie Assault 2"],[3405,"Scary Maze Game"],[3406,"Scooby Doo Creepy Run"],[3407,"Scooby Doo Zombie Hunter"],[3408,"Sentry Fortress"],[3409,"Serving Up Madness"],[3410,"Shopping Cart Hero"],[3411,"Sift Heads Cartels Act 1"],[3412,"Sift Heads Cartels Act 2"],[3413,"Sift Heads Cartels Act 3"],[3414,"Sift Heads World Ultimatum"],[3415,"Sierra 7"],[3416,"Skywire"],[3417,"Skywire 2"],[3418,"Slime Laboratory"],[3419,"Snail Bob"],[3420,"Snail Bob 2"],[3421,"Snail Bob 3"],[3422,"Snail Bob 4"],[3423,"Snail Bob 5 Love Story"],[3424,"Solitaire"],[3425,"Sonny 2"],[3426,"Space is Key"],[3427,"Space is Key 2"],[3428,"Space is Key Xmas"],[3429,"Spewer"],[3430,"Spongebob PowerKart Grand Prix"],[3431,"Sports Heads: Ice Hockey"],[3432,"Steak and Jake"],[3433,"Stealth Assassin"],[3434,"Stick RPG"],[3435,"Stick Man SWAT"],[3436,"Stick War"],[3437,"Stick War 2"],[3438,"Storm the House"],[3439,"Storm the House 2"],[3440,"Storm the House 3"],[3441,"Strike Force Heroes"],[3442,"Special Mission"],[3443,"Strike Force Heroes 2"],[3444,"Strike Force Heroes 3"],[3445,"Sugar Sugar"],[3446,"Suma"],[3447,"Super Chibi Knight"],[3448,"Super Fighters"],[3449,"Super House of Dead Ninjas"],[3450,"Super Mario 63"],[3451,"Super Mario Crossover"],[3452,"Super Smash Flash"],[3453,"SuperSmashFlash v0.8"],[3454,"Super Smash Flash 2"],[3455,"Super Stacker 2"],[3456,"Sushi Cat"],[3457,"Swords and Sandals"],[3458,"Swords and Souls"],[3459,"Sydney Shark"],[3460,"Takeover"],[3461,"Tank Trouble"],[3462,"Tasty Planet"],[3463,"Temple of Boom"],[3464,"Territory War"],[3465,"Territory War 2"],[3466,"Territory War 3"],[3467,"The Classroom"],[3468,"The Classroom 2"],[3469,"The Classroom 3"],[3470,"The Deepest Sleep"],[3471,"The Enchanted Cave 2"],[3472,"The Impossible Game"],[3473,"The Impossible Quiz"],[3474,"The Impossible Quiz 2"],[3475,"The Last Stand"],[3476,"The Last Stand 2"],[3477,"The Last Stand Union City"],[3478,"The Sodor Race"],[3479,"The Sun For The Vampire"],[3480,"This is the Only Level"],[3481,"This is the Only Level Too"],[3482,"Toss the Turtle"],[3483,"Troll Face Quest 1"],[3484,"Troll Face Quest 2"],[3485,"Troll Face Quest 3"],[3486,"Troll Face Quest 4"],[3487,"Troll Face Quest 5"],[3488,"Troll Face Quest 6"],[3489,"Troll Face Quest 7"],[3490,"Troll Face Quest 8"],[3491,"Troll Face Quest 9"],[3492,"Troll Face Quest 10"],[3493,"Troll Face Quest 11"],[3494,"Troll Face Quest 12"],[3495,"Troll Face Quest 13"],[3496,"Tuper Tario Tros"],[3497,"Twin Shot"],[3498,"Ultimate Assassin 2"],[3499,"Ultimate Assassin 3"],[3500,"Ultimate Flash Sonic"],[3501,"Unfair Mario"],[3502,"Upgrade Complete"],[3503,"Upgrade Complete 2"],[3504,"Vex"],[3505,"Vex 2"],[3506,"VVVVVV"],[3507,"Warfare 1917"],[3508,"Warfare 1944"],[3509,"Weltling"],[3510,"Whack the Thief"],[3511,"Whack Your Boss"],[3512,"Whack Your Computer"],[3513,"Wheely"],[3514,"Wheely 2"],[3515,"Wheely 3"],[3516,"Wheely 4"],[3517,"Wheely 5"],[3518,"Wheely 6"],[3519,"Wheely 7"],[3520,"Wheely 8"],[3521,"Windows Doors"],[3522,"World's Hardest Game"],[3523,"World's Hardest Game 2"],[3524,"World's Hardest Game 3"],[3525,"World's Hardest Game 4"],[3526,"Wpn Fire"],[3527,"Yellow"],[3528,"You Are Lucky"],[3529,"Zoikz Defender"],[3530,"Zombie Exploder"],[3531,"Zombocalypse 2"],[3532,"Zombotron"],[3533,"Zombotron 2"],[3534,"Zuma"],[3535,"Arm Wrestling"],[3536,"Art of Fighting"],[3537,"Art of Fighting 2"],[3538,"Art of Fighting 3"],[3539,"Asteroids"],[3540,"Centipede"],[3541,"Contra"],[3542,"Crazy Climber"],[3543,"Crystal Castles"],[3544,"Darkstalkers: The Night Warriors"],[3545,"Defender"],[3546,"Donkey Kong"],[3547,"Donkey Kong Jr"],[3548,"Donkey Kong 3"],[3549,"Double Dragon"],[3550,"Double Dragon 2"],[3551,"Double Dragon 3"],[3552,"Fatal Fury"],[3553,"Fatal Fury 3"],[3554,"Fatal Fury Special"],[3555,"Final Fight"],[3556,"Final Fight 30th Anniversary"],[3557,"Frogger"],[3558,"Galaga"],[3559,"Galaga 88"],[3560,"Hyper Street Fighter 2"],[3561,"JoJo's Bizarre Adventure: Heritage for the Future"],[3562,"Jojo's Venture"],[3563,"Journey"],[3564,"Joust"],[3565,"Karnov's Revenge"],[3566,"King Of Fighters '94"],[3567,"King Of Fighters '95"],[3568,"King Of Fighters '96"],[3569,"King Of Fighters '97"],[3570,"King Of Fighters '98"],[3571,"King Of Fighters '99"],[3572,"King Of Fighters 2000"],[3573,"King Of Fighters 2001"],[3574,"King Of Fighters 2002"],[3575,"King Of Fighters 2003"],[3576,"Last Blade"],[3577,"Last Blade 2"],[3578,"League Bowling"],[3579,"Mario Bros"],[3580,"Marvel Super Heroes"],[3581,"Marvel Super Heroes vs Street Fighter"],[3582,"Marvel vs Capcom"],[3583,"Mega Man: The Power Battle"],[3584,"Mega Man 2: The Power Fighters"],[3585,"Metal Slug"],[3586,"Metal Slug 2"],[3587,"Metal Slug 3"],[3588,"Metal Slug 4"],[3589,"Metal Slug 5"],[3590,"Metal Slug X"],[3591,"Mortal Kombat"],[3592,"Mortal Kombat 2"],[3593,"Mortal Kombat 3"],[3594,"Ms. Pacman"],[3595,"NBA Jam Tournament Edition"],[3596,"Outrun"],[3597,"Pac-man"],[3598,"Punch Out"],[3599,"Puzzle Bobble"],[3600,"Q*bert"],[3601,"Real Bout Fatal Fury"],[3602,"Real Bout Fatal Fury 2"],[3603,"Real Bout Fatal Fury Special"],[3604,"Red Earth"],[3605,"Samurai Shodown"],[3606,"Samurai Shodown 2"],[3607,"Samurai Shodown 3"],[3608,"Samurai Shodown 4"],[3609,"Samurai Shodown 5"],[3610,"Samurai Shodown 5 Special"],[3611,"SegaSonic The Hedgehog"],[3612,"Shinobi"],[3613,"Simpsons Arcade"],[3614,"SNK vs Capcom"],[3615,"Space Harrier"],[3616,"Space Invaders 95"],[3617,"Street Fighter"],[3618,"Street Fighter 2"],[3619,"Street Fighter 2: Champion Edition"],[3620,"Street Fighter 2: Hyper Fighting"],[3621,"Street Fighter 2: Rainbow Edition"],[3622,"Street Fighter 3: 2nd Impact"],[3623,"Street Fighter 3: 3rd Strike"],[3624,"Street Fighter 3: 4rd Strike"],[3625,"Street Fighter 3: New Generation"],[3626,"Street Fighter Alpha"],[3627,"Street Fighter Alpha 2"],[3628,"Street Fighter Alpha 3"],[3629,"Super Punch Out"],[3630,"Super Street Fighter 2: The New Challengers"],[3631,"Super Street Fighter 2 Turbo JP"],[3632,"SVC Chaos Plus"],[3633,"Teenage Mutant Ninja Turtles 1"],[3634,"Teenage Mutant Ninja Turtles 2: Turtles In Time"],[3635,"Tempest"],[3636,"Tetris: The Grandmaster 2"],[3637,"Ultimate Mortal Kombat 3"],[3638,"VS Super Mario Bros"],[3639,"Wonder Boy"],[3640,"Wonder Boy Monster Land"],[3641,"World Heroes"],[3642,"World Heroes 2"],[3643,"World Heroes 2 Jet"],[3644,"World Heroes Perfect"],[3645,"X-Men"],[3646,"X-Men: Children of the Atom"],[3647,"X-Men VS Street Fighter"],[3648,"Adventure"],[3649,"Asteroids"],[3650,"Battlezone"],[3651,"Beamrider"],[3652,"Dig Dug"],[3653,"Enduro"],[3654,"E.T.: the Extra-Terrestrial"],[3655,"Halloween"],[3656,"Missile Command"],[3657,"Pitfall!"],[3658,"Q-bert"],[3659,"Space Invaders"],[3660,"Star Raiders"],[3661,"Vanguard"],[3662,"Yar's Revenge"],[3663,"Blood"],[3664,"Command and Conquer"],[3665,"Doom"],[3666,"Doom 2"],[3667,"Doom 2D"],[3668,"Fallout"],[3669,"Hacx"],[3670,"Heretic"],[3671,"Karateka"],[3672,"Prince of Persia"],[3673,"Quake"],[3674,"The Elder Scrolls: Arena"],[3675,"The Elder Scrolls 2: Daggerfall"],[3676,"The Incredible Machine"],[3677,"The Oregon Trail"],[3678,"Touhou 1 Touhou-Reiiden"],[3679,"Touhou 2 Touhou-Fuumaroku"],[3680,"Touhou 3 Touhou-Yumejikuu"],[3681,"Touhou 4 Touhou-Gensokyou"],[3682,"Touhou 5 Touhou-Kaikidan"],[3683,"Ultima I: The First Age of Darkness"],[3684,"Wolfenstein 3D"],[3685,"ZDoom"],[3686,"Tapper"],[3687,"Super Mario Bros"],[3688,"10-Yard Fight"],[3689,"100 in 1"],[3690,"1942"],[3691,"Astyanax"],[3692,"All night nippon super mario bros"],[3693,"Balloon Fight"],[3694,"Baseball"],[3695,"Bomberman"],[3696,"Bomberman 2"],[3697,"BurgerTime"],[3698,"Castlevania"],[3699,"Castlevania 2"],[3700,"Castlevania 3"],[3701,"Celeste Mario DX"],[3702,"Clu Clu Land"],[3703,"Contra"],[3704,"Contra Force"],[3705,"Darkwing Duck"],[3706,"Dig Dug 2"],[3707,"Donkey Kong"],[3708,"Donkey Kong Collection"],[3709,"Demon Blade"],[3710,"Double Dribble"],[3711,"Dr. Mario"],[3712,"Duck hunt"],[3713,"Ducktales"],[3714,"Ducktales 2"],[3715,"Earthbound Beginnings"],[3716,"Elevator Action"],[3717,"Excitebike"],[3718,"Famidash Demo version"],[3719,"Famidash 1.2.8"],[3720,"Famidash 1.2.8 Album"],[3721,"Famidash 1.2.8 B-Sides"],[3722,"Famidash 1.2.8 C-Sides"],[3723,"Famidash 1.2.8 D-Sides"],[3724,"Famidash 1.2.8 E-Sides"],[3725,"Famidash 2 Alpha"],[3726,"Final Fantasy"],[3727,"Final Fantasy 2"],[3728,"Final Fantasy 3"],[3729,"Galaga"],[3730,"Gun.smoke"],[3731,"Gyromite"],[3732,"High Speed"],[3733,"Ice Climber"],[3734,"James Bond Jr"],[3735,"Kirby's Adventure"],[3736,"Lode Runner"],[3737,"Mach Rider"],[3738,"Mario Bros"],[3739,"Mega Man"],[3740,"Mega Man 2"],[3741,"Mega Man 3"],[3742,"Mega Man 4"],[3743,"Mega Man 5"],[3744,"Mega Man 6"],[3745,"Metal Gear"],[3746,"Metroid"],[3747,"Mike Tyson's Punch Out"],[3748,"Ms. Pac-man"],[3749,"MVP Baseball"],[3750,"Narc"],[3751,"Nightshade"],[3752,"Nintendo World Championships 1990"],[3753,"Nintendo World Cup"],[3754,"Pac-man"],[3755,"Pinball"],[3756,"Popeye"],[3757,"Pro Wrestling"],[3758,"Rad Racer"],[3759,"Road Fighter"],[3760,"Road Runner"],[3761,"Skate or Die"],[3762,"Slalom"],[3763,"Snow Bros"],[3764,"Soccer"],[3765,"Solstice"],[3766,"Sonic in SMB1"],[3767,"Spy Hunter"],[3768,"Summer Carnival 92"],[3769,"Super C"],[3770,"Super Mario Bros"],[3771,"Super Mario Bros. 2"],[3772,"Super Mario Bros. 2: The Lost Levels"],[3773,"Super Mario Bros. 3"],[3774,"Super Mario Bros. 3 Mix"],[3775,"Super Tilt Bros"],[3776,"TaleSpin"],[3777,"Tecmo Bowl"],[3778,"Tennis"],[3779,"Tetris"],[3780,"Tetris (Tengen)"],[3781,"The Immortal"],[3782,"The Legend of Zelda"],[3783,"The Lone Ranger"],[3784,"Urban Champion"],[3785,"Volleyball"],[3786,"Wrecking Crew"],[3787,"Xevious"],[3788,"Zelda 2 the Legend of Link"],[3789,"Alex Kidd in Miracle World"],[3790,"Fantasy Zone"],[3791,"Hang On"],[3792,"Phantasy Star 1"],[3793,"Space Harrier"],[3794,"Winter Olympics"],[3795,"Wolf Child"],[3796,"Wonder Boy 3: Dragon's Trap"],[3797,"Aladdin"],[3798,"Alex Kidd in the Enchanted Castle"],[3799,"Alien Storm"],[3800,"An Ordinary Sonic rom Hack (sonic.exe)"],[3801,"Another World"],[3802,"Art of Fighting"],[3803,"Altered Beast"],[3804,"Bonanza Bros"],[3805,"Bubsy"],[3806,"Bubsy 2"],[3807,"Captain Lang"],[3808,"Castlevania: Bloodlines"],[3809,"Columns"],[3810,"Columns III"],[3811,"Crusader of Centy"],[3812,"Dynamite Headdy"],[3813,"Dr Robotnik's Mean Bean Machine"],[3814,"Earthworm Jim"],[3815,"Earthworm Jim 2"],[3816,"Ecco the Dolphin"],[3817,"Fatal Fury 2"],[3818,"FIFA International Soccer"],[3819,"FIFA Soccer 95"],[3820,"Gain Ground"],[3821,"Garfield: Caught in the Act"],[3822,"General Chaos"],[3823,"Golden Axe"],[3824,"Golden Axe 2"],[3825,"Golden Axe 3"],[3826,"Gunstar Heroes"],[3827,"Knuckles Chaotix"],[3828,"Mega Man: The Wily Wars"],[3829,"Mega Man: The Sequel Wars Episode Red"],[3830,"Metal Sonic Hyperdrive"],[3831,"Metal Sonic Rebooted"],[3832,"Mobius Evolution"],[3833,"Mortal Kombat 3"],[3834,"Mortal Kombat Mythologies: Sub Zero (Unlicensed)"],[3835,"Outrun"],[3836,"Phantasy Star 2"],[3837,"Phantasy Star 3"],[3838,"Phantasy Star 4"],[3839,"Puyo Puyo"],[3840,"Ristar"],[3841,"Rocket Knight Adventures"],[3842,"Rocket Knight Adventures 2"],[3843,"Shining Force"],[3844,"Shining Force 2"],[3845,"Snow Bros: Nick and Tom"],[3846,"Sonic 1 Contemporary"],[3847,"Sonic 1 Score Rush"],[3848,"Sonic 1: The Super Challenges"],[3849,"Sonic 2 Pink Edition"],[3850,"Sonic 2 Return of Shadow"],[3851,"Sonic 2 Score Rush"],[3852,"Sonic 2 Time and Place"],[3853,"Sonic 3 And Knuckles"],[3854,"Sonic 3 And Sally"],[3855,"Sonic 3 Complete"],[3856,"Sonic & Knuckles + Sonic The Hedgehog 3"],[3857,"Sonic 3D Blast: Director's Cut"],[3858,"Sonic and Ashuro"],[3859,"Sonic and Knuckles"],[3860,"Sonic Classic Heroes"],[3861,"Sonic Classics"],[3862,"Sonic Delta Origins"],[3863,"Sonic Erazor"],[3864,"Sonic Hellfire Saga"],[3865,"Sonic Megamix"],[3866,"Sonic Scorched Quest"],[3867,"Sonic Spinball"],[3868,"Sonic the Hedgehog"],[3869,"Sonic the Hedgehog 2"],[3870,"Sonic the Hedgehog 3"],[3871,"Shadow Dancer: The Secret of Shinobi"],[3872,"Steel Empire"],[3873,"Streets Of Rage"],[3874,"Streets Of Rage 2"],[3875,"Streets Of Rage 3"],[3876,"Teenage Mutant Ninja Turtles: Shredder's Re-Revenge"],[3877,"ToeJam & Earl"],[3878,"ToeJam & Earl: Panic on Funkotron"],[3879,"The Revenge of Shinobi"],[3880,"The S Factor: Sonia and Silver"],[3881,"Toy Story"],[3882,"Ultimate Mortal Kombat 3"],[3883,"Viewpoint"],[3884,"World Heroes"],[3885,"Zombies Ate My Neighbors"],[3886,"007 Nightfire"],[3887,"Advance Wars"],[3888,"Advance Wars 2"],[3889,"Akumanor Gaiden"],[3890,"Alien Hominid"],[3891,"Apotris"],[3892,"Backyard Football"],[3893,"Balatro"],[3894,"Castlevania"],[3895,"Castlevania: Aria of Sorrow"],[3896,"Castlevania: Circle of the Moon"],[3897,"Castlevania: Harmony of Dissonance"],[3898,"Commander Keen 4"],[3899,"Commander Keen 5"],[3900,"Commander Keen 6"],[3901,"Crash Bandicoot"],[3902,"Crash Bandicoot 2"],[3903,"Crazy Taxi: Catch a Ride"],[3904,"Dig Dug"],[3905,"Donkey Kong"],[3906,"Donkey Kong 94"],[3907,"Doom 2"],[3908,"Dragon Ball Advanced Adventure"],[3909,"Dragon Ball GT- Transformation"],[3910,"Dragon Ball Z: Supersonic Warriors"],[3911,"Dragon Ball Z: the Legacy of Goku"],[3912,"Dragon Ball Z: The Legacy of Goku 1/2"],[3913,"Dragon Warrior Monsters"],[3914,"Earthbound 3"],[3915,"FIFA 07"],[3916,"FIFA 2000"],[3917,"Final Fantasy Legend 2"],[3918,"Fire Emblem"],[3919,"Fleur de Lis (video)"],[3920,"Game And Watch Collection"],[3921,"Game and Watch Gallery 3"],[3922,"Golden Sun"],[3923,"Golden Sun: The Lost Age"],[3924,"Goodboy Galaxy"],[3925,"Grand Theft Auto 2"],[3926,"Grand Theft Auto Advance"],[3927,"Grimace's Birthday"],[3928,"Halo Combat Devolved"],[3929,"Hajime No Ippo: the Fighting"],[3930,"Harry Potter and the Chamber of Secrets"],[3931,"Harry Potter and the Sorcerer's Stone"],[3932,"Harvest Moon"],[3933,"Harvest Moon 2"],[3934,"Hollow Knight Demake"],[3935,"Hollow Knight Silksong Demake"],[3936,"Kingdom Hearts: Chain of Memories"],[3937,"Kirby and the Amazing Mirror"],[3938,"Kirby's Dream Land"],[3939,"Kirby's Dream Land 2"],[3940,"Kirby Tilt N Tumble"],[3941,"Klonoa Heroes: The Legendary Star Medal"],[3942,"The Legend of Zelda: Link's Awakening"],[3943,"The Legend of Zelda: Link's Awakening (DX Version)"],[3944,"The Legend of Zelda: Oracle of Seasons"],[3945,"The Legend of Zelda: Oracle of Ages"],[3946,"Lego Star Wars"],[3947,"Lego Star Wars 2"],[3948,"Madden NFL"],[3949,"Mario & Luigi: Superstar Saga"],[3950,"Mario Kart Super Circuit"],[3951,"Mario Party Advanced"],[3952,"Mario Tennis"],[3953,"Mat Hoffman's Pro BMX 2"],[3954,"Max Payne"],[3955,"Meatboy"],[3956,"Mega Man 2"],[3957,"Mega Man 5"],[3958,"Mega Man: Battle Chip Challenge"],[3959,"Mega Man Battle Network"],[3960,"Mega Man Battle Network 2"],[3961,"Mega Man Battle Network 3: Blue Version"],[3962,"Mega Man Battle Network 3: White Version"],[3963,"Mega Man Battle Network 4: Blue Moon"],[3964,"Mega Man Battle Network 4: Red Sun"],[3965,"Mega Man Battle Network 5: Team Colonel"],[3966,"Mega Man Battle Network 5: Team Protoman"],[3967,"Mega Man Battle Network 6: Cybeast Falzar"],[3968,"Mega Man Battle Network 6: Cybeast Gregar"],[3969,"Mega Man Zero"],[3970,"Metal gear Solid"],[3971,"Metal Slug Advance"],[3972,"Metroid 2"],[3973,"Metroid Fusion"],[3974,"Metroid Zero Mission"],[3975,"Mortal Kombat Advance"],[3976,"Mr. Driller 2"],[3977,"Need for Speed: Carbon – Own the City"],[3978,"Need For Speed: Most Wanted"],[3979,"Need For Speed: Porsche Unleashed"],[3980,"Need For Speed: Underground"],[3981,"Need For Speed: Underground 2"],[3982,"NHL 2002"],[3983,"NHL Hitz 2003"],[3984,"Nicktoons: Freeze Frame Frenzy"],[3985,"One Piece"],[3986,"Opossum Country"],[3987,"Pac-man World"],[3988,"Pokémon Picross"],[3989,"Pokémon Volume 1 [Rom Show]"],[3990,"Pokémon Volume 2 [Rom Show]"],[3991,"Pokémon Volume 3 [Rom Show]"],[3992,"Pokémon Volume 4 [Rom Show]"],[3993,"Puyo Puyo Fever"],[3994,"Pyrotoad"],[3995,"Rhythm Heaven"],[3996,"Serious Sam Advance"],[3997,"Shantae"],[3998,"Shrek 2"],[3999,"Simpson's Road Rage"],[4000,"Sonic Advance"],[4001,"Sonic Advance 2"],[4002,"Sonic Advance 2 SP"],[4003,"Sonic Advance 3"],[4004,"Sonic Battle"],[4005,"Street Fighter Alpha 3"],[4006,"Super Mario Advance"],[4007,"Super Mario Advance 2"],[4008,"Super Mario Advance 3"],[4009,"Super Mario Advance 4"],[4010,"Super Mario Bros Deluxe"],[4011,"Super Mario Land"],[4012,"Super Mario Land 1 DX"],[4013,"Super Mario Land 2"],[4014,"Super Mario Land 2 DX"],[4015,"Super Monkey Ball jr"],[4016,"Super Street Fighter II Turbo Revival"],[4017,"Tetris"],[4018,"The Legend of Zelda: Minish Cap"],[4019,"The Pit"],[4020,"Tony Hawk's Pro Skater 2"],[4021,"Tony Hawk's Pro Skater 4"],[4022,"Tony Hawk's Underground"],[4023,"Wario Land 1: Super Mario Land 3"],[4024,"Wario Land 3"],[4025,"Wario Land 4"],[4026,"Wario Ware inc"],[4027,"Chip's Challenge"],[4028,"Scrapyard Dog"],[4029,"Dr. Robotnik's Mean Bean Machine"],[4030,"G. G. Shinobi"],[4031,"G. G. Shinobi 2: The Silent Fury"],[4032,"Golden Axe"],[4033,"Earthworm Jim"],[4034,"Sonic Blast"],[4035,"Sonic Chaos"],[4036,"Sonic Drift"],[4037,"Sonic Drift 2"],[4038,"Sonic Labyrinth"],[4039,"Sonic the Hedgehog"],[4040,"Sonic The Hedgehog 2"],[4041,"Sonic Triple Trouble"],[4042,"Tails Adventure"],[4043,"Tails Skypatrol"],[4044,"100 Rooms Of Enemies"],[4045,"Aladdin"],[4046,"Baby Kaizo World"],[4047,"Bonkers"],[4048,"Chrono Trigger"],[4049,"Contra III The Alien Wars"],[4050,"Donkey Kong Country"],[4051,"Donkey Kong Country 1 Competition"],[4052,"Donkey Kong Country 2"],[4053,"Donkey Kong Country 3"],[4054,"Earthbound"],[4055,"Earthworm Jim"],[4056,"Earthworm Jim 2"],[4057,"FIFA Road To World Cup 98"],[4058,"FIFA Soccer 96"],[4059,"FIFA Soccer 97"],[4060,"Final Fantasy Mystic Quest"],[4061,"Final Fantasy II"],[4062,"Final Fantasy VI"],[4063,"Final Fight 2"],[4064,"Final Fight 2 Plus"],[4065,"Final Fight 3"],[4066,"Final Fight 3 Plus"],[4067,"F-zero"],[4068,"F-Zero 2"],[4069,"Goof Troop"],[4070,"I hate you"],[4071,"John Madden Football '93"],[4072,"JUMP"],[4073,"Kaizo Mario World"],[4074,"Ken Griffey jr. Presents Major League Baseball"],[4075,"Killer Instinct"],[4076,"Kirby's Dream Land 3"],[4077,"Kirby Super Star"],[4078,"Lemmings"],[4079,"Madden Football"],[4080,"Madden NFL '94"],[4081,"Madden NFL '95"],[4082,"Madden NFL '96"],[4083,"Madden NFL '98"],[4084,"Mario is Missing Done Right"],[4085,"Mario Paint"],[4086,"Mario's Mystery Meat"],[4087,"Mickey Mania"],[4088,"Maui Mallard in Cold Shadow"],[4089,"Mega Man X"],[4090,"Mega Man X2"],[4091,"Mega Man X3"],[4092,"Mega Man 7"],[4093,"Mega Man and Bass"],[4094,"Mortal Kombat"],[4095,"Mortal Kombat 2"],[4096,"NBA Jam"],[4097,"NBA Jam: Tournament Edition"],[4098,"New Super Mario World 2: Around the World"],[4099,"Quickie World"],[4100,"Secret of Mana"],[4101,"Side Pocket"],[4102,"Sonic in Super Mario World"],[4103,"Sparkster"],[4104,"Star Fox"],[4105,"Star Fox SFX2 hack (better performance)"],[4106,"Star Fox 2"],[4107,"Street Fighter 2"],[4108,"Street Fighter 2 Turbo"],[4109,"Super Adventure Island"],[4110,"Super Bomberman"],[4111,"Super Bomberman 2"],[4112,"Super Bomberman 3"],[4113,"Super Bomberman 4"],[4114,"Super Bomberman 5"],[4115,"Super Castlevania IV"],[4116,"Super Diagonal mario 2"],[4117,"Super Mario All Stars"],[4118,"Super Mario Kart"],[4119,"Super Mario Rpg"],[4120,"Super Mario World"],[4121,"Super Mario World: A Plumber For All Seasons"],[4122,"Super Mario World 2 Yoshi's Island"],[4123,"Super Mario World the Secret of the 7 Golden Statues"],[4124,"Super Metroid"],[4125,"Super Noah's Ark 3D"],[4126,"Super Punch Out (EN)"],[4127,"Super Punch Out (JP)"],[4128,"Teenage Mutant Ninja Turtles: Turtles in Time"],[4129,"Tetris Attack"],[4130,"The Jungle Book"],[4131,"The Legend of Zelda a Link to the Past"],[4132,"What a Mario World!"],[4133,"Yoshi's Strange Quest"],[4134,"Sonic CD"],[4135,"Sonic CD Japanese"],[4136,"Sonic Megamix 4.0"],[4137,"Sonic Megamix 5.0a LEAKED"],[4138,"Alien vs. Predator"],[4139,"Cannon Fodder"],[4140,"Doom"],[4141,"Evolution-dino Dudes"],[4142,"Iron Soldier"],[4143,"NBA Jam: Tournament Edition"],[4144,"Rayman"],[4145,"Tempest 2000"],[4146,"Theme Park"],[4147,"Wolfenstein 3D"],[4148,"Sonic 3D Blast"],[4149,"Sonic Jam"],[4150,"Sonic R"],[4151,"Ace Combat 2"],[4152,"Ace Combat 3"],[4153,"Atari Collection 2"],[4154,"Backyard Soccer"],[4155,"Bomberman World"],[4156,"Bushido Blade"],[4157,"Castlevania: Symphony of the Night"],[4158,"Choro Q Wonderful"],[4159,"Colin Mcrae Rally"],[4160,"Crash Bandicoot"],[4161,"Crash Bandicoot 2: Cortex Strikes Back"],[4162,"Crash Bandicoot 3: Warped"],[4163,"Crash Bash"],[4164,"Crash Team Racing"],[4165,"Diablo"],[4166,"Doom"],[4167,"Doom (Alt Link)"],[4168,"Final Fantasy VII (disc one)"],[4169,"Final Fantasy VII (disc one) (Alt Link)"],[4170,"Final Fantasy VII (disc two)"],[4171,"Final Fantasy VII (disc three)"],[4172,"Final Fantasy IX"],[4173,"Final Fantasy Tactics"],[4174,"Grand Theft Auto"],[4175,"Grand Theft Auto (Alt Link)"],[4176,"Grand Theft Auto 2"],[4177,"Grand Theft Auto 2 (Alt Link)"],[4178,"Gran Turismo"],[4179,"Gran Turismo 2"],[4180,"Gunfighter: The Legend of Jesse James"],[4181,"Jojo's Bizarre Adventure"],[4182,"Klonoa: Door to Phantomile"],[4183,"Klonoa: Door to Phantomile (CHD Version)"],[4184,"LSD: Dream Emulator"],[4185,"Marvel VS Capcom: Clash of Superheroes"],[4186,"Marvel Super Heroes vs Street Fighter"],[4187,"MediEvil"],[4188,"Mega Man 8"],[4189,"Mega Man Legends"],[4190,"Mega Man Legends 2"],[4191,"Mega Man X4"],[4192,"Mega Man X5"],[4193,"Mega Man X6"],[4194,"Medal of Honor"],[4195,"Metal Gear Solid"],[4196,"Mortal Kombat 4"],[4197,"Mortal Kombat Trilogy"],[4198,"Mr. Driller"],[4199,"NBA Fastbreak 98"],[4200,"NBA Hang Time"],[4201,"NBA in the Zone"],[4202,"NBA Live 2000"],[4203,"NBA Live 2001"],[4204,"NBA Live 2003"],[4205,"Need for Speed"],[4206,"Need for Speed 2"],[4207,"Need for Speed 3"],[4208,"Need for Speed: High Stakes"],[4209,"NFL Blitz"],[4210,"NFL Blitz 2000"],[4211,"NFL Blitz 2001"],[4212,"NHL 98"],[4213,"Pac-man World"],[4214,"Parappa the Rapper"],[4215,"Parappa the Rapper (Alt Link)"],[4216,"Pepsiman"],[4217,"Pepsiman (Alt Link)"],[4218,"Persona"],[4219,"Persona (Alt Link)"],[4220,"Persona 2"],[4221,"Persona 2 (Alt Link)"],[4222,"Powerslave"],[4223,"Quake II"],[4224,"Resident Evil"],[4225,"Resident Evil 2 (Disk 1)"],[4226,"Resident Evil 2 (Disk 2)"],[4227,"Resident Evil 3"],[4228,"Silent Hill"],[4229,"Silent Hill (Alt Link)"],[4230,"Spiderman"],[4231,"Super Puzzle Fighter II Turbo"],[4232,"Super Puzzle Fighter II Turbo (Alt Link)"],[4233,"Street Fighter Alpha 3"],[4234,"Street Fighter EX Plus Alpha"],[4235,"Street Fighter EX 2 Plus"],[4236,"Tekken 2"],[4237,"Tekken 3"],[4238,"Tom Clancy's Rainbow Six"],[4239,"Tom Clancy's Rainbow Six (Alt Link)"],[4240,"Theme Park"],[4241,"Tony Hawk's Pro Skater"],[4242,"Twisted Metal"],[4243,"Twisted Metal 2"],[4244,"Um Jammer Lammy"],[4245,"Vib-Ribbon"],[4246,"Wipeout 2097"],[4247,"Wipeout 2097 (Alt Link)"],[4248,"WWF Smackdown 2"],[4249,"Mario's Tennis"],[4250,"Animal Forest"],[4251,"B3313 (version 0.7)"],[4252,"B3313 Unabandoned A2"],[4253,"Banjo-Kazooie"],[4254,"Banjo-Tooie"],[4255,"Bomberman 64"],[4256,"Bomberman Hero"],[4257,"Buck Bumble"],[4258,"Conker's Bad Fur Day"],[4259,"Danganronpa 64"],[4260,"Diddy Kong Racing"],[4261,"Donkey kong 64"],[4262,"Doom 64"],[4263,"Doki Doki Literature Club 64"],[4264,"Excitebike 64"],[4265,"FIFA 99"],[4266,"FIFA World Cup 98"],[4267,"F-zero X"],[4268,"Glover"],[4269,"Goldeneye 007"],[4270,"Harvest Moon 64"],[4271,"Hydro Thunder"],[4272,"Jet Force Gemini"],[4273,"Kirby 64"],[4274,"Kirby 64: The Crystal Shards"],[4275,"Lego Racers"],[4276,"Madden Football 64"],[4277,"Madden NFL 2000"],[4278,"Madden NFL 2001"],[4279,"Madden NFL 2002"],[4280,"Madden NFL '99"],[4281,"Mario Builder 64"],[4282,"Mario Golf"],[4283,"Mario Kart 64"],[4284,"Mario Kart 64: Amped Up"],[4285,"Mario Odyssey"],[4286,"Mario Party"],[4287,"Mario Party 2"],[4288,"Mario Party 3"],[4289,"Mario Tennis"],[4290,"Mortal Kombat 4"],[4291,"Mortal Kombat Mythologies Subzero"],[4292,"Midway's Greatest Hits"],[4293,"Natsuki (DDLC) 64"],[4294,"NBA Hangtime"],[4295,"NBA Live 2000"],[4296,"NFL Blitz"],[4297,"NFL Blitz 2000"],[4298,"NFL Blitz Special"],[4299,"Paper Mario"],[4300,"Paper Mario All Bosses In 1 Battle"],[4301,"Paper Mario Black Pit"],[4302,"Paper Mario: Dark Star Edition"],[4303,"Paper Mario Practice Hack"],[4304,"Paper Mario Pro Mode"],[4305,"Paper Mario-TTYD Edition"],[4306,"Perfect Dark"],[4307,"Pilotwings 64"],[4308,"Pokémon Snap"],[4309,"Pokémon Stadium"],[4310,"Pokémon Stadium 2"],[4311,"Portal"],[4312,"Quake 64"],[4313,"Resident Evil 2"],[4314,"SimCity 64"],[4315,"Smash Remix"],[4316,"Smash Remix 2.0.1"],[4317,"Somari 64"],[4318,"Sonic in Super Mario 64"],[4319,"Sonic in Super Mario 64 Plus"],[4320,"Sonic Mushroom Blast"],[4321,"South Park"],[4322,"Star Fox 64"],[4323,"Super Mario 64"],[4324,"Super Mario 64 Land"],[4325,"Super Mario 64 Last Impact"],[4326,"Super Mario 64: Liminal Dream"],[4327,"Super Mario 64: Ocarina of Time"],[4328,"Super Mario 64: Sapphire"],[4329,"Super Mario 64: The Green Stars"],[4330,"Super Mario 64 The Hidden Stars"],[4331,"Super Mario 64 Sunshine"],[4332,"Super Mario 64 Y Scaled"],[4333,"Super Mario 74"],[4334,"Super Mario Star Road"],[4335,"Super Mario Star Road Retooled"],[4336,"Super Smash bros"],[4337,"Telocation"],[4338,"Tetris 64"],[4339,"The Legend of Zelda Majora's Mask"],[4340,"The Legend of Zelda Majora's Mask (US)"],[4341,"The Legend of Zelda Majora's Mask Redux"],[4342,"The Legend of Zelda Ocarina of Time"],[4343,"The Legend of Zelda Ocarina of Time Master Quest"],[4344,"Triple Play 2000"],[4345,"Turok: Dinosaur Hunter"],[4346,"Virtual Pro Wrestling 2"],[4347,"Wave Race 64"],[4348,"Waluigi's Taco Stand"],[4349,"WWF Attitude"],[4350,"WWF No Mercy"],[4351,"Zelda Indigo: Chapter 2"],[4352,"Celia's Stupid ROM Hack"],[4353,"FRLG.ips"],[4354,"Oops All Eevees"],[4355,"Pokémon A Walk In The Forest Version"],[4356,"Pokémon Acko's Mach Bike Challenge"],[4357,"Pokémon Aesthetic Red"],[4358,"Pokémon All In"],[4359,"Pokémon Ambrosia"],[4360,"Pokémon Amnesia"],[4361,"Pokémon Arceus Legend"],[4362,"Pokémon Battle Factory"],[4363,"Pokémon Bill's Secret Garden"],[4364,"Pokémon Blue Version"],[4365,"Pokéclassic"],[4366,"Pokémon Clover"],[4367,"Pokémon Crown"],[4368,"Pokémon Crystal"],[4369,"Pokémon Crystal Advance Redux"],[4370,"Pokémon Crystal Clear"],[4371,"Pokémon Crystal Inheritance"],[4372,"Pokémon Crystal Legacy"],[4373,"Pokémon Dreamstone"],[4374,"Pokémon Elite Redux"],[4375,"Pokémon Elysium A"],[4376,"Pokémon Elysium B"],[4377,"Pokémon Emerald"],[4378,"Pokémon Emerald 47"],[4379,"Pokémon Emerald Battle Frontier"],[4380,"Pokémon Emerald Crest"],[4381,"Pokémon Emerald Enhanced"],[4382,"Pokémon Emerald Extended Cut"],[4383,"Pokémon Emerald Flow"],[4384,"Pokémon Emerald Horizons"],[4385,"Pokémon Emerald Imperium"],[4386,"Pokémon Emerald Kaizo"],[4387,"Pokémon Emerald Legacy"],[4388,"Pokémon Emerald Mini"],[4389,"Pokémon Emerald Randomized"],[4390,"Pokémon Emerald Random Team of 6"],[4391,"Pokémon Emerald Rogue"],[4392,"Pokémon Emerald Rogue EX"],[4393,"Pokémon Emerald Seaglass"],[4394,"Pokémon Emerald Xtreme"],[4395,"Pokémon Emerald Z"],[4396,"Pokémon Energized Emerald"],[4397,"Pokémon Evolved"],[4398,"Pokémon Exceeded"],[4399,"Pokémon Exceeded Emerald"],[4400,"Pokémon FireEmerald"],[4401,"Pokémon FireRed"],[4402,"Pokémon FireRed LeafGreen Plus"],[4403,"Pokémon FireRed Randomized"],[4404,"Pokémon FireRed Rocket Edition"],[4405,"Pokémon Fire Gold"],[4406,"Pokémon Fusion 3"],[4407,"Pokémon Flora Sky"],[4408,"Pokémon Fused dimension"],[4409,"Pokémon Gaia"],[4410,"Pokémon Giga Red"],[4411,"Pokémon Glazed"],[4412,"Pokémon Gold"],[4413,"Pokémon GS Chronicles"],[4414,"Pokémon Heart & Soul"],[4415,"Pokémon Hoenn's Last Wish"],[4416,"Pokémon Inclement Emerald"],[4417,"Pokémon Inkwell Version"],[4418,"Pokémon Kaizo Iron Fire Red"],[4419,"Pokémon Lazarus"],[4420,"Pokémon Leaf Green"],[4421,"Pokémon Let's Go, Eevee!"],[4422,"Pokémon Let's Go, Pikachu!"],[4423,"Pokémon Light Platinum"],[4424,"Pokémon Lime"],[4425,"Pokémon Liquid Crystal"],[4426,"Pokémon Low Budget Crystal"],[4427,"Pokémon Lucid"],[4428,"Pokémon Mega Moemon"],[4429,"Pokémon Modern Emerald"],[4430,"Pokémon Moemon Emerald Vanilla+ (v1.1.0)"],[4431,"Pokémon Moon Emerald"],[4432,"Pokémon Moon Emerald Extreme Randomized"],[4433,"Pokémon Moon Galaxy"],[4434,"Pokémon Mystery Dungeon"],[4435,"Pokémon Nameless"],[4436,"Pokémon Odyssey"],[4437,"Pokémon Odyssey 2"],[4438,"Pokémon Peach"],[4439,"Pokémon Perfect Fire Red"],[4440,"Pokémon Perfect Emerald"],[4441,"Pokémon Pinball"],[4442,"Pokémon Pisces"],[4443,"Pokémon Pit of 100 trials (generation 9)"],[4444,"Pokémon Polished Crystal"],[4445,"Pokémon Pure Blue"],[4446,"Pokémon Pure Green"],[4447,"Pokémon Pure Red"],[4448,"Pokémon Quetzal"],[4449,"Pokémon Radical Red"],[4450,"Pokémon RBY Nova"],[4451,"Pokémon Recharged Pink"],[4452,"Pokémon Recharged Yellow"],[4453,"Pokémon Record Keepers"],[4454,"Pokémon Red Version"],[4455,"Pokémon Remnants of Wah"],[4456,"Pokémon Retro Platinum"],[4457,"Pokémon Roaring Red"],[4458,"Pokémon Rose Gold"],[4459,"Pokémon ROWE"],[4460,"Pokémon Ruby"],[4461,"Pokémon Run and Bun"],[4462,"Pokémon Saiph"],[4463,"Pokémon Saiph 2"],[4464,"Pokémon Sapphire"],[4465,"Pokémon Scarlet Violet"],[4466,"Pokémon Scorched Silver"],[4467,"Pokémon Scrambled Scarlet"],[4468,"Pokémon Shiny Gold Sigma"],[4469,"Pokémon Silver"],[4470,"Pokémon Snowy White"],[4471,"Pokémon Sonicmon"],[4472,"Pokémon Sors"],[4473,"Pokémon Sors 2"],[4474,"Pokémon Sovereign of the Skies"],[4475,"Pokémon Stunning Steel"],[4476,"Pokémon SunSky"],[4477,"Pokémon Super Luigi Green"],[4478,"Pokémon Super Mario Red"],[4479,"Pokémon Sword and Shield Ultimate Plus"],[4480,"Pokémon Team Rocket Edition"],[4481,"Pokémon the Last Fire Red"],[4482,"Pokémon Theta Emerald EX"],[4483,"Pokémon Too Many Types"],[4484,"Pokémon Too Many Types 2"],[4485,"Pokémon Tourmaline Version"],[4486,"Pokémon Trade & Stache (v1.1)"],[4487,"Pokémon Trading Card Game"],[4488,"Pokémon Trading Card Game 2"],[4489,"Pokémon TWO (v1.1)"],[4490,"Pokémon Unown King"],[4491,"Pokémon Ultimate Fusion"],[4492,"Pokémon Ultra Violet"],[4493,"Pokémon Unbound"],[4494,"Pokémon Unova Emerald"],[4495,"Pokémon Vega"],[4496,"Pokémon Voyager"],[4497,"Pokémon Wild Indigo"],[4498,"Pokémon Yellow Legacy"],[4499,"Pokémon Yellow Version"],[4500,"Super Mariomon"],[4501,"Fatal Fury: First Contact"],[4502,"Metal Slug: 1st Mission"],[4503,"Metal Slug: 2nd Mission"],[4504,"Sonic the Hedgehog: Pocket Adventure"],[4505,"Final Fantasy 2"],[4506,"Klonoa: Moonlight Museum"],[4507,"Megaman and Bass: Challenger from the Future"],[4508,"Megaman Battle Network WS"],[4509,"Ace Attorney Investigations: Miles Edgeworth"],[4510,"Advance Wars Dual Strike"],[4511,"Animal Crossing-Wild World"],[4512,"Ages Of Empire"],[4513,"Backyard Baseball '09"],[4514,"Backyard Baseball '10"],[4515,"Bejeweled Twist"],[4516,"Ben 10: Alien Force"],[4517,"Ben 10: Galactic Racing"],[4518,"Ben 10: Omniverse"],[4519,"Ben 10: Protector of Earth"],[4520,"Ben 10: Ultimate Alien"],[4521,"Breath of the Wild DS"],[4522,"Call of Duty: Black Ops"],[4523,"Call of Duty: Modern Warfare 3 – Defiance"],[4524,"Call of Duty: Modern Warfare – Mobilized"],[4525,"Call of Duty: World at War"],[4526,"Call of Duty 4: Modern Warfare"],[4527,"Carnival Games"],[4528,"Castlevania Dawn of Sorrow"],[4529,"Castlevania Order of Ecclesia"],[4530,"Castlevania Portrait of Ruin"],[4531,"Cooking Mama"],[4532,"Cooking Mama 2"],[4533,"Cooking Mama 3"],[4534,"Cory In The House"],[4535,"Counter Strike DS"],[4536,"Crazy Frog Racer"],[4537,"CTGP Nitro"],[4538,"De Blob 2"],[4539,"Dementium: The Ward"],[4540,"Dragon Ball Origins"],[4541,"Dragon Ball Origins 2"],[4542,"Dragon Ball Z: Attack Of the Saiyans"],[4543,"Dragon Ball Z: Supersonic Warriors 2"],[4544,"Dragon Quest V"],[4545,"Dragon Quest IX"],[4546,"Drawn To Life"],[4547,"Drawn To Life: The Next Chapter"],[4548,"Etrian Odyssey"],[4549,"FIFA 10"],[4550,"FIFA 11"],[4551,"FIFA Soccer 06"],[4552,"FIFA Street 2"],[4553,"Final Fantasy III"],[4554,"Ghost Trick: Phantom Detective"],[4555,"Golden Sun: Dark Dawn"],[4556,"Grand Theft Auto: Chinatown Wars"],[4557,"Incredibles Rise of the Underminer"],[4558,"Kimmunicator"],[4559,"Kingdom Hearts: 358-2 Days"],[4560,"Kingdom Hearts Re-Coded"],[4561,"Kingdom Hearts Re-Coded (Alt Link)"],[4562,"Kirby Canvas Curse"],[4563,"Kirby Mass Attack"],[4564,"Kirby Squeak Squad"],[4565,"Kirby Super Star Ultra"],[4566,"The Legend of Zelda: Spirit Tracks"],[4567,"Legend of Zelda: Phantom Hourglass"],[4568,"Lego Batman: the Videogame"],[4569,"Lego Batman 2: DC Super Heroes"],[4570,"Lego Indiana Jones: the Original Adventures"],[4571,"Lego Indiana Jones 2: the Adventure Continues"],[4572,"Lego Marvel Super Heroes"],[4573,"Lego Ninjago: the Videogame"],[4574,"Lego Star Wars: the Complete Saga"],[4575,"Madden NFL 09"],[4576,"Mario & Luigi: Bowser's Inside Story"],[4577,"Mario & Luigi: Partners In Time"],[4578,"Mario Kart DS"],[4579,"Mario Party DS"],[4580,"Mega Man Star Force: Dragon"],[4581,"Mega Man Star Force: Leo"],[4582,"Mega Man Star Force: Pegasus"],[4583,"Mega Man Star Force 2: Zerker x Ninja"],[4584,"Mega Man Star Force 2: Zerker x Saurian"],[4585,"Mega Man Star Force 3: Black Ace"],[4586,"Mega Man Star Force 3: Red Joker"],[4587,"Mega Man ZX"],[4588,"Metroid Prime Hunters"],[4589,"N+"],[4590,"Need for Speed: Carbon"],[4591,"Need for Speed: Nitro"],[4592,"New Super Mario Bros"],[4593,"New Super Mario Bros U DS"],[4594,"New Super Mario Bros Wii DS"],[4595,"Newer Super Mario Bros DS"],[4596,"Nintendogs: Lab & Friends"],[4597,"Pac-man World 3"],[4598,"Phoenix wright: Ace Attorney"],[4599,"Phoenix Wright: Ace Attorney – Justice for All"],[4600,"Phoenix Wright: Ace Attorney – Trials and Tribulations"],[4601,"Plants vs Zombies"],[4602,"Pokémon Black Version"],[4603,"Pokémon Black Version (Alt Link)"],[4604,"Pokémon Black Version (Experimental)"],[4605,"Pokémon Black Version 2"],[4606,"Pokémon Black Version 2 (Alt Link)"],[4607,"Pokémon Black Version 2 (Experimental)"],[4608,"Pokémon Blaze Black 2 Redux"],[4609,"Pokémon Diamond Version"],[4610,"Pokémon Diamond Version (Experimental)"],[4611,"Pokémon Golden Shield"],[4612,"Pokémon HeartGold Generations"],[4613,"Pokémon HeartGold Version"],[4614,"Pokémon HeartGold Version (Experimental)"],[4615,"Pokémon Jet Black"],[4616,"Pokémon Mirror Gold"],[4617,"Pokémon Mystery Dungeon: Explorers of Sky"],[4618,"Pokémon Pearl Version"],[4619,"Pokémon Pearl Version (Experimental)"],[4620,"Pokémon Platinum Version"],[4621,"Pokémon Platinum Version Randomized"],[4622,"Pokémon Renegade Platinum"],[4623,"Pokémon SoulSilver Version"],[4624,"Pokémon SoulSilver Version (Experimental)"],[4625,"Pokémon Volt White 2 Redux"],[4626,"Pokémon White Version"],[4627,"Pokémon White Version (Experimental)"],[4628,"Pokémon White Version 2"],[4629,"Pokémon White Version 2 (Alt Link)"],[4630,"Pokémon White Version 2 (Experimental)"],[4631,"Professor Layton and the Curious Village"],[4632,"Rhythm Heaven"],[4633,"Ridge Racer"],[4634,"Scribblenauts"],[4635,"Shin Megami Tensei Devil Survivor"],[4636,"Shin Megami Tensei Strange Journey"],[4637,"Skate It"],[4638,"Solatorobo: Red the Hunter"],[4639,"Sonic Classic Collection"],[4640,"Sonic Colors"],[4641,"Sonic Rush"],[4642,"Sonic Rush Adventure"],[4643,"SpongeBob SquarePants: Plankton's Robotic Revenge"],[4644,"Style Savvy"],[4645,"Super Mario 64 DS"],[4646,"Super Mario Galaxy DS"],[4647,"Super Scribblenauts"],[4648,"Taiko No Tatsujin"],[4649,"Tomodachi Collection"],[4650,"Ultimate Mortal Kombat"],[4651,"Warioware D.I.Y"],[4652,"Warioware Touched"],[4653,"WWE Smackdown vs RAW 2009"],[4654,"7 Grand Dad"],[4655,"115 in 1"],[4656,"Action 52 (Genesis)"],[4657,"Action 52 (NES)"],[4658,"Final Fantasy 7"],[4659,"Kart Fighter"],[4660,"Pokémon Yellow"],[4661,"Somari"],[4662,"Super Mario World (NES)"]];
+  var ACH = [{"id":"first-game","name":"First Game","rarity":"common"},{"id":"games-10","name":"Getting Started","rarity":"common"},{"id":"games-50","name":"Regular Player","rarity":"rare"},{"id":"games-100","name":"Century","rarity":"epic"},{"id":"games-500","name":"Half a Thousand","rarity":"legendary"},{"id":"games-1000","name":"Game Veteran","rarity":"nolife"},{"id":"fav-1","name":"First Favorite","rarity":"common"},{"id":"fav-5","name":"Starred","rarity":"common"},{"id":"fav-20","name":"Collector","rarity":"rare"},{"id":"fav-100","name":"Hoarder","rarity":"epic"},{"id":"theme-changed","name":"Fresh Look","rarity":"common"},{"id":"background-changed","name":"New Scenery","rarity":"common"},{"id":"active-5m","name":"Just Visiting","rarity":"common"},{"id":"active-20m","name":"Settling In","rarity":"common"},{"id":"active-1h","name":"Hooked","rarity":"rare"},{"id":"active-5h","name":"Part-Timer","rarity":"rare"},{"id":"active-12h","name":"Full Shift","rarity":"epic"},{"id":"active-24h","name":"A Whole Day","rarity":"epic"},{"id":"active-48h","name":"Two Days Gone","rarity":"legendary"},{"id":"active-100h","name":"Hundred Hours","rarity":"legendary"},{"id":"active-1000h","name":"HOW DO YOU EVEN DO THIS?!","rarity":"nolife"},{"id":"session-10m","name":"Warmed Up","rarity":"common"},{"id":"session-30m","name":"In the Zone","rarity":"rare"},{"id":"session-1h","name":"Hour of Power","rarity":"rare"},{"id":"session-3h","name":"Deep Dive","rarity":"epic"},{"id":"session-5h","name":"No Breaks","rarity":"epic"},{"id":"session-10h","name":"Iron Thumbs","rarity":"legendary"},{"id":"session-24h","name":"Touch grass","rarity":"nolife"},{"id":"streak-2","name":"Back Again","rarity":"common"},{"id":"streak-5","name":"On a Roll","rarity":"common"},{"id":"streak-7","name":"Week Warrior","rarity":"rare"},{"id":"streak-12","name":"Dozen Days","rarity":"rare"},{"id":"streak-20","name":"Habit Formed","rarity":"epic"},{"id":"streak-30","name":"Monthly Regular","rarity":"epic"},{"id":"streak-40","name":"Forty Days","rarity":"epic"},{"id":"streak-50","name":"Half Century","rarity":"legendary"},{"id":"streak-75","name":"Seventy-Five Alive","rarity":"legendary"},{"id":"streak-100","name":"Hundred Days","rarity":"legendary"},{"id":"streak-200","name":"Two Hundred Days","rarity":"nolife"},{"id":"streak-365","name":"A Full Year","rarity":"nolife"},{"id":"organized","name":"Organized","rarity":"common"},{"id":"curator","name":"Curator","rarity":"rare"},{"id":"librarian","name":"Librarian","rarity":"epic"},{"id":"explorer","name":"Explorer","rarity":"rare"},{"id":"retro-fan","name":"Retro Fan","rarity":"common"},{"id":"flashback","name":"Flashback","rarity":"common"},{"id":"backed-up","name":"Backed Up","rarity":"common"},{"id":"night-owl","name":"Night Owl","rarity":"rare"},{"id":"full-day","name":"Full Day","rarity":"epic"},{"id":"cps-10","name":"Okay pretty fast","rarity":"secret"},{"id":"cps-20","name":"OKAY VERY FAST","rarity":"secret"},{"id":"cps-50","name":"Wow nice autoclicker","rarity":"secret"},{"id":"rt-300","name":"Quick Draw","rarity":"secret"},{"id":"rt-200","name":"Snap Reaction","rarity":"secret"},{"id":"rt-100","name":"Faster Than Thought","rarity":"secret"},{"id":"rt-50","name":"Impossible?","rarity":"secret"},{"id":"nat-20","name":"Natural 20","rarity":"secret"},{"id":"boring","name":"Boringgg","rarity":"secret"},{"id":"rickroll","name":"GET RICKROLLED!!!!","rarity":"secret"},{"id":"konami","name":"Old School","rarity":"secret"}];
+  var TITLES = {}; GAMES.forEach(function (g) { TITLES[g[0]] = g[1]; });
   var RARITY = { common: 'Common', rare: 'Rare', epic: 'Epic', legendary: 'Legendary', nolife: 'No-Life', secret: 'SECRET' };
+  var CLASSIC = 'Classic', TROLLS = 'Trolls (they undo themselves)';
+  var ACTIONS = [
+    { v: 'rickroll', t: 'Rickroll', g: CLASSIC }, { v: 'countdown_rickroll', t: 'Countdown, then rickroll', g: CLASSIC },
+    { v: 'message', t: 'Show a message', g: CLASSIC }, { v: 'close_game', t: 'Close the open game', g: CLASSIC },
+    { v: 'close_tab', t: 'Close the site tab', g: CLASSIC }, { v: 'reload', t: 'Reload the site', g: CLASSIC },
+    { v: 'give_all', t: 'Give ALL achievements', g: CLASSIC }, { v: 'give_one', t: 'Give the selected achievement', g: CLASSIC },
+    { v: 'confetti', t: 'Confetti (5 s)', g: TROLLS }, { v: 'emoji_rain', t: 'Emoji rain (11 s)', g: TROLLS },
+    { v: 'flip', t: 'Flip the page upside down (15 s)', g: TROLLS }, { v: 'invert', t: 'Invert the colors (15 s)', g: TROLLS },
+    { v: 'rainbow', t: 'Slow rainbow colors (20 s)', g: TROLLS }, { v: 'shake', t: 'Wobble the page (3 s)', g: TROLLS },
+    { v: 'comic', t: 'Comic Sans everywhere (30 s)', g: TROLLS }, { v: 'banana', t: 'Banana mouse cursor (30 s)', g: TROLLS },
+    { v: 'random_game', t: 'Open a random game', g: TROLLS }, { v: 'stop_effects', t: 'Stop all effects now', g: TROLLS }
+  ];
+  var KINDS = {
+    game_of_the_hour: { label: 'Game of the Hour', min: 1, max: 1, title: false, descr: false, mins: [[15, '15 minutes'], [30, '30 minutes'], [60, '1 hour'], [90, '90 minutes'], [120, '2 hours']] },
+    featured_collection: { label: 'Featured collection', min: 2, max: 12, title: true, descr: false, mins: [[60, '1 hour'], [180, '3 hours'], [360, '6 hours'], [720, '12 hours'], [1440, '1 day'], [2880, '2 days'], [4320, '3 days']] },
+    weekend_challenge: { label: 'Weekend challenge', min: 0, max: 1, title: true, descr: true, mins: [[180, '3 hours'], [720, '12 hours'], [1440, '1 day'], [2880, '2 days'], [4320, '3 days']] }
+  };
 
   var $ = function (id) { return document.getElementById(id); };
-  var state = { key: '', base: '', devices: [], selected: {}, timer: 0 };
+  var S = { key: '', base: '', me: null, now: 0, nowAt: 0, page: '', current: null, timer: 0, prefillDevice: '' };
 
-  // Everything that came from visitors is shown with textContent only, never as HTML.
-  function el(tag, text, cls) { var e = document.createElement(tag); if (text !== undefined) e.textContent = String(text); if (cls) e.className = cls; return e; }
+  // Small helper that builds elements. Text is only ever set with textContent (never as HTML),
+  // because a lot of what is shown here (browser names, game names) came from visitors.
+  function h(tag, attrs, kids) {
+    var e = document.createElement(tag);
+    attrs = attrs || {};
+    Object.keys(attrs).forEach(function (k) {
+      var v = attrs[k];
+      if (k === 'text') e.textContent = String(v);
+      else if (k === 'class') e.className = v;
+      else if (k === 'style') e.style.cssText = typeof v === 'string' ? v : v.cssText;
+      else e[k] = v;
+    });
+    (kids || []).forEach(function (c) {
+      if (c === null || c === undefined || c === false) return;
+      e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+    });
+    return e;
+  }
+  var card = function (title, kids, owner) { return h('div', { class: 'card' + (owner ? ' owner' : '') }, [title ? h('h2', { text: title }) : null].concat(kids)); };
+  var muted = function (t) { return h('div', { class: 'muted', text: t }); };
+
+  function token() { try { return localStorage.getItem('secretv4-voter') || ''; } catch (e) { return ''; } }
 
   function api(path, body) {
-    var payload = { key: state.key };
+    var payload = { key: S.key, v: token() };
     for (var k in body) payload[k] = body[k];
-    return fetch(state.base + path, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) })
+    return fetch(S.base + path, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) })
       .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok || j.error) throw new Error(j.error || ('Error ' + r.status)); return j; }); });
   }
 
@@ -148,101 +159,512 @@
     sec = Math.max(0, Math.floor(sec || 0));
     if (sec < 60) return sec + 's';
     if (sec < 3600) return Math.floor(sec / 60) + ' min';
-    return (sec / 3600).toFixed(1).replace(/\.0$/, '') + ' hr';
+    if (sec < 86400) return (sec / 3600).toFixed(1).replace(/\.0$/, '') + ' hr';
+    return (sec / 86400).toFixed(1).replace(/\.0$/, '') + ' days';
   }
   function ago(sec) { return sec < 5 ? 'just now' : dur(sec) + ' ago'; }
+  function serverNow() { return S.now + Math.floor((Date.now() - S.nowAt) / 1000); }
+  function when(t) { return new Date(t * 1000).toLocaleString(); }
+  function title(id) { return TITLES[id] ? TITLES[id] + ' (#' + id + ')' : 'game #' + id; }
+  function can(cap) { return !!S.me && S.me.caps.indexOf(cap) >= 0; }
+  function isOwner() { return !!S.me && S.me.role === 'owner'; }
+  function toast(el, msg, bad) { el.textContent = msg; el.style.color = bad ? 'var(--bad)' : 'var(--ok)'; }
 
-  function log(text) {
-    var d = el('div', new Date().toLocaleTimeString() + '  ' + text);
-    var box = $('log'); box.insertBefore(d, box.firstChild);
+  // ---- a search box that finds games by name ----
+  function gamePicker(onPick, label) {
+    var input = h('input', { placeholder: 'Type a game name...' });
+    var out = h('div', { class: 'results', hidden: true });
+    input.oninput = function () {
+      var q = input.value.trim().toLowerCase();
+      out.textContent = '';
+      if (!q) { out.hidden = true; return; }
+      var words = q.split(/\s+/);
+      var found = GAMES.filter(function (g) { var t = g[1].toLowerCase(); return words.every(function (w) { return t.indexOf(w) >= 0; }); }).slice(0, 20);
+      out.hidden = found.length === 0;
+      found.forEach(function (g) {
+        out.appendChild(h('button', { text: g[1] + '  (#' + g[0] + ')', onclick: function () { onPick(g[0]); input.value = ''; out.textContent = ''; out.hidden = true; } }));
+      });
+    };
+    return h('div', { class: 'picker' }, [h('label', { text: label || 'Find a game' }), input, out]);
   }
 
-  function name(d) { return d.label || ('Device ' + d.id.slice(0, 6)); }
+  // =====================================================================
+  //  PAGES
+  // =====================================================================
+  var PAGES = [
+    { id: 'hub', label: 'Staff hub', group: 'staff', ok: function () { return can('team'); }, build: pageHub },
+    { id: 'stats', label: 'Live stats', group: 'staff', ok: function () { return can('stats'); }, build: pageStats },
+    { id: 'picks', label: 'Staff Picks', group: 'staff', ok: function () { return can('picks'); }, build: pagePicks },
+    { id: 'events', label: 'Events', group: 'staff', ok: function () { return can('events'); }, build: pageEvents },
+    { id: 'announce', label: 'Announcements', group: 'staff', ok: function () { return can('send') && S.me.allowed.indexOf('announce') >= 0 && S.me.role !== 'helper'; }, build: pageAnnounce },
+    { id: 'reports', label: 'Broken games', group: 'staff', ok: function () { return can('reports'); }, build: pageReports },
+    { id: 'devices', label: 'Devices & actions', group: 'owner', ok: function () { return can('devices'); }, build: pageDevices },
+    { id: 'helpers', label: 'Helpers', group: 'owner', ok: function () { return isOwner(); }, build: pageHelpers },
+    { id: 'admins', label: 'Admins', group: 'owner', ok: function () { return isOwner(); }, build: pageAdmins },
+    { id: 'log', label: 'Activity log', group: 'owner', ok: function () { return isOwner(); }, build: pageLog }
+  ];
+  var TOOL_INFO = {
+    stats: 'See how many people are online and which games are popular.',
+    picks: 'Add or remove games in the Staff Picks tab that every visitor can see.',
+    events: 'Start or end Game of the Hour, collections and weekend challenges.',
+    announce: 'Send a short message that pops up in the corner for everyone online.',
+    reports: 'Flag a game that is broken so the owner can look at it.',
+    devices: 'See every device online, name them, and send pranks.',
+    helpers: 'Make temporary codes for friends (messages, rickrolls and visual gags only).',
+    admins: 'Give a browser admin access, see who has it, and remove it.',
+    log: 'Everything the staff have done: who, what and when.'
+  };
 
-  function render() {
-    var showOff = $('showOff').checked, now = state.now || Math.floor(Date.now() / 1000);
-    var list = state.devices.filter(function (d) { return d.online || showOff || d.label; })
-      .sort(function (a, b) { return (b.online - a.online) || (b.seen - a.seen); });
-    var onlineCount = state.devices.filter(function (d) { return d.online; }).length;
-    $('onlineCount').textContent = onlineCount;
-    $('empty').hidden = list.length > 0;
-    var tbody = $('rows'); tbody.textContent = '';
-    list.forEach(function (d) {
-      var tr = el('tr', undefined, d.online ? '' : 'off');
-      var c0 = el('td'); var cb = document.createElement('input'); cb.type = 'checkbox'; cb.style.width = 'auto';
-      cb.checked = !!state.selected[d.id]; cb.disabled = !d.online;
-      cb.onchange = function () { if (cb.checked) state.selected[d.id] = true; else delete state.selected[d.id]; counts(); };
-      c0.appendChild(cb); tr.appendChild(c0);
-      var c1 = el('td'); var dot = el('span', '', 'dot' + (d.online ? ' on' : '')); c1.appendChild(dot); c1.appendChild(document.createTextNode(name(d)));
-      var rn = el('button', d.label ? 'rename' : 'name it', 'link'); rn.onclick = function () {
-        var n = prompt('Name for this device (blank to clear):', d.label || ''); if (n === null) return;
-        api('/admin/label', { device: d.id, name: n }).then(load).catch(function (e) { log('Rename failed: ' + e.message); });
-      };
-      c1.appendChild(rn);
-      if (d.online && now - d.first < 300) { var nw = el('span', 'NEW', 'link'); nw.style.color = 'var(--ok)'; nw.style.fontWeight = '700'; c1.appendChild(nw); }
-      tr.appendChild(c1);
-      var i = d.info || {};
-      var doing = i.game ? ('Playing ' + i.game) : (i.page ? ('On ' + i.page) : '-');
-      tr.appendChild(el('td', doing, 'wrap'));
-      tr.appendChild(el('td', i.ua || '-'));
-      tr.appendChild(el('td', dur(i.active)));
-      tr.appendChild(el('td', (i.ach || 0) + ' / ' + ACH.length));
-      tr.appendChild(el('td', d.online ? ago(now - d.seen) : ('offline, ' + ago(now - d.seen))));
-      tr.appendChild(el('td', ago(now - d.first)));
-      tbody.appendChild(tr);
+  function visiblePages() { return PAGES.filter(function (p) { return p.ok(); }); }
+
+  function renderNav() {
+    var nav = $('nav'); nav.textContent = '';
+    var pages = visiblePages();
+    var staff = pages.filter(function (p) { return p.group === 'staff'; });
+    var owner = pages.filter(function (p) { return p.group === 'owner'; });
+    var mk = function (label, list, isOwnerGroup) {
+      if (!list.length) return;
+      var row = h('div', { class: 'navgroup' }, [h('span', { class: 'navlabel' + (isOwnerGroup ? ' owner' : ''), text: label })]);
+      list.forEach(function (p) {
+        row.appendChild(h('button', { class: (isOwnerGroup ? 'ownerpage ' : '') + (S.page === p.id ? 'active' : ''), text: p.label, onclick: function () { go(p.id); } }));
+      });
+      nav.appendChild(row);
+    };
+    if (S.me.role === 'helper') mk('Helper tools', pages, false);
+    else { mk('Staff tools', staff, false); mk('Owner only', owner, true); }
+  }
+
+  function go(id) {
+    var p = visiblePages().filter(function (x) { return x.id === id; })[0] || visiblePages()[0];
+    if (!p) return;
+    S.page = p.id; renderNav();
+    var box = $('page'); box.textContent = '';
+    S.current = p.build();
+    box.appendChild(S.current.el);
+    if (S.current.refresh) S.current.refresh();
+  }
+
+  function renderBanner() {
+    var me = S.me, box = $('banner');
+    box.hidden = false; box.textContent = '';
+    box.className = 'card banner' + (me.role === 'helper' ? ' helper' : '');
+    if (me.role === 'owner') box.appendChild(h('div', { text: 'Signed in as the owner. Messages and announcements you send show as "' + me.label + '".' }));
+    else if (me.role === 'admin') box.appendChild(h('div', { text: 'Signed in as ' + me.label + '. You can use the staff tools. Announcements you send show as "' + me.label + '". You cannot send pranks, change settings, or see device details.' }));
+    else {
+      box.appendChild(h('div', { text: 'Signed in as ' + me.label + ' (helper). You can send messages, rickrolls and visual gags. Messages show as "' + me.label + '".' }));
+      box.appendChild(muted('Your access ends in ' + dur(me.expires - serverNow()) + '.'));
+    }
+  }
+
+  // ---- Staff hub: who is on the team + where everything is ----
+  function pageHub() {
+    var team = h('div'), stripe = h('div', { class: 'grid' }), tools = h('div', { class: 'grid' }), ownerTools = h('div', { class: 'grid' });
+    var tile = function (p) {
+      return h('button', { class: 'tool', onclick: function () { go(p.id); } }, [h('b', { text: p.label }), h('span', { text: TOOL_INFO[p.id] || '' })]);
+    };
+    PAGES.filter(function (p) { return p.ok() && p.id !== 'hub'; }).forEach(function (p) { (p.group === 'owner' ? ownerTools : tools).appendChild(tile(p)); });
+    var kids = [
+      card("Who's online on the team", [team, muted('Online = has this dashboard open (or is on SecretV4 in their browser).')]),
+      card('Right now', [stripe]),
+      card('Your tools', [tools].concat(S.me.role === 'admin' ? [muted('As an admin you can not send pranks, change settings, delete games, or see devices. Only the owner can.')] : []))
+    ];
+    if (ownerTools.children.length) kids.push(card('Owner only', [ownerTools], true));
+    var el = h('div', {}, kids);
+    function refresh() {
+      api('/admin/team', {}).then(function (j) {
+        S.now = j.now; S.nowAt = Date.now(); team.textContent = '';
+        j.team.forEach(function (m) {
+          var status = m.where === 'dashboard' ? 'in the dashboard' : m.where === 'site' ? 'on the site' : (m.lastActive ? 'offline, last seen ' + ago(serverNow() - m.lastActive) : 'offline');
+          team.appendChild(h('div', { style: { cssText: 'padding:6px 0;border-bottom:1px solid var(--line)' } }, [
+            h('span', { class: 'dot' + (m.online ? ' on' : '') }), h('b', { text: m.label }),
+            h('span', { class: 'tag ' + m.role, text: m.role === 'owner' ? 'Owner' : 'Admin' }), h('span', { class: 'muted', text: '  ' + status })
+          ]));
+        });
+      }).catch(fail);
+      if (can('stats')) api('/admin/stats', {}).then(function (j) {
+        stripe.textContent = '';
+        [['Online visitors', j.online], ['Seen today', j.today], ['Total plays', j.totalPlays]].forEach(function (s) { stripe.appendChild(h('div', {}, [h('div', { class: 'stat', text: s[1] }), muted(s[0])])); });
+      }).catch(fail);
+    }
+    return { el: el, refresh: refresh };
+  }
+
+  function pageStats() {
+    var big = h('div', { class: 'grid' }), tbody = h('tbody');
+    var el = h('div', {}, [card('Live stats', [big, muted('Updates every 10 seconds. Play totals refresh about once a minute.')]),
+      card('Most played games', [h('div', { class: 'tablewrap' }, [h('table', {}, [h('thead', {}, [h('tr', {}, [h('th', { text: '#' }), h('th', { text: 'Game' }), h('th', { text: 'Plays' })])]), tbody])])])]);
+    function refresh() {
+      api('/admin/stats', {}).then(function (j) {
+        big.textContent = ''; tbody.textContent = '';
+        [['Online visitors', j.online], ['Seen in the last 24 hours', j.today], ['Total plays counted', j.totalPlays]].forEach(function (s) { big.appendChild(h('div', {}, [h('div', { class: 'stat', text: s[1] }), muted(s[0])])); });
+        j.top.forEach(function (g, i) { tbody.appendChild(h('tr', {}, [h('td', { text: i + 1 }), h('td', { text: title(g.id) }), h('td', { text: g.n })])); });
+      }).catch(fail);
+    }
+    return { el: el, refresh: refresh };
+  }
+
+  function pagePicks() {
+    var msg = h('div', { class: 'err' }), tbody = h('tbody');
+    var picker = gamePicker(function (id) {
+      api('/admin/featured/add', { game: id }).then(function (j) { toast(msg, j.already ? title(id) + ' is already featured.' : 'Featured ' + title(id) + '.'); refresh(); }).catch(function (e) { toast(msg, e.message, true); });
+    }, 'Add a game to Staff Picks');
+    var el = h('div', {}, [card('Staff Picks', [muted('These show in the Staff Picks tab for every visitor. Removing a game here only takes it off the Staff Picks list. It never deletes the game.'), h('div', { style: { cssText: 'height:10px' } }), picker, msg]),
+      card('Current picks', [h('div', { class: 'tablewrap' }, [h('table', {}, [h('thead', {}, [h('tr', {}, [h('th', { text: 'Game' }), h('th', { text: 'Added by' }), h('th', { text: 'When' }), h('th')])]), tbody])])])]);
+    function refresh() {
+      api('/admin/featured/list', {}).then(function (j) {
+        tbody.textContent = '';
+        if (!j.picks.length) tbody.appendChild(h('tr', {}, [h('td', { text: 'No Staff Picks yet.', colSpan: 4 })]));
+        j.picks.forEach(function (p) {
+          tbody.appendChild(h('tr', {}, [h('td', { text: title(p.game) }), h('td', { text: p.by }), h('td', { text: when(p.t) }),
+            h('td', {}, [h('button', { class: 'link', text: 'remove', onclick: function () { api('/admin/featured/remove', { game: p.game }).then(function () { toast(msg, 'Removed ' + title(p.game) + ' from Staff Picks.'); refresh(); }).catch(function (e) { toast(msg, e.message, true); }); } })])]));
+        });
+      }).catch(fail);
+    }
+    return { el: el, refresh: refresh };
+  }
+
+  function pageEvents() {
+    var chosen = [], msg = h('div', { class: 'err' }), tbody = h('tbody'), chips = h('div', { class: 'chips' });
+    var kind = h('select'); Object.keys(KINDS).forEach(function (k) { kind.appendChild(h('option', { value: k, text: KINDS[k].label })); });
+    kind.value = 'game_of_the_hour';
+    var name = h('input', { maxLength: 40, placeholder: 'Event title' }), descr = h('input', { maxLength: 120, placeholder: 'What should people do? (one sentence)' });
+    var length = h('select'); var nameBox = h('div', { class: 'grow' }, [h('label', { text: 'Title' }), name]), descrBox = h('div', { class: 'grow' }, [h('label', { text: 'Challenge (shown to visitors)' }), descr]);
+    var need = h('div', { class: 'muted' });
+    function drawKind() {
+      var k = KINDS[kind.value];
+      nameBox.hidden = !k.title; descrBox.hidden = !k.descr;
+      length.textContent = ''; k.mins.forEach(function (m) { length.appendChild(h('option', { value: m[0], text: m[1] })); }); length.value = k.mins[0][0];
+      need.textContent = k.max === k.min ? 'Pick exactly ' + k.min + ' game.' : 'Pick ' + k.min + ' to ' + k.max + ' games.';
+      if (chosen.length > k.max) chosen = chosen.slice(0, k.max);
+      drawChips();
+    }
+    function drawChips() {
+      chips.textContent = '';
+      chosen.forEach(function (id, i) { chips.appendChild(h('span', { class: 'chip' }, [title(id) + ' ', h('button', { class: 'link', text: 'x', onclick: function () { chosen.splice(i, 1); drawChips(); } })])); });
+    }
+    kind.onchange = drawKind;
+    var picker = gamePicker(function (id) { var k = KINDS[kind.value]; if (chosen.indexOf(id) < 0 && chosen.length < k.max) chosen.push(id); drawChips(); }, 'Add a game to this event');
+    var start = h('button', { class: 'primary', text: 'Start event', onclick: function () {
+      api('/admin/events/start', { kind: kind.value, title: name.value, descr: descr.value, minutes: Number(length.value), games: chosen })
+        .then(function () { toast(msg, 'Event started.'); chosen = []; name.value = ''; descr.value = ''; drawChips(); refresh(); }).catch(function (e) { toast(msg, e.message, true); });
+    } });
+    var el = h('div', {}, [
+      card('Start an event', [h('div', { class: 'row' }, [h('div', { class: 'grow' }, [h('label', { text: 'Type' }), kind]), nameBox, descrBox, h('div', { class: 'grow' }, [h('label', { text: 'Lasts' }), length])]),
+        h('div', { style: { cssText: 'height:10px' } }), picker, need, chips, h('div', { style: { cssText: 'height:10px' } }), start, msg,
+        muted('Events end by themselves when their time is up. At most 3 can run at once.')]),
+      card('Events', [h('div', { class: 'tablewrap' }, [h('table', {}, [h('thead', {}, [h('tr', {}, [h('th', { text: 'Event' }), h('th', { text: 'Games' }), h('th', { text: 'By' }), h('th', { text: 'Status' }), h('th')])]), tbody])])])]);
+    drawKind();
+    function refresh() {
+      api('/admin/events/list', {}).then(function (j) {
+        S.now = j.now; S.nowAt = Date.now(); tbody.textContent = '';
+        if (!j.events.length) tbody.appendChild(h('tr', {}, [h('td', { text: 'No events yet.', colSpan: 5 })]));
+        j.events.forEach(function (e) {
+          var end = h('td');
+          if (e.active) end.appendChild(h('button', { class: 'link', text: 'end now', onclick: function () { api('/admin/events/end', { id: e.id }).then(function () { toast(msg, 'Ended "' + e.title + '".'); refresh(); }).catch(function (x) { toast(msg, x.message, true); }); } }));
+          tbody.appendChild(h('tr', { class: e.active ? '' : 'off' }, [h('td', { class: 'wrap', text: e.title + ' (' + (KINDS[e.kind] ? KINDS[e.kind].label : e.kind) + ')' }), h('td', { class: 'wrap', text: e.games.map(title).join(', ') || '-' }), h('td', { text: e.by }),
+            h('td', { text: e.active ? 'live, ' + dur(e.ends - serverNow()) + ' left' : 'ended' }), end]));
+        });
+      }).catch(fail);
+    }
+    return { el: el, refresh: refresh };
+  }
+
+  function pageAnnounce() {
+    var text = h('textarea', { rows: 3, maxLength: 120, placeholder: 'Short message for everyone online (max 120 characters)' });
+    var count = h('span', { class: 'muted', text: '0 / 120' }), msg = h('div', { class: 'err' });
+    text.oninput = function () { count.textContent = text.value.length + ' / 120'; };
+    var send = h('button', { class: 'primary', text: 'Send to everyone online', onclick: function () {
+      if (!text.value.trim()) { toast(msg, 'Type something first.', true); return; }
+      if (!confirm('Send this announcement to everyone online?')) return;
+      api('/admin/send', { type: 'announce', target: '*', text: text.value }).then(function (j) { toast(msg, 'Sent. ' + j.onlineTargets + ' browsers online right now will see it within about 30 seconds.'); text.value = ''; count.textContent = '0 / 120'; }).catch(function (e) { toast(msg, e.message, true); });
+    } });
+    var el = h('div', {}, [card('Send an announcement', [text, h('div', { class: 'row', style: { cssText: 'margin-top:6px' } }, [count]), h('div', { style: { cssText: 'height:8px' } }), send, msg,
+      muted('It shows in a small corner pop-up for about 7 seconds with your name ("' + S.me.label + '") under it.' + (S.me.role === 'admin' ? ' Admins can send 6 an hour.' : ''))])]);
+    return { el: el };
+  }
+
+  function pageReports() {
+    var msg = h('div', { class: 'err' }), tbody = h('tbody'), game = 0, picked = h('div', { class: 'muted', text: 'No game picked yet.' });
+    var note = h('input', { maxLength: 200, placeholder: 'What is wrong? (black screen, will not load, no sound...)' });
+    var picker = gamePicker(function (id) { game = id; picked.textContent = 'Reporting: ' + title(id); }, 'Which game is broken?');
+    var send = h('button', { class: 'primary', text: 'Report it', onclick: function () {
+      if (!game) { toast(msg, 'Pick a game first.', true); return; }
+      api('/admin/reports/create', { game: game, note: note.value }).then(function (j) { toast(msg, j.duplicate ? 'You already reported that one today.' : 'Reported. The owner will take a look.'); note.value = ''; refresh(); }).catch(function (e) { toast(msg, e.message, true); });
+    } });
+    var el = h('div', {}, [card('Report a broken game', [picker, picked, h('div', { style: { cssText: 'height:8px' } }), h('label', { text: 'What is wrong' }), note, h('div', { style: { cssText: 'height:8px' } }), send, msg,
+        muted('You can only report. The owner decides what happens, and nobody here can delete games.')]),
+      card(isOwner() ? 'All reports' : 'Your reports', [h('div', { class: 'tablewrap' }, [h('table', {}, [h('thead', {}, [h('tr', {}, [h('th', { text: 'Game' }), h('th', { text: 'Note' }), h('th', { text: 'By' }), h('th', { text: 'When' }), h('th', { text: 'Status' }), h('th')])]), tbody])])])]);
+    function refresh() {
+      api('/admin/reports/list', {}).then(function (j) {
+        tbody.textContent = '';
+        if (!j.reports.length) tbody.appendChild(h('tr', {}, [h('td', { text: 'No reports.', colSpan: 6 })]));
+        j.reports.forEach(function (r) {
+          var act = h('td');
+          if (isOwner() && r.status === 'open') {
+            ['resolved', 'dismissed'].forEach(function (s) { act.appendChild(h('button', { class: 'link', text: s === 'resolved' ? 'mark fixed' : 'dismiss', onclick: function () { api('/admin/reports/resolve', { id: r.id, status: s }).then(refresh).catch(function (e) { toast(msg, e.message, true); }); } })); });
+          }
+          tbody.appendChild(h('tr', { class: r.status === 'open' ? '' : 'off' }, [h('td', { class: 'wrap', text: title(r.game) }), h('td', { class: 'wrap', text: r.note }), h('td', { text: r.by }), h('td', { text: when(r.t) }),
+            h('td', { text: r.status + (r.handledBy ? ' by ' + r.handledBy : '') }), act]));
+        });
+      }).catch(fail);
+    }
+    return { el: el, refresh: refresh };
+  }
+
+  // ---- owner / helper: devices and actions ----
+  function pageDevices() {
+    var tbody = h('tbody'), selected = {}, devices = [];
+    var showOff = h('input', { type: 'checkbox' }); showOff.style.width = 'auto';
+    var action = h('select'), msg = h('input', { maxLength: 200 }), emoji = h('input', { maxLength: 8 }), ach = h('select');
+    var msgBox = h('div', { class: 'grow', hidden: true }, [h('label', { text: 'Message (max 200 characters)' }), msg]);
+    var emojiBox = h('div', { class: 'grow', hidden: true }, [h('label', { text: 'Emoji (blank = pizza)' }), emoji]);
+    var achBox = h('div', { class: 'grow', hidden: true }, [h('label', { text: 'Achievement' }), ach]);
+    ACH.forEach(function (a) { ach.appendChild(h('option', { value: a.id, text: a.name + ' (' + RARITY[a.rarity] + ')' })); });
+    var groups = {};
+    ACTIONS.forEach(function (a) {
+      if (S.me.allowed.indexOf(a.v) < 0 || a.v === 'announce') return;
+      if (!groups[a.g]) { groups[a.g] = h('optgroup', { label: a.g }); action.appendChild(groups[a.g]); }
+      groups[a.g].appendChild(h('option', { value: a.v, text: a.t }));
     });
-    counts();
+    var firstAction = ACTIONS.filter(function (a) { return S.me.allowed.indexOf(a.v) >= 0 && a.v !== 'announce'; })[0];
+    action.value = firstAction ? firstAction.v : '';
+    action.onchange = function () { msgBox.hidden = action.value !== 'message'; achBox.hidden = action.value !== 'give_one'; emojiBox.hidden = action.value !== 'emoji_rain'; };
+    var sendSel = h('button', { class: 'primary', text: 'Send to selected (0)' }), sendAll = h('button', { class: 'danger', text: 'Send to everyone online (0)' });
+    function actionLabel() { var f = ACTIONS.filter(function (a) { return a.v === action.value; })[0]; return f ? f.t : action.value; }
+    function send(targets, who) {
+      var type = action.value, text = type === 'emoji_rain' ? emoji.value : msg.value;
+      if (!type) return;
+      if (type === 'message' && !text.trim()) { alert('Type a message first.'); return; }
+      var extra = type === 'give_one' ? ' (' + ach.value + ')' : '';
+      if (who === 'everyone' && !confirm(actionLabel() + extra + ' to EVERYONE online?')) return;
+      Promise.all(targets.map(function (t) { return api('/admin/send', { type: type, target: t, text: text, achievement: ach.value }); }))
+        .then(function () { log(actionLabel() + extra + ' sent to ' + who); }).catch(function (e) { log('Send failed: ' + e.message); alert(e.message); });
+    }
+    function selectedOnline() { return Object.keys(selected).filter(function (id) { return devices.some(function (d) { return d.id === id && d.online; }); }); }
+    function counts() {
+      var on = devices.filter(function (d) { return d.online; }).length, sel = selectedOnline().length;
+      sendSel.textContent = 'Send to selected (' + sel + ')'; sendSel.disabled = sel === 0;
+      sendAll.textContent = 'Send to everyone online (' + on + ')'; sendAll.disabled = on === 0;
+    }
+    sendSel.onclick = function () { send(selectedOnline(), 'the selected devices'); };
+    sendAll.onclick = function () { send(['*'], 'everyone'); };
+    function name(d) { return d.label || ('Device ' + d.id.slice(0, 6)); }
+    function render() {
+      var now = serverNow(), list = devices.filter(function (d) { return d.online || showOff.checked || d.label; }).sort(function (a, b) { return (b.online - a.online) || (b.seen - a.seen); });
+      tbody.textContent = '';
+      if (!list.length) tbody.appendChild(h('tr', {}, [h('td', { text: 'Nobody is online right now.', colSpan: 8 })]));
+      list.forEach(function (d) {
+        var cb = h('input', { type: 'checkbox', checked: !!selected[d.id], disabled: !d.online }); cb.style.width = 'auto';
+        cb.onchange = function () { if (cb.checked) selected[d.id] = true; else delete selected[d.id]; counts(); };
+        var c1 = h('td', {}, [h('span', { class: 'dot' + (d.online ? ' on' : '') }), name(d)]);
+        if (isOwner()) {
+          c1.appendChild(h('button', { class: 'link', text: d.label ? 'rename' : 'name it', onclick: function () {
+            var n = prompt('Name for this device (blank to clear):', d.label || ''); if (n === null) return;
+            api('/admin/label', { device: d.id, name: n }).then(refresh).catch(function (e) { log('Rename failed: ' + e.message); });
+          } }));
+          c1.appendChild(h('button', { class: 'link', text: 'make admin', onclick: function () { S.prefillDevice = d.id; go('admins'); } }));
+        }
+        if (d.online && now - d.first < 300) { var nw = h('span', { class: 'link', text: 'NEW' }); nw.style.color = 'var(--ok)'; nw.style.fontWeight = '700'; c1.appendChild(nw); }
+        var i = d.info || {};
+        tbody.appendChild(h('tr', { class: d.online ? '' : 'off' }, [h('td', {}, [cb]), c1, h('td', { class: 'wrap', text: i.game ? 'Playing ' + i.game : (i.page ? 'On ' + i.page : '-') }), h('td', { text: i.ua || '-' }), h('td', { text: dur(i.active) }),
+          h('td', { text: (i.ach || 0) + ' / ' + ACH.length }), h('td', { text: d.online ? ago(now - d.seen) : 'offline, ' + ago(now - d.seen) }), h('td', { text: ago(now - d.first) })]));
+      });
+      counts();
+    }
+    showOff.onchange = render;
+    var logBox = h('div', { id: 'log' });
+    function log(t) { logBox.insertBefore(h('div', { text: new Date().toLocaleTimeString() + '  ' + t }), logBox.firstChild); }
+    var el = h('div', {}, [
+      card('Send an action', [h('div', { class: 'row' }, [h('div', { class: 'grow' }, [h('label', { text: 'Action' }), action]), msgBox, emojiBox, achBox]),
+        h('div', { class: 'row', style: { cssText: 'margin-top:12px' } }, [sendSel, sendAll, muted('Actions expire after 2 minutes and arrive within about 30 seconds.')])], isOwner()),
+      card('Devices', [h('div', { class: 'row', style: { cssText: 'margin-bottom:8px' } }, [h('button', { text: 'Select all online', onclick: function () { devices.forEach(function (d) { if (d.online) selected[d.id] = true; }); render(); } }),
+        h('button', { text: 'Clear selection', onclick: function () { selected = {}; render(); } }), h('label', { style: { cssText: 'margin:0;display:flex;gap:6px;align-items:center' } }, [showOff, 'show unnamed devices seen in the last 24 h'])]),
+        h('div', { class: 'tablewrap' }, [h('table', { style: { cssText: 'min-width:720px' } }, [h('thead', {}, [h('tr', {}, [h('th'), h('th', { text: 'Device' }), h('th', { text: 'Doing' }), h('th', { text: 'Browser' }), h('th', { text: 'Active' }), h('th', { text: 'Achievements' }), h('th', { text: 'Last seen' }), h('th', { text: 'First seen' })])]), tbody])])], isOwner()),
+      card('Log', [logBox])]);
+    function refresh() { api('/admin/devices', {}).then(function (j) { devices = j.devices || []; S.now = j.now; S.nowAt = Date.now(); render(); }).catch(fail); }
+    return { el: el, refresh: refresh };
   }
 
-  function counts() {
-    var sel = Object.keys(state.selected).filter(function (id) { return state.devices.some(function (d) { return d.id === id && d.online; }); }).length;
-    var on = state.devices.filter(function (d) { return d.online; }).length;
-    $('sendSel').textContent = 'Send to selected (' + sel + ')'; $('sendSel').disabled = sel === 0;
-    $('sendAll').textContent = 'Send to everyone online (' + on + ')'; $('sendAll').disabled = on === 0;
+  // ---- owner: helpers (temporary, prank-only) ----
+  function pageHelpers() {
+    var ownerName = h('input', { maxLength: 24, placeholder: 'Micah', value: S.me.ownerName || '' }), preview = h('span', { class: 'muted', text: 'Your messages show as: ' + S.me.label });
+    var caName = h('input', { maxLength: 24, placeholder: 'Bob' }), caTitle = h('input', { maxLength: 16, value: 'Helper' }), caHours = h('select');
+    [[1, '1 hour'], [6, '6 hours'], [24, '1 day'], [72, '3 days'], [168, '7 days']].forEach(function (o) { caHours.appendChild(h('option', { value: o[0], text: o[1] })); }); caHours.value = 24;
+    var codeBox = h('div', { class: 'codebox', hidden: true }), tbody = h('tbody');
+    var el = h('div', {}, [card('Helpers (temporary, pranks only)', [muted('Give a friend a code. For the time you choose they can sign in here and send messages, rickrolls and visual gags only. Their messages show the name you give them under "Message from SecretV4".'), h('div', { style: { cssText: 'height:12px' } }),
+      h('div', { class: 'row' }, [h('div', { class: 'grow' }, [h('label', { text: 'Your name on your own messages' }), ownerName]), h('button', { text: 'Save', onclick: function () {
+        api('/admin/owner', { name: ownerName.value }).then(function (j) { S.me.label = j.label; preview.textContent = 'Your messages show as: ' + j.label; renderBanner(); }).catch(function (e) { alert(e.message); });
+      } }), preview]),
+      h('div', { style: { cssText: 'height:12px' } }),
+      h('div', { class: 'row' }, [h('div', { class: 'grow' }, [h('label', { text: 'Their name' }), caName]), h('div', { class: 'grow' }, [h('label', { text: 'Title' }), caTitle]), h('div', { class: 'grow' }, [h('label', { text: 'Lasts for' }), caHours]),
+        h('button', { class: 'primary', text: 'Create code', onclick: function () {
+          api('/admin/coadmin/create', { name: caName.value, title: caTitle.value, hours: Number(caHours.value) }).then(function (j) {
+            codeBox.hidden = false; codeBox.textContent = '';
+            codeBox.appendChild(muted('Copy this now. It is shown only once.')); codeBox.appendChild(h('div', { class: 'code', text: j.code }));
+            codeBox.appendChild(muted('For ' + j.label + ', valid until ' + when(j.expires) + '. They paste it into the sign-in box on this page.'));
+            caName.value = ''; refresh();
+          }).catch(function (e) { alert(e.message); });
+        } })]), codeBox], true),
+      card('Current and past helpers', [h('div', { class: 'tablewrap' }, [h('table', {}, [h('thead', {}, [h('tr', {}, [h('th', { text: 'Shown as' }), h('th', { text: 'Status' }), h('th', { text: 'Last used' }), h('th', { text: 'Actions sent' }), h('th')])]), tbody])])], true)]);
+    function refresh() {
+      api('/admin/coadmin/list', {}).then(function (j) {
+        tbody.textContent = '';
+        if (!j.coadmins.length) tbody.appendChild(h('tr', {}, [h('td', { text: 'No helpers yet.', colSpan: 5 })]));
+        j.coadmins.forEach(function (c) {
+          var act = h('td');
+          act.appendChild(h('button', { class: 'link', text: 'edit', onclick: function () {
+            var n = prompt('Their name:', c.name); if (n === null) return; var t = prompt('Title shown after the name:', c.title); if (t === null) return;
+            api('/admin/coadmin/update', { id: c.id, name: n, title: t }).then(refresh).catch(function (e) { alert(e.message); });
+          } }));
+          if (c.active) act.appendChild(h('button', { class: 'link', text: 'cancel access', onclick: function () { if (confirm('Cancel access for ' + c.label + ' right now?')) api('/admin/coadmin/revoke', { id: c.id }).then(refresh).catch(function (e) { alert(e.message); }); } }));
+          tbody.appendChild(h('tr', { class: c.active ? '' : 'off' }, [h('td', { text: c.label }), h('td', { text: c.revoked ? 'cancelled' : c.active ? 'active, ends in ' + dur(c.expires - j.now) : 'expired' }), h('td', { text: c.lastUsed ? ago(j.now - c.lastUsed) : 'never' }), h('td', { text: c.sent }), act]));
+        });
+      }).catch(fail);
+    }
+    return { el: el, refresh: refresh };
   }
 
-  function load() {
-    return api('/admin/devices', {}).then(function (j) {
-      state.devices = j.devices || []; state.now = j.now; render();
-    });
+  // ---- owner: admins (staff) ----
+  function pageAdmins() {
+    var idBox = h('input', { class: 'mono', maxLength: 32, placeholder: '32 letters and numbers', value: S.prefillDevice || '' }); S.prefillDevice = '';
+    var who = h('div'), nameBox = h('input', { maxLength: 24, placeholder: 'Bob' }), titleBox = h('input', { maxLength: 16, value: 'Admin' });
+    var grantRow = h('div', { hidden: true }), codeBox = h('div', { class: 'codebox', hidden: true }), msg = h('div', { class: 'err' }), tbody = h('tbody');
+    function showDevice(j) {
+      who.textContent = '';
+      if (!j.found) { who.appendChild(h('div', { class: 'err', text: 'No browser with that ID has visited the site yet.' })); grantRow.hidden = true; return; }
+      var d = j.device, i = d.info || {};
+      who.appendChild(h('div', { class: 'card', style: { cssText: 'margin:10px 0' } }, [
+        h('b', { text: d.label ? d.label : 'Unnamed device' }), muted('Browser: ' + (i.ua || 'unknown') + '   |   ' + (d.online ? 'online now' : 'last seen ' + ago(serverNow() - d.seen)) + '   |   first seen ' + ago(serverNow() - d.first)),
+        muted('Doing: ' + (i.game ? 'playing ' + i.game : i.page ? 'on the ' + i.page + ' tab' : 'nothing yet')), muted('Confirm this is the person you mean (for example ask them to open a game, then check it shows here) before you continue.')]));
+      grantRow.hidden = !!j.alreadyAdmin;
+      if (j.alreadyAdmin) who.appendChild(h('div', { class: 'err', text: 'That browser is already an admin.' }));
+    }
+    function lookup() {
+      var id = idBox.value.trim().toLowerCase(); codeBox.hidden = true;
+      api('/admin/staff/lookup', { device: id }).then(function (j) { S.now = j.now || S.now; S.nowAt = Date.now(); showDevice(j); }).catch(function (e) { who.textContent = ''; who.appendChild(h('div', { class: 'err', text: e.message })); grantRow.hidden = true; });
+    }
+    var grant = h('button', { class: 'primary', text: 'Grant Admin', onclick: function () {
+      if (!confirm('Give admin access to this browser?')) return;
+      api('/admin/staff/grant', { device: idBox.value.trim().toLowerCase(), name: nameBox.value, title: titleBox.value }).then(function (j) {
+        codeBox.hidden = false; codeBox.textContent = '';
+        codeBox.appendChild(muted('Passphrase for ' + j.label + '. Copy it now. It is shown only once, and you can make a new one later.'));
+        codeBox.appendChild(h('div', { class: 'code', text: j.passphrase }));
+        codeBox.appendChild(muted('To sign in they open this page in the SAME browser they use on SecretV4 and enter the passphrase. It only works in that browser.'));
+        grantRow.hidden = true; who.textContent = ''; idBox.value = ''; nameBox.value = ''; refresh();
+      }).catch(function (e) { toast(msg, e.message, true); });
+    } });
+    grantRow.appendChild(h('div', { class: 'row' }, [h('div', { class: 'grow' }, [h('label', { text: 'Their name' }), nameBox]), h('div', { class: 'grow' }, [h('label', { text: 'Title' }), titleBox]), grant]));
+    var el = h('div', {}, [
+      card('Give someone admin access', [muted('Admins can manage Staff Picks, start events, send announcements, flag broken games and see basic stats. They cannot send pranks, change settings, see devices or delete games. Access is tied to their browser AND a passphrase only you can create, so copying either one alone does nothing.'),
+        h('div', { style: { cssText: 'height:10px' } }),
+        h('div', { class: 'row' }, [h('div', { class: 'grow' }, [h('label', { text: 'Their browser ID (they get it from "Show my browser ID" on the sign-in page, or use "make admin" next to a device)' }), idBox]), h('button', { text: 'Look up', onclick: lookup })]),
+        who, grantRow, codeBox, msg], true),
+      card('Admins', [h('div', { class: 'tablewrap' }, [h('table', {}, [h('thead', {}, [h('tr', {}, [h('th', { text: 'Admin' }), h('th', { text: 'Browser ID' }), h('th', { text: 'Granted' }), h('th', { text: 'By' }), h('th', { text: 'Status' }), h('th')])]), tbody])])], true)]);
+    if (idBox.value) lookup();
+    function refresh() {
+      api('/admin/staff/list', {}).then(function (j) {
+        S.now = j.now; S.nowAt = Date.now(); tbody.textContent = '';
+        if (!j.admins.length) tbody.appendChild(h('tr', {}, [h('td', { text: 'No admins yet.', colSpan: 6 })]));
+        j.admins.forEach(function (a) {
+          var act = h('td');
+          if (!a.revoked) {
+            act.appendChild(h('button', { class: 'link', text: 'rename', onclick: function () { var n = prompt('Name:', a.name); if (n === null) return; var t = prompt('Title:', a.title); if (t === null) return; api('/admin/staff/update', { id: a.id, name: n, title: t }).then(refresh).catch(function (e) { alert(e.message); }); } }));
+            act.appendChild(h('button', { class: 'link', text: 'new passphrase', onclick: function () { if (confirm('Make a new passphrase for ' + a.label + '? The old one stops working.')) api('/admin/staff/reset', { id: a.id }).then(function (j2) { codeBox.hidden = false; codeBox.textContent = ''; codeBox.appendChild(muted('New passphrase for ' + a.label + ' (shown once):')); codeBox.appendChild(h('div', { class: 'code', text: j2.passphrase })); }).catch(function (e) { alert(e.message); }); } }));
+            act.appendChild(h('button', { class: 'link', text: 'remove access', onclick: function () { if (confirm('Remove admin access for ' + a.label + ' right now?')) api('/admin/staff/revoke', { id: a.id }).then(refresh).catch(function (e) { alert(e.message); }); } }));
+          }
+          tbody.appendChild(h('tr', { class: a.revoked ? 'off' : '' }, [h('td', { text: a.label }), h('td', { class: 'mono', title: a.device, text: a.device.slice(0, 12) + '...' }), h('td', { text: when(a.granted) }), h('td', { text: a.grantedBy }),
+            h('td', { text: a.revoked ? 'removed by ' + a.revokedBy : (a.lastUsed ? 'last used ' + ago(serverNow() - a.lastUsed) : 'not used yet') }), act]));
+        });
+      }).catch(fail);
+    }
+    return { el: el, refresh: refresh };
   }
 
-  function actionLabel() { var s = $('action'); return s.options[s.selectedIndex].text; }
-
-  function send(targets, who) {
-    var type = $('action').value, text = type === 'emoji_rain' ? $('emoji').value : $('msg').value, ach = $('ach').value;
-    if (type === 'message' && !text.trim()) { alert('Type a message first.'); return; }
-    var extra = type === 'give_one' ? ' (' + $('ach').options[$('ach').selectedIndex].text + ')' : '';
-    if (who === 'everyone' && !confirm(actionLabel() + extra + ' to EVERYONE online?')) return;
-    var jobs = targets.map(function (t) { return api('/admin/send', { type: type, target: t, text: text, achievement: ach }); });
-    Promise.all(jobs).then(function () { log(actionLabel() + extra + ' sent to ' + who); })
-      .catch(function (e) { log('Send failed: ' + e.message); alert(e.message); });
+  // ---- owner: activity log (read only) ----
+  function logText(l) {
+    var d = l.detail || {};
+    switch (l.action) {
+      case 'feature': return 'featured ' + title(d.game);
+      case 'unfeature': return 'removed ' + title(d.game) + ' from Staff Picks';
+      case 'event_start': return 'started "' + d.title + '" (' + d.kind + ', ' + d.minutes + ' min)';
+      case 'event_end': return 'ended "' + d.title + '"';
+      case 'announcement': return 'announced "' + d.text + '"';
+      case 'report': return 'reported ' + title(d.game) + ': ' + d.note;
+      case 'report_resolved': return 'marked the report on ' + title(d.game) + ' as fixed';
+      case 'report_dismissed': return 'dismissed the report on ' + title(d.game);
+      case 'grant_admin': return 'gave admin to ' + d.admin + ' (browser ' + d.device + '...)';
+      case 'revoke_admin': return 'removed admin access from ' + d.admin;
+      case 'reset_admin_passphrase': return 'made a new passphrase for ' + d.admin;
+      case 'rename_admin': return 'renamed admin ' + d.from + ' to ' + d.to;
+      case 'create_helper': return 'made a ' + d.hours + ' hour helper code for ' + d.helper;
+      case 'revoke_helper': return 'cancelled helper ' + d.helper;
+      case 'rename_helper': return 'renamed helper ' + d.from + ' to ' + d.to;
+      default: return l.action;
+    }
+  }
+  function pageLog() {
+    var box = h('div', { id: 'log' }), more = h('button', { text: 'Load older', hidden: true }), oldest = null;
+    function load(before) {
+      api('/admin/log', before ? { before: before } : {}).then(function (j) {
+        j.log.forEach(function (l) { box.appendChild(h('div', {}, [h('b', { text: when(l.t) + '  ' }), h('span', { class: 'tag ' + (l.role === 'owner' ? 'owner' : 'admin'), text: l.role }), ' ' + l.actor + ' ' + logText(l)])); });
+        if (j.log.length) oldest = j.log[j.log.length - 1].id; more.hidden = j.log.length < 100;
+        if (!j.log.length && !before) box.appendChild(muted('Nothing has been logged yet.'));
+      }).catch(fail);
+    }
+    more.onclick = function () { load(oldest); };
+    var el = h('div', {}, [card('Activity log', [muted('Newest first. This is read-only: nothing in the dashboard can edit or delete it, and passwords and codes are never recorded.'), box, more], true)]);
+    return { el: el, refresh: function () { box.textContent = ''; load(null); } };
   }
 
+  // =====================================================================
+  //  SIGN IN
+  // =====================================================================
+  function fail(e) {
+    if (/expired|cancelled|removed|Wrong|Too many/.test(e.message)) signOut(e.message);
+  }
+  function signOut(message) {
+    sessionStorage.removeItem('v4admin'); clearInterval(S.timer);
+    S.key = ''; S.me = null; $('key').value = '';
+    $('app').hidden = true; $('login').hidden = false; $('loginMsg').textContent = message || '';
+  }
   function connect(key, base) {
-    state.key = key; state.base = base.replace(/\/+$/, '');
+    S.key = key; S.base = base.replace(/\/+$/, '');
     $('loginMsg').textContent = 'Connecting...';
-    api('/admin/devices', {}).then(function (j) {
-      sessionStorage.setItem('v4admin', JSON.stringify({ key: state.key, base: state.base }));
-      state.devices = j.devices || []; state.now = j.now;
-      $('login').hidden = true; $('app').hidden = false; $('loginMsg').textContent = ''; render();
-      clearInterval(state.timer);
-      state.timer = setInterval(function () { if (document.visibilityState === 'visible') load().catch(function () {}); }, 10000);
+    api('/admin/me', {}).then(function (j) {
+      sessionStorage.setItem('v4admin', JSON.stringify({ key: S.key, base: S.base }));
+      S.now = j.now; S.nowAt = Date.now(); S.me = j.me;
+      $('login').hidden = true; $('app').hidden = false; $('loginMsg').textContent = '';
+      $('subtitle').textContent = S.me.label;
+      renderBanner();
+      go(S.me.role === 'helper' ? 'devices' : 'hub');
+      clearInterval(S.timer);
+      S.timer = setInterval(function () {
+        if (document.visibilityState !== 'visible') return;
+        if (S.current && S.current.refresh) S.current.refresh();
+        else api('/admin/me', {}).catch(fail);
+        if (S.me && S.me.role === 'helper') renderBanner();
+      }, 10000);
     }).catch(function (e) { $('loginMsg').textContent = e.message || 'Could not connect.'; });
   }
 
-  // setup
-  ACH.forEach(function (a) { var o = document.createElement('option'); o.value = a.id; o.textContent = a.name + ' (' + RARITY[a.rarity] + ')'; $('ach').appendChild(o); });
-  $('action').onchange = function () { $('msgBox').hidden = this.value !== 'message'; $('achBox').hidden = this.value !== 'give_one'; $('emojiBox').hidden = this.value !== 'emoji_rain'; };
   $('connect').onclick = function () { connect($('key').value, $('base').value.trim()); };
   $('key').onkeydown = function (e) { if (e.key === 'Enter') $('connect').click(); };
-  $('refresh').onclick = function () { load().catch(function (e) { log('Refresh failed: ' + e.message); }); };
-  $('showOff').onchange = render;
-  $('selOnline').onclick = function () { state.devices.forEach(function (d) { if (d.online) state.selected[d.id] = true; }); render(); };
-  $('selNone').onclick = function () { state.selected = {}; render(); };
-  $('sendSel').onclick = function () { send(Object.keys(state.selected).filter(function (id) { return state.devices.some(function (d) { return d.id === id && d.online; }); }), 'the selected devices'); };
-  $('sendAll').onclick = function () { send(['*'], 'everyone'); };
-  $('signout').onclick = function () { sessionStorage.removeItem('v4admin'); clearInterval(state.timer); state.key = ''; $('key').value = ''; $('app').hidden = true; $('login').hidden = false; };
+  $('refresh').onclick = function () { if (S.current && S.current.refresh) S.current.refresh(); };
+  $('signout').onclick = function () { signOut(''); };
+  $('myid').onclick = function () {
+    var base = $('base').value.trim().replace(/\/+$/, ''), out = $('myidOut');
+    if (!token()) { out.textContent = 'This browser has not opened SecretV4 yet. Open the site once, then come back.'; return; }
+    fetch(base + '/whoami', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ v: token() }) })
+      .then(function (r) { return r.json(); }).then(function (j) { out.textContent = j.id ? 'Your browser ID: ' + j.id : (j.error || 'Could not get it.'); })
+      .catch(function () { out.textContent = 'Could not reach the counter. Check the address.'; });
+  };
+
+  // Games added after this page was made: pick up their names from the site's manifest
+  try {
+    fetch('./games/manifest.json').then(function (r) { return r.json(); }).then(function (m) {
+      (m.games || []).forEach(function (g) { if (g && g.id && g.title && !TITLES[g.id]) { TITLES[g.id] = g.title; GAMES.push([g.id, g.title]); } });
+    }).catch(function () {});
+  } catch (e) {}
 
   var cfg = window.SECRETV4_SITE || {};
   var saved = null; try { saved = JSON.parse(sessionStorage.getItem('v4admin') || 'null'); } catch (e) {}
