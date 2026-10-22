@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { Search, Play, Star, Crown, Flame, Box, Gamepad2, Zap, Joystick, Clock, ThumbsUp, Library, FolderPlus, FolderMinus, Pencil, Trash2, Plus } from 'lucide-react';
+import { Search, Play, Star, Crown, Flame, Box, Gamepad2, Zap, Joystick, Clock, ThumbsUp, Library, FolderPlus, FolderMinus, Pencil, Trash2, Plus, BadgeCheck, LayoutGrid } from 'lucide-react';
 import { libraryGames, libraryLetters, gameLetter, type LibraryGame } from '@/data/gameLibrary';
 import {
   featuredGames,
@@ -15,20 +15,28 @@ import { searchScore } from '@/lib/search';
 import { playMode, useManifestVersion } from '@/lib/manifest';
 import { useSetting } from '@/hooks/useSettings';
 import { useGlobalTop } from '@/lib/stats';
+import { useStaff } from '@/lib/staff';
+import { EventsPanel } from '@/components/EventsPanel';
+import { GENRES, genresOf, type GenreId } from '@/data/genres';
 import { likedPercent, ratingScore, ratingsEnabled, useRatings } from '@/lib/ratings';
 import { useGameClick } from '@/components/GameLaunchProvider';
 import { MAX_COLLECTIONS, createCollection, deleteCollection, renameCollection, toggleInCollection, useCollections } from '@/lib/collections';
 import { AddToCollectionModal, ConfirmModal, NameModal } from '@/components/CollectionDialogs';
 import { SubTabs, type SubTab } from '@/components/SubTabs';
 
-type CategoryId = 'recent' | 'featured' | 'collections' | 'all' | 'ragebait' | 'minecraft' | 'flash' | 'emulated';
+type CategoryId = 'recent' | 'featured' | 'staff' | 'collections' | 'genres' | 'all' | 'ragebait' | 'minecraft' | 'flash' | 'emulated';
 
 const gameById = new Map(libraryGames.map((g) => [g.id, g]));
+
+const genreCounts: Record<string, number> = {};
+for (const g of GENRES) genreCounts[g.id] = libraryGames.filter((x) => genresOf(x.id).includes(g.id)).length;
 
 const categoryGames: Record<CategoryId, LibraryGame[]> = {
   recent: [],
   featured: featuredGames,
   collections: [],
+  staff: [],
+  genres: [],
   all: libraryGames,
   ragebait: rageBaitGames,
   minecraft: minecraftGames,
@@ -39,7 +47,9 @@ const categoryGames: Record<CategoryId, LibraryGame[]> = {
 const tabs: SubTab<CategoryId>[] = [
   { id: 'recent', label: 'Recent', icon: Clock },
   { id: 'featured', label: 'Featured', icon: Crown, gold: true },
+  { id: 'staff', label: 'Staff Picks', icon: BadgeCheck },
   { id: 'collections', label: 'Collections', icon: Library },
+  { id: 'genres', label: 'Genres', icon: LayoutGrid },
   { id: 'all', label: `All Games (${libraryGames.length})`, icon: Gamepad2 },
   { id: 'ragebait', label: `Ragebait (${rageBaitGames.length})`, icon: Flame },
   { id: 'minecraft', label: `Minecraft (${minecraftGames.length})`, icon: Box },
@@ -61,6 +71,8 @@ export function GamesTab() {
   const manifestVersion = useManifestVersion();
   const driveOnly = useSetting('driveLinksOnly');
   const [system, setSystem] = useState<string | null>(null);
+  const [genre, setGenre] = useState<GenreId>(GENRES[0].id);
+  const staff = useStaff();
   const collections = useCollections();
   const [activeCollection, setActiveCollection] = useState<string | null>(null);
   const [dialog, setDialog] = useState<
@@ -121,13 +133,29 @@ export function GamesTab() {
     () => (selectedCollection ? selectedCollection.games.map((id) => gameById.get(id)).filter((g): g is LibraryGame => !!g) : []),
     [selectedCollection],
   );
+  const staffGames = useMemo(() => staff.picks.map((id) => gameById.get(id)).filter((g): g is LibraryGame => !!g), [staff.picks]);
+  const genreGames = useMemo(() => libraryGames.filter((g) => genresOf(g.id).includes(genre)), [genre]);
   const currentGames =
-    category === 'recent' ? recentGames : category === 'featured' ? topGames : category === 'collections' ? collectionGames : categoryGames[category];
+    category === 'recent'
+      ? recentGames
+      : category === 'featured'
+        ? topGames
+        : category === 'staff'
+          ? staffGames
+          : category === 'collections'
+            ? collectionGames
+            : category === 'genres'
+              ? genreGames
+              : categoryGames[category];
 
   const isRecent = category === 'recent';
   const isFeatured = category === 'featured';
   const isCollections = category === 'collections';
   const isEmulated = category === 'emulated';
+  const isPicks = category === 'staff';
+  const isGenres = category === 'genres';
+  // Lists that are already hand-picked or personal: no A-Z row, favorites filter or sorting
+  const curated = isFeatured || isRecent || isCollections || isPicks;
 
   const switchCategory = (id: CategoryId) => {
     setCategory(id);
@@ -142,19 +170,19 @@ export function GamesTab() {
       const score = q ? searchScore(g, q) : 1;
       if (q && score === 0) continue;
       if (activeLetter && gameLetter(g) !== activeLetter) continue;
-      if (onlyFavs && !isFeatured && !isRecent && !isCollections && !favorites.includes(g.id)) continue;
-      if (playableOnly && !isFeatured && !isRecent && !isCollections && playMode(g.url, driveOnly) === 'drive') continue;
+      if (onlyFavs && !curated && !favorites.includes(g.id)) continue;
+      if (playableOnly && !curated && playMode(g.url, driveOnly) === 'drive') continue;
       if (isEmulated && system && g.system !== system) continue;
       out.push({ game: g, score });
     }
     // Best matches first when searching
     if (q) out.sort((a, b) => b.score - a.score);
     // "Top rated" puts well-liked games first; games without enough votes keep their order after them
-    if (topRated && !isFeatured && !isRecent && !isCollections) out.sort((a, b) => ratingScore(ratings.get(b.game.id)) - ratingScore(ratings.get(a.game.id)));
+    if (topRated && !curated) out.sort((a, b) => ratingScore(ratings.get(b.game.id)) - ratingScore(ratings.get(a.game.id)));
     return out.map((x) => x.game);
     // manifestVersion: re-check which games are playable once the manifest has loaded
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentGames, query, activeLetter, onlyFavs, favorites, system, isEmulated, isFeatured, isRecent, isCollections, playableOnly, driveOnly, manifestVersion, topRated, ratings]);
+  }, [currentGames, query, activeLetter, onlyFavs, favorites, system, isEmulated, isFeatured, isRecent, isCollections, isPicks, curated, playableOnly, driveOnly, manifestVersion, topRated, ratings]);
 
   // Long lists show a page at a time and load more as you scroll
   useEffect(() => {
@@ -194,6 +222,8 @@ export function GamesTab() {
     <div className="h-full flex flex-col">
       <SubTabs tabs={tabs} active={category} onChange={switchCategory} />
 
+      {isPicks ? <EventsPanel /> : <EventsPanel compact onOpen={() => switchCategory('staff')} />}
+
       <div className="flex-shrink-0 mb-4">
         <div
           className="flex items-center gap-3 px-4 py-3 rounded-xl border transition-all"
@@ -217,6 +247,24 @@ export function GamesTab() {
           </span>
         </div>
       </div>
+
+      {isGenres && (
+        <div className="flex-shrink-0 mb-3 flex flex-wrap gap-1">
+          {GENRES.map((g) => (
+            <button
+              key={g.id}
+              onClick={() => {
+                setGenre(g.id);
+                setActiveLetter(null);
+              }}
+              className="px-2.5 py-1 text-xs rounded-md transition-all"
+              style={chip(genre === g.id)}
+            >
+              {g.label} ({genreCounts[g.id]})
+            </button>
+          ))}
+        </div>
+      )}
 
       {isEmulated && (
         <div className="flex-shrink-0 mb-3 flex flex-wrap gap-1">
@@ -274,7 +322,7 @@ export function GamesTab() {
         </div>
       )}
 
-      {!isFeatured && !isRecent && !isCollections && (
+      {!curated && (
         <div className="flex-shrink-0 mb-4 flex flex-wrap gap-1">
           <button
             onClick={() => setActiveLetter(null)}
@@ -349,7 +397,9 @@ export function GamesTab() {
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-3 h-full">
             <p className="text-sm text-center" style={{ color: 'var(--text-dim)' }}>
-              {isRecent && !query
+              {isPicks && !query
+                ? 'No Staff Picks yet. The staff will add some soon.'
+                : isRecent && !query
                 ? 'Nothing here yet. Games you play on SecretV4 will show up here.'
                 : isCollections && !query
                   ? selectedCollection

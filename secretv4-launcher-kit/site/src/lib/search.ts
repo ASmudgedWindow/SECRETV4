@@ -1,4 +1,5 @@
 import type { LibraryGame } from '@/data/gameLibrary';
+import { genresOf, genreLabel } from '@/data/genres';
 
 /** Lowercase, no accents, no punctuation: "Pokémon: Red!" -> "pokemon red" */
 const norm = (s: string) =>
@@ -20,7 +21,8 @@ const cache = new Map<number, Entry>();
 function entryFor(g: LibraryGame): Entry {
   let e = cache.get(g.id);
   if (!e) {
-    const text = norm(`${g.title} ${g.system ?? ''} ${g.kind ?? ''}`);
+    const genres = genresOf(g.id).map(genreLabel).join(' ');
+    const text = norm(`${g.title} ${g.system ?? ''} ${g.kind ?? ''} ${genres}`);
     e = { text, squashed: text.replace(/ /g, ''), words: text.split(' ') };
     cache.set(g.id, e);
   }

@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Gamepad2, Wrench, Package, Settings as SettingsIcon, Search } from 'lucide-react';
+import { Gamepad2, Wrench, Package, Settings as SettingsIcon, Search, Trophy } from 'lucide-react';
 import { GamesTab } from '@/components/tabs/GamesTab';
 import { ToolsTab } from '@/components/tabs/ToolsTab';
 import { StuffTab } from '@/components/tabs/StuffTab';
 import { SettingsTab } from '@/components/tabs/SettingsTab';
+import { AchievementsTab } from '@/components/tabs/AchievementsTab';
+import { Announcement } from '@/components/Announcement';
 import { useSettings } from '@/hooks/useSettings';
 import { libraryGames } from '@/data/gameLibrary';
 import { GameLaunchProvider } from '@/components/GameLaunchProvider';
@@ -13,7 +15,7 @@ import { RemoteMessage } from '@/components/RemoteMessage';
 import { setPresencePage } from '@/lib/presence';
 import { useClickRipple } from '@/hooks/useClickRipple';
 
-type TabId = 'games' | 'tools' | 'stuff' | 'settings';
+type TabId = 'games' | 'tools' | 'stuff' | 'achievements' | 'settings';
 
 interface NavItem {
   id: TabId;
@@ -25,6 +27,7 @@ const navItems: NavItem[] = [
   { id: 'games', label: 'Games', icon: Gamepad2 },
   { id: 'tools', label: 'Tools', icon: Wrench },
   { id: 'stuff', label: 'Stuff', icon: Package },
+  { id: 'achievements', label: 'Achievements', icon: Trophy },
   { id: 'settings', label: 'Settings', icon: SettingsIcon },
 ];
 
@@ -148,6 +151,7 @@ export function AppShell() {
             {activeTab === 'games' && <GamesTab />}
             {activeTab === 'tools' && <ToolsTab />}
             {activeTab === 'stuff' && <StuffTab />}
+            {activeTab === 'achievements' && <AchievementsTab />}
             {activeTab === 'settings' && <SettingsTab settings={settings} update={update} />}
           </div>
         </main>
@@ -156,6 +160,7 @@ export function AppShell() {
     <AchievementWatcher />
     <Rickroll />
     <RemoteMessage />
+    <Announcement />
     </GameLaunchProvider>
   );
 }

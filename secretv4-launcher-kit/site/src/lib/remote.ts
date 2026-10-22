@@ -5,6 +5,7 @@ import { getPresence } from '@/lib/presence';
 import { ACHIEVEMENTS, grantAchievements } from '@/lib/achievements';
 import { openRickroll } from '@/components/Rickroll';
 import { showRemoteMessage } from '@/components/RemoteMessage';
+import { showAnnouncement } from '@/components/Announcement';
 import { bananaCursor, comic, confetti, countdown, emojiRain, flip, invert, rainbow, shake, stopAllEffects } from '@/lib/trolls';
 
 /**
@@ -36,7 +37,8 @@ export function run(c: RemoteCommand) {
       break;
     case 'message': {
       const text = typeof c.payload?.text === 'string' ? c.payload.text.slice(0, 200) : '';
-      if (text) showRemoteMessage(text);
+      const from = typeof c.payload?.from === 'string' ? c.payload.from.slice(0, 40) : '';
+      if (text) showRemoteMessage(text, from);
       break;
     }
     case 'close_game':
@@ -55,6 +57,12 @@ export function run(c: RemoteCommand) {
     case 'give_one': {
       const id = c.payload?.id;
       if (typeof id === 'string' && ACHIEVEMENTS.some((a) => a.id === id)) grantAchievements([id]);
+      break;
+    }
+    case 'announce': {
+      const text = typeof c.payload?.text === 'string' ? c.payload.text.slice(0, 120) : '';
+      const from = typeof c.payload?.from === 'string' ? c.payload.from.slice(0, 40) : '';
+      if (text) showAnnouncement(text, from);
       break;
     }
     case 'confetti':
