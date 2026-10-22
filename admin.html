@@ -351,7 +351,7 @@
     var el = h('div', {}, [
       card('Start an event', [h('div', { class: 'row' }, [h('div', { class: 'grow' }, [h('label', { text: 'Type' }), kind]), nameBox, descrBox, h('div', { class: 'grow' }, [h('label', { text: 'Lasts' }), length])]),
         h('div', { style: { cssText: 'height:10px' } }), picker, need, chips, h('div', { style: { cssText: 'height:10px' } }), start, msg,
-        muted('Events end by themselves when their time is up. At most 3 can run at once.')]),
+        muted('Events end by themselves when their time is up. At most 3 can run at once. NOTE: TRY TO ADD GAMES THAT ARE HIGH QUALITY and/or FUN, BUT ARENT ON THE TOP 10.')]),
       card('Events', [h('div', { class: 'tablewrap' }, [h('table', {}, [h('thead', {}, [h('tr', {}, [h('th', { text: 'Event' }), h('th', { text: 'Games' }), h('th', { text: 'By' }), h('th', { text: 'Status' }), h('th')])]), tbody])])])]);
     drawKind();
     function refresh() {
@@ -370,7 +370,7 @@
   }
 
   function pageAnnounce() {
-    var text = h('textarea', { rows: 3, maxLength: 120, placeholder: 'Short message for everyone online (max 120 characters)' });
+    var text = h('textarea', { rows: 3, maxLength: 120, placeholder: 'Short message for everyone online (max 120 characters) DONT SPAM OR TROLL EXCESSIVELY.' });
     var count = h('span', { class: 'muted', text: '0 / 120' }), msg = h('div', { class: 'err' });
     text.oninput = function () { count.textContent = text.value.length + ' / 120'; };
     var send = h('button', { class: 'primary', text: 'Send to everyone online', onclick: function () {
