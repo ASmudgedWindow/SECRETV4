@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Check, Palette, Shield, AlertTriangle, Type, Image, HardDrive, Save, Download, Upload, Eye } from 'lucide-react';
+import { Check, Palette, Shield, AlertTriangle, Type, Image, HardDrive, Save, Download, Upload, Eye, Compass } from 'lucide-react';
 import { exportBackup, importBackup } from '@/lib/backup';
 import { themes } from '@/data/themes';
 import { backgrounds } from '@/data/backgrounds';
@@ -181,6 +181,30 @@ export function SettingsTab({ settings, update }: SettingsTabProps) {
             value={settings.driveLinksOnly}
             onChange={(v) => update({ driveLinksOnly: v })}
           />
+        </div>
+
+        {/* Tour */}
+        <div className="rounded-xl border p-5 animate-slide-up" style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', animationDelay: '106ms' }}>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <Compass size={18} style={{ color: 'var(--accent)' }} />
+              <div>
+                <h3 className="text-sm font-medium" style={{ color: 'var(--text)' }}>
+                  Welcome tour
+                </h3>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--text-dim)' }}>
+                  A one-minute walk through the site.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => window.dispatchEvent(new Event('secretv4-start-tour'))}
+              className="px-4 py-2 rounded-lg text-sm flex-shrink-0"
+              style={{ background: 'var(--accent)', color: 'var(--bg)', border: '1px solid var(--accent)' }}
+            >
+              Replay the tour
+            </button>
+          </div>
         </div>
 
         {/* Notice */}

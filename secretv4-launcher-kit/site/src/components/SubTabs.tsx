@@ -12,11 +12,13 @@ interface SubTabsProps<T extends string> {
   tabs: SubTab<T>[];
   active: T;
   onChange: (id: T) => void;
+  /** Name used by the welcome tour to find this row */
+  tourId?: string;
 }
 
-export function SubTabs<T extends string>({ tabs, active, onChange }: SubTabsProps<T>) {
+export function SubTabs<T extends string>({ tabs, active, onChange, tourId }: SubTabsProps<T>) {
   return (
-    <div className="flex-shrink-0 mb-4 flex flex-wrap gap-2">
+    <div data-tour={tourId} className="flex-shrink-0 mb-4 flex flex-wrap gap-2">
       {tabs.map((tab) => {
         const isActive = tab.id === active;
         const color = tab.gold ? 'var(--gold)' : 'var(--accent)';

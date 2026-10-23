@@ -6,6 +6,7 @@ import { StuffTab } from '@/components/tabs/StuffTab';
 import { SettingsTab } from '@/components/tabs/SettingsTab';
 import { AchievementsTab } from '@/components/tabs/AchievementsTab';
 import { Announcement } from '@/components/Announcement';
+import { Tour } from '@/components/Tour';
 import { useSettings } from '@/hooks/useSettings';
 import { libraryGames } from '@/data/gameLibrary';
 import { GameLaunchProvider } from '@/components/GameLaunchProvider';
@@ -114,6 +115,7 @@ export function AppShell() {
             return (
               <button
                 key={item.id}
+                data-tour={`tab-${item.id}`}
                 onClick={() => setActiveTab(item.id)}
                 className="flex items-center gap-3 mx-2 my-0.5 px-3 py-2.5 rounded-lg transition-all duration-150"
                 style={{
@@ -146,7 +148,7 @@ export function AppShell() {
         </nav>
 
         {/* Content area */}
-        <main className="flex-1 overflow-hidden p-4 sm:p-6">
+        <main data-tour="content" className="flex-1 overflow-hidden p-4 sm:p-6">
           <div className="h-full animate-fade-in" key={activeTab}>
             {activeTab === 'games' && <GamesTab />}
             {activeTab === 'tools' && <ToolsTab />}
@@ -161,6 +163,7 @@ export function AppShell() {
     <Rickroll />
     <RemoteMessage />
     <Announcement />
+    <Tour tab={activeTab} onTab={setActiveTab} />
     </GameLaunchProvider>
   );
 }

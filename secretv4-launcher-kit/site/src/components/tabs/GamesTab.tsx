@@ -220,12 +220,13 @@ export function GamesTab() {
 
   return (
     <div className="h-full flex flex-col">
-      <SubTabs tabs={tabs} active={category} onChange={switchCategory} />
+      <SubTabs tabs={tabs} active={category} onChange={switchCategory} tourId="games-subtabs" />
 
       {isPicks ? <EventsPanel /> : <EventsPanel compact onOpen={() => switchCategory('staff')} />}
 
       <div className="flex-shrink-0 mb-4">
         <div
+          data-tour="games-search"
           className="flex items-center gap-3 px-4 py-3 rounded-xl border transition-all"
           style={{
             background: 'var(--bg-secondary)',
