@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { pickSplash } from '@/lib/splash';
 
 interface IntroProps {
   onComplete: () => void;
@@ -6,6 +7,7 @@ interface IntroProps {
 
 export function Intro({ onComplete }: IntroProps) {
   const [phase, setPhase] = useState<'fadein' | 'shimmer' | 'fadeout'>('fadein');
+  const [splash] = useState(() => pickSplash());
 
   useEffect(() => {
     const t1 = setTimeout(() => setPhase('shimmer'), 600);
@@ -52,6 +54,27 @@ export function Intro({ onComplete }: IntroProps) {
           }}
         >
           Initializing
+        </p>
+        {/* A random line under the loading text. Clicking or selecting it does not skip the intro. */}
+        <style>{`@keyframes v4splash{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.04)}}@media (prefers-reduced-motion: reduce){.v4splash{animation:none!important}}`}</style>
+        <p
+          data-no-translate
+          className="v4splash absolute text-center text-sm italic select-text transition-opacity duration-1000"
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            left: '50%',
+            top: '100%',
+            marginTop: 14,
+            width: 'min(90vw, 34rem)',
+            color: 'var(--accent)',
+            textShadow: '0 0 10px var(--accent-glow)',
+            opacity: phase === 'shimmer' ? 0.9 : 0,
+            transform: 'translateX(-50%)',
+            animation: phase === 'shimmer' ? 'v4splash 2.4s ease-in-out infinite' : 'none',
+            transitionDelay: phase === 'shimmer' ? '500ms' : '0ms',
+          }}
+        >
+          {splash}
         </p>
       </div>
     </div>
