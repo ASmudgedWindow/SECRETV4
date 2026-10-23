@@ -23,6 +23,16 @@ export const SPLASHES: string[] = [
   'drive mad, drive mad.',
   'farts',
   'what is grass anyway?',
+  'Its a beautiful day outside.',
+  'As a child, I yearned for the mines.',
+  'FORNITE BATTLE PASS!!! (SHUT UP!!!)',
+  'Friends dont lie...',
+  'Welcome to Hawkings, Indiana!',
+  'mouthbreather!',
+  'HAWKINGS LAB??!?!?!??!',
+  'FIRE IN THE HOLE!!!'.
+  'Attempt 1',
+  'GRIEF GOT VERIFIED LETS GOOOOOOOOOO (geometry dash reference)',
   'i saw some green stuff growing on the ground outside yesterday...',
 ];
 
