@@ -95,7 +95,7 @@ export function tourReducer(s: TourState, a: TourAction, total = STEPS.length): 
 }
 
 // ---- remembering that it has been shown ----
-const DONE_KEY = 'secretv4-tour-done';
+const DONE_KEY = 'secretv4-tour-is-done';
 
 /** True once the tour has been finished or skipped. If storage is blocked we also say true, so it never nags. */
 export function tourDone(): boolean {
