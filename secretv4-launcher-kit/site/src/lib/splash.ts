@@ -30,7 +30,7 @@ export const SPLASHES: string[] = [
   'Welcome to Hawkings, Indiana!',
   'mouthbreather!',
   'HAWKINGS LAB??!?!?!??!',
-  'FIRE IN THE HOLE!!!'.
+  'FIRE IN THE HOLE!!!',
   'Attempt 1',
   'GRIEF GOT VERIFIED LETS GOOOOOOOOOO (geometry dash reference)',
   'i saw some green stuff growing on the ground outside yesterday...',
