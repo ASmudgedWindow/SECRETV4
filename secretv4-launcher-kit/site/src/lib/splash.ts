@@ -41,7 +41,6 @@ export const SPLASHES: string[] = [
   'Now with extra pepperoni!',
   'Crazy Cattle 3D!',
   'Now Gluten Free!',
-  '/╲/\╭(•‿•)╮/\╱\',
   'Out of the ordinary.',
   'Froggit approaches!',
   '(╯°□°）╯︵ ┻━┻',
