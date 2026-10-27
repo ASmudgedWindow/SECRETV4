@@ -42,7 +42,6 @@ export const SPLASHES: string[] = [
   'Crazy Cattle 3D!',
   'Now Gluten Free!',
   '/╲/\╭(•‿•)╮/\╱\',
-  'Muffet attacks!',
   'Out of the ordinary.',
   'Froggit approaches!',
   '(╯°□°）╯︵ ┻━┻',
@@ -61,6 +60,7 @@ export const SPLASHES: string[] = [
   'big mac whopper',
   '-_-  o_o  O_0  \_(0W0)_/  evolution!!',
   'splash text',
+  'Muffet Attacks!',
 ];
 
 const LAST_KEY = 'secretv4-last-splash';
