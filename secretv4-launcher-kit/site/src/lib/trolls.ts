@@ -158,3 +158,29 @@ export function countdown(after: () => void) {
     };
   });
 }
+
+/** The whole page does one full turn (about 1.6 seconds) */
+export function spinPage() {
+  if (reduceMotion()) return;
+  begin('spinpage', 1800, () => addStyle('@keyframes v4spinpage{to{transform:rotate(360deg)}}#root{animation:v4spinpage 1.6s ease-in-out 1}'));
+}
+
+/** "Grubby" in huge letters, then it spins very fast for about 4 seconds */
+export function grubby() {
+  begin('grubby', 5000, () => {
+    const l = layer();
+    const css = addStyle('@keyframes v4grub{to{transform:rotate(360deg)}}');
+    const t = document.createElement('div');
+    t.textContent = 'Grubby';
+    t.style.cssText =
+      'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:900 min(26vw,260px)/1 system-ui,sans-serif;color:#fff;text-shadow:0 0 30px #000,0 0 8px #000;-webkit-text-stroke:2px #000';
+    l.el.appendChild(t);
+    // Without motion the word just stays put for a few seconds
+    const spin = reduceMotion() ? 0 : window.setTimeout(() => (t.style.animation = 'v4grub 0.25s linear infinite'), 1000);
+    return () => {
+      if (spin) window.clearTimeout(spin);
+      l.remove();
+      css();
+    };
+  });
+}

@@ -35,7 +35,7 @@ export const STEPS: TourStep[] = [
     tab: 'games',
     target: 'games-subtabs',
     title: 'Ways to browse',
-    text: 'Recent, Featured (the most played), Staff Picks and live events, your own Collections, and Genres. Tap the star on a game to favorite it, or the folder to add it to a collection.',
+    text: 'Recent, Featured (the most played), Staff Picks and live events, your own Collections, Genres, and a Terminal that takes commands. Tap the star on a game to favorite it, or the folder to add it to a collection.',
   },
   {
     tab: 'tools',

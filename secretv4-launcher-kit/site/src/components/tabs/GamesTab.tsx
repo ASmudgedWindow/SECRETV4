@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { Search, Play, Star, Crown, Flame, Box, Gamepad2, Zap, Joystick, Clock, ThumbsUp, Library, FolderPlus, FolderMinus, Pencil, Trash2, Plus, BadgeCheck, LayoutGrid } from 'lucide-react';
+import { Search, Play, Star, Crown, Flame, Box, Gamepad2, Zap, Joystick, Clock, ThumbsUp, Library, FolderPlus, FolderMinus, Pencil, Trash2, Plus, BadgeCheck, LayoutGrid, Terminal as TerminalIcon } from 'lucide-react';
 import { libraryGames, libraryLetters, gameLetter, type LibraryGame } from '@/data/gameLibrary';
 import {
   featuredGames,
@@ -17,6 +17,8 @@ import { useSetting } from '@/hooks/useSettings';
 import { useGlobalTop } from '@/lib/stats';
 import { useStaff } from '@/lib/staff';
 import { EventsPanel } from '@/components/EventsPanel';
+import { Terminal } from '@/components/Terminal';
+import { takePending } from '@/lib/nav';
 import { GENRES, genresOf, type GenreId } from '@/data/genres';
 import { likedPercent, ratingScore, ratingsEnabled, useRatings } from '@/lib/ratings';
 import { useGameClick } from '@/components/GameLaunchProvider';
@@ -24,7 +26,7 @@ import { MAX_COLLECTIONS, createCollection, deleteCollection, renameCollection, 
 import { AddToCollectionModal, ConfirmModal, NameModal } from '@/components/CollectionDialogs';
 import { SubTabs, type SubTab } from '@/components/SubTabs';
 
-type CategoryId = 'recent' | 'featured' | 'staff' | 'collections' | 'genres' | 'all' | 'ragebait' | 'minecraft' | 'flash' | 'emulated';
+type CategoryId = 'recent' | 'featured' | 'staff' | 'collections' | 'genres' | 'terminal' | 'all' | 'ragebait' | 'minecraft' | 'flash' | 'emulated';
 
 const gameById = new Map(libraryGames.map((g) => [g.id, g]));
 
@@ -37,6 +39,7 @@ const categoryGames: Record<CategoryId, LibraryGame[]> = {
   collections: [],
   staff: [],
   genres: [],
+  terminal: [],
   all: libraryGames,
   ragebait: rageBaitGames,
   minecraft: minecraftGames,
@@ -55,6 +58,7 @@ const tabs: SubTab<CategoryId>[] = [
   { id: 'minecraft', label: `Minecraft (${minecraftGames.length})`, icon: Box },
   { id: 'flash', label: `Flash (${flashGames.length})`, icon: Zap },
   { id: 'emulated', label: `Emulated (${emulatedGames.length})`, icon: Joystick },
+  { id: 'terminal', label: 'Terminal', icon: TerminalIcon },
 ];
 
 const PAGE_SIZE = 240;
@@ -62,6 +66,7 @@ const PAGE_SIZE = 240;
 export function GamesTab() {
   const [category, setCategory] = useState<CategoryId>('featured');
   const [query, setQuery] = useState('');
+  const searchRef = useRef<HTMLInputElement>(null);
   const [activeLetter, setActiveLetter] = useState<string | null>(null);
   const [onlyFavs, setOnlyFavs] = useState(false);
   const [playableOnly, setPlayableOnly] = useState(false);
@@ -163,6 +168,21 @@ export function GamesTab() {
     setSystem(null);
   };
 
+  // The terminal (or anything else) can ask this tab to show a category or fill in the search box
+  useEffect(() => {
+    const apply = () => {
+      const req = takePending();
+      if (!req) return;
+      if (req.category && tabs.some((t) => t.id === req.category)) switchCategory(req.category as CategoryId);
+      if (req.query !== undefined) setQuery(req.query);
+      if (req.focus) window.setTimeout(() => searchRef.current?.focus(), 150);
+    };
+    apply();
+    window.addEventListener('secretv4-goto', apply);
+    return () => window.removeEventListener('secretv4-goto', apply);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const filtered = useMemo(() => {
     const q = query.trim();
     const out: { game: LibraryGame; score: number }[] = [];
@@ -218,6 +238,18 @@ export function GamesTab() {
     border: `1px solid ${active ? 'var(--accent)' : 'var(--border)'}`,
   });
 
+  // The terminal replaces the game list entirely
+  if (category === 'terminal') {
+    return (
+      <div className="h-full flex flex-col">
+        <SubTabs tabs={tabs} active={category} onChange={switchCategory} tourId="games-subtabs" />
+        <div className="flex-1 min-h-0">
+          <Terminal />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-full flex flex-col">
       <SubTabs tabs={tabs} active={category} onChange={switchCategory} tourId="games-subtabs" />
@@ -236,6 +268,7 @@ export function GamesTab() {
         >
           <Search size={18} style={{ color: 'var(--text-dim)' }} />
           <input
+            ref={searchRef}
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}

@@ -35,6 +35,16 @@ const navItems: NavItem[] = [
 export function AppShell() {
   const [activeTab, setActiveTab] = useState<TabId>('games');
   useEffect(() => setPresencePage(activeTab), [activeTab]);
+
+  // Other parts of the site (like the terminal) can ask for a different tab
+  useEffect(() => {
+    const go = (e: Event) => {
+      const tab = (e as CustomEvent<{ tab?: TabId }>).detail?.tab;
+      if (tab) setActiveTab(tab);
+    };
+    window.addEventListener('secretv4-goto', go);
+    return () => window.removeEventListener('secretv4-goto', go);
+  }, []);
   const { settings, update, theme } = useSettings();
   useClickRipple();
 
