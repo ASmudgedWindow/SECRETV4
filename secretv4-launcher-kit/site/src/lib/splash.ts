@@ -47,7 +47,7 @@ export const SPLASHES: string[] = [
   'Dance Dance Revolution!! ヘ(￣ω￣ヘ)',
   'snow rider, snow rider.',
   'cat',
-  'only on tuesdays!'
+  'only on tuesdays!',
   'SPOOKY SCARY SKELETONS!!',
   'wHy dOnT yOu aSk tHe cIrClE bIrDs?',
   'Thats rough buddy',
