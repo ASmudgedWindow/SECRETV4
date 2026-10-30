@@ -5,6 +5,7 @@ import { usePlays } from '@/lib/plays';
 import { useCollections, type Collection } from '@/lib/collections';
 import { getProgress, unlockAchievements, useProgress } from '@/lib/progress';
 import { RARITIES, type Rarity } from '@/lib/rarity';
+import { grantAchievements } from '@/lib/achievements';
 
 const gameById = new Map(libraryGames.map((g) => [g.id, g]));
 const rageIds = new Set(rageBaitGames.map((g) => g.id));
@@ -223,6 +224,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   a('Secret', 'boring', 'Boringgg', 'Turn off your background.', 'secret', 1, flag('backgroundOff')),
   a('Secret', 'rickroll', 'GET RICKROLLED!!!!', 'Click the V in the SecretV4 title.', 'secret', 1, flag('rickroll')),
   a('Secret', 'konami', 'Old School', 'Enter a famous cheat code.', 'secret', 1, flag('konami')),
+  a('Secret', 'cryptographer', '𝙲𝚁𝚈𝙿𝚃𝙾𝙶𝚁𝙰𝙿𝙷𝙴𝚁', 'Solve the terminal puzzle.', 'secret', 1, () => 0),
 ];
 
 /** Number of favorited games, kept up to date as stars are toggled */
