@@ -196,6 +196,8 @@ export const COMMANDS: Command[] = [
   { id: 'chicken', names: ['chicken'], run: say('CHICKEN JOCKEY!!') },
   { id: 'ugly', names: ['you are ugly'], run: say('You are literally talking to a terminal') },
   { id: 'secret', names: ['secret'], run: say('you found a secret!! absolutely nothing!!') },
+  { id: 'sunflower', names: ['sunflower'], run: (_a, api) => { api.print("If you somehow knew this was a youtube url. Wow. If you searched it into google, not as tuff but still good for you."); api.print("Next Clue: https://moldy.app/ + sunflower + u9wmf2bQONtditeRE+Srb5agUbgPR/7FJ0oaCkmyG3JtgPawpi+jwwWa0bx38mLLArToZj7ihcKNvtFpn5m6em9eB0ThlIn33JQpfIRtVIGeHtfMJ5Vnk5CUbNvhLkbSZsEp7aLeR1+Dw5tsr+xI46V3YG6woXe2Cn83aX/NHUX5X54nD+PWQXh+7Z+p0SikYHR2wdBMrdUQpUpngMdnkEzASyKMpaLQkNQjAccoz6VWk3Tto3tnm2tC3LgCruGhH44teQsqlHFJEDVZcg=="); } },
+  { id: 'maggot', names: ['maggot'], run: (_a, api) => api.print("I don't know if that one was really easy or really hard. Either way, nice job, you won!") },
   {
     id: 'cattle',
     names: ['crazy cattle 3d'],
