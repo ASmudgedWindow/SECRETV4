@@ -7,6 +7,7 @@
  */
 import type { LibraryGame } from '@/data/gameLibrary';
 import type { GamesRequest, NavTab } from '@/lib/nav';
+import { grantAchievements } from '@/lib/achievements';
 
 export type LineKind = 'out' | 'dim' | 'error' | 'cmd' | 'big';
 
