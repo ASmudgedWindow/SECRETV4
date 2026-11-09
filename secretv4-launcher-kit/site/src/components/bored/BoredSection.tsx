@@ -219,9 +219,10 @@ const ideas = [
   'Learn how to solve a Rubik\'s cube (or just one side).',
   'Challenge a friend to a 1-minute drawing contest.',
   'Rank your top 10 games of all time.',
-  'Go for a 10-minute walk with no phone.',
+  'Go for a 10-minute walk.',
   'Try to juggle with three balled-up socks.',
   'Write a six-word story.',
+  'Play and download Undertale on steam!!!! (Best game ever)!!',
 ];
 
 function IdeaGenerator() {
