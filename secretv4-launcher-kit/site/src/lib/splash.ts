@@ -24,6 +24,17 @@ export const SPLASHES: string[] = [
   'farts',
   'what is grass anyway?',
   'i saw some green stuff growing on the ground outside yesterday...',
+  'Does anyone read these?',
+  "Its a beautiful day outside... Birds are singing... Flowers are blooming... and kids like you should be... (undertale reference)",
+  "Houston, we have a problem.",
+  "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA!!!!!!!",
+  "IF YOU ARE READING THIS: GO TO THE TERMINAL TAB UNDER GAMES AND TYPE IN: Matrix",
+  "COCA COLA ESPUMA",
+  "elytra maced",
+  "mincraftee",
+  "flowey go brrrrrrrrrr",
+  "6_6",
+  "you are so bald",
 ];
 
 const LAST_KEY = 'secretv4-last-splash';
